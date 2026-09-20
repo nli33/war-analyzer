@@ -1,0 +1,14 @@
+[project]
+name = "war-analyzer"
+version = "0.1.0"
+description = "Battle-level dataset and metrics for ranking military generals."
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+# `war` is imported as a top-level package from the repo root, so the root has to
+# be on sys.path; tests/ never gets a package __init__.py.
+pythonpath = ["."]
+# war/ is collected too so the doctests written next to the parsing helpers
+# (schema.parse_year and friends) run as part of the suite.
+testpaths = ["tests", "war"]
+addopts = "--doctest-modules"
