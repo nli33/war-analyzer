@@ -930,7 +930,51 @@ instruction).
       Rout-level) / 1 loss (Burgos, his clearest field failure, included for an honest record rather
       than a highlight reel). `python scripts/validate_data.py` passes; full test suite (150 tests,
       unchanged — data curation doesn't add tests) still green.
-- [ ] Robert E. Lee battles (Industrial)
+- [x] Robert E. Lee battles (Industrial) — 14 rows (Gaines's Mill, Malvern Hill, Second Bull Run,
+      Antietam, Fredericksburg, Chancellorsville, Gettysburg, Wilderness, Spotsylvania, Cold Harbor,
+      the Crater, Globe Tavern, Third Petersburg, Appomattox) in `data/battles.csv` plus a
+      `generals.csv` row (`general_id=robert-e-lee`, matching the `opponent_general_id=robert-e-lee`
+      already used by several existing Grant rows); `era=Industrial`, `tech_era_tier=4` matching
+      Grant, `source_confidence` mostly High/Medium, Low only on Gettysburg (genuine 23,000-28,000
+      Confederate-casualty range across sources) and Spotsylvania (mirrors Grant's own Low, same
+      Wikipedia-vs-ABT troop-strength spread). Ran `scripts/scrape_wikipedia_infobox.py` per battle
+      for a draft scaffold (hit Wikipedia API rate-limiting mid-run — spaced calls out rather than
+      retry-looping), cross-checked every figure against named academic sources (Clodfelter's
+      *Warfare and Armed Conflicts*, Sears' single-volume campaign histories, Hennessy, O'Reilly,
+      Busey & Martin for Gettysburg, Rhea and Trudeau for the Overland Campaign/Petersburg rows,
+      Freeman's *R. E. Lee* biography) before writing rows; `source_citation` cites those named
+      historians, not "Wikipedia" alone, per this session's tightened citation instruction (a
+      stricter standard than the original Grant rows used, noted here rather than retroactively
+      edited). Deviation/judgment call, the big one: 7 of the 14 rows (Wilderness, Spotsylvania,
+      Cold Harbor, the Crater, Globe Tavern, Third Petersburg, Appomattox) mirror existing
+      `grant-*-1864`/`grant-*-1865` rows with own/enemy strength and casualty fields swapped, the
+      same treatment already established for the Napoleon/Wellington Waterloo pair and the
+      Hannibal/Scipio Zama pair — outcomes are not always symmetric (e.g. Grant's Cold Harbor Loss
+      mirrors to a Lee Win) but Draw rows (Wilderness, Spotsylvania) are Draw on both sides. The
+      Second Battle of Petersburg (June 1864) is deliberately excluded from that mirrored set even
+      though it falls inside the date range, since Grant's own row for that battle documents
+      P.G.T. Beauregard as the sole defending commander with Lee's army arriving only as the
+      assaults were ending — the same subordinate-command exclusion bar used elsewhere in this
+      dataset, not an oversight. Antietam is coded Loss rather than Draw (a real, actively-debated
+      historiographical call, documented in the row's notes) since Lee's invasion failed its own
+      stated objective and ended in full withdrawal from Maryland, even though neither army broke
+      on the field itself on September 17. `resource_backing_tier` is set per-row on a declining
+      3→2→1 curve (Army of Northern Virginia's real shrinking, irreplaceable manpower position),
+      the intentional mirror-image of Grant's own rising 2→5 curve on the same roster since the two
+      sides' wartime mobilization trajectories moved in opposite directions — full reasoning in
+      `generals.csv`'s note. `political_constraint_flag` is true for Antietam/Gettysburg (both
+      invasions had explicit political rationales) and true for every 1864-through-Third-Petersburg
+      row (Davis's standing order to hold the capital, a different and longer-lived constraint than
+      the US-election-cycle pressure driving Grant's own flag on the same mirrored rows — a
+      documented asymmetry, same pattern as the Waterloo/Wellington pair); false again at
+      Appomattox once the Confederate government had already fled and the surrender decision was
+      Lee's own judgment. Net record is 6 wins (2 Rout-level: Second Bull Run, the Crater) / 6
+      losses (1 Rout-level: Appomattox) / 2 draws (Wilderness, Spotsylvania) — deliberately not
+      hand-tuned, and it happens to land close to even, matching Lee's historian-consensus
+      reputation as tactically dominant for most of his tenure while still losing the war (the
+      "brilliant on the field, lost the war" pattern PLAN.md's Squander Index targets). `python
+      scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation
+      doesn't add tests) still green.
 - [ ] Dwight D. Eisenhower battles (WWII)
 - [ ] Erwin Rommel battles (WWII)
 - [ ] Erich von Manstein battles (WWII)
