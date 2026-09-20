@@ -1235,3 +1235,5 @@ instruction).
   dataset** — the two names at the extremes (Eisenhower #1, Rommel #19) both trace to real,
   already-documented data/roster characteristics rather than a pipeline bug. This closes out the
   re-run of Phase 7's sanity-pass instruction for the 19-general roster; no weights were changed.
+
+DONE
