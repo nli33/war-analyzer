@@ -1088,7 +1088,46 @@ instruction).
       as operationally brilliant through early 1943 followed by a losing fighting withdrawal that got
       him dismissed by Hitler in March 1944. `python scripts/validate_data.py` passes; full test suite
       (150 tests, unchanged — data curation doesn't add tests) still green.
-- [ ] Douglas MacArthur battles (WWII)
+- [x] Douglas MacArthur battles (WWII) — 6 rows (Philippines Campaign 1941-42, Buna-Gona, Salamaua-Lae,
+      Hollandia, Leyte, Manila) in `data/battles.csv` plus a `generals.csv` row; `era=WWII`,
+      `tech_era_tier=5` matching Zhukov/Eisenhower/Rommel/Manstein. Delegated a research pass first
+      (candidate battles across the full 1941-45 Pacific/SWPA career, command attribution,
+      draft strength/casualty figures per battle), then cross-checked every figure by hand via
+      `scripts/scrape_wikipedia_infobox.py` (hit Wikipedia API rate-limiting mid-run, same as the
+      Robert E. Lee task — spaced calls out rather than retry-looping) plus web research against
+      named official U.S. Army Center of Military History volumes (Morton's *The Fall of the
+      Philippines*, Milner's *Victory in Papua*, Miller's *CARTWHEEL: The Reduction of Rabaul*,
+      Smith's *The Approach to the Philippines* and *Triumph in the Philippines*, Cannon's *Leyte:
+      The Return to the Philippines*) plus Morison's naval-operations volumes, D. Clayton James's
+      *The Years of MacArthur*, and Drea's *MacArthur's ULTRA* — `source_citation` names those
+      historians/official histories, never "Wikipedia" alone. Deviation/judgment call, the big one:
+      **excluded MacArthur's Korean War command (1950-51) entirely**, even though it contains his
+      single cleanest personal-command case of his career (Inchon) and its mirror-image disaster
+      (the Yalu advance/Chinese intervention) — the schema's `era` field is one value per general,
+      not per battle, and the ERAS enum has no Korean War bucket; adding one would be a schema
+      change beyond this task's scope and would immediately recreate the singleton-era-cohort
+      z-scoring problem already flagged for Frederick/Napoleon/Grant/Zhukov in Phase 5. Per
+      SCOPE.md's "don't expand scope mid-run to chase a nice-to-have field" guidance, kept
+      WWII-only and documented Korea as a candidate for a future schema decision rather than
+      deciding it unilaterally — full reasoning in `generals.csv`'s note. Also excluded, on the
+      established personal-command bar: Kokoda Track (Blamey's own relief of subordinates, no
+      documented MacArthur decision) and the Battle of the Bismarck Sea (Kenney's air-interdiction
+      battle against a convoy, also a poor fit for the schema's troop-strength fields with no
+      comparable ground force on either side); the broader Battle of Luzon campaign is excluded as
+      a standalone row to avoid double-counting the included, better-documented Manila row within
+      it (same treatment as Gazala absorbing Tobruk elsewhere in this dataset). Manila's ~100,000
+      Filipino civilian deaths are deliberately kept out of the enemy_casualties/own_casualties
+      fields (an atrocity inflicted by the defending garrison on the city's population, not a
+      combatant loss on either side) and noted in the row's `notes` instead of forced into a field
+      the schema has no room for. `resource_backing_tier` set per-row on a rising 1→5 curve
+      (Philippines 1941-42 cut off under "Europe First" to Manila 1945's peak Pacific material
+      superiority), same per-row approach as Grant/Eisenhower. Roster size (6) matches the same
+      structural shortfall already documented for Zhukov/Eisenhower. Net record is 5 wins (3
+      Rout-level: Hollandia, Leyte, Manila; 1 Pyrrhic: Buna-Gona) / 1 loss (Rout-level: the
+      Philippines 1941-42, the worst single defeat of his career) — a dramatic arc from
+      catastrophic early defeat to increasingly lopsided victories as US material superiority grew,
+      matching historian consensus. `python scripts/validate_data.py` passes; full test suite (150
+      tests, unchanged — data curation doesn't add tests) still green.
 - [ ] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
       `pytest`, then re-run every `scripts/render_*.py` script to regenerate
       `output/viz/*.png`/`*.csv`/`*.html` from the expanded dataset (old output is stale the
