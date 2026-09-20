@@ -374,9 +374,39 @@
       + 5 new).
 
 ## Phase 4: Uncertainty
-- [ ] Monte Carlo resampling (N>=1000) for Low/Medium confidence battles
-- [ ] Test: High-confidence general has near-zero interval width
-- [ ] Test: Low-confidence general has visibly wider interval
+- [x] Monte Carlo resampling (N>=1000) for Low/Medium confidence battles — `war/metrics/uncertainty.py`
+      adds `monte_carlo_uncertainty`, resampling every Low/Medium-confidence battle's four numeric
+      fields (own/enemy troop strength, own/enemy casualties) each run via an independent
+      multiplicative factor (High=0% noise, Medium=±10%, Low=±40% — the two figures approximating
+      the real cross-source spreads already logged in Phase 2, e.g. Frederick's Mollwitz vs. Zhukov's
+      Operation Mars) and re-running only the metrics whose formulas actually read those fields:
+      `raw.py`'s three troop/casualty totals, `rate.py`'s `casualty_exchange_ratio`/
+      `avg_force_ratio_faced`, `war_residual.py`'s `war_residual`, and `clutch.py`'s `clutch_rating`.
+      Deviation/judgment call: `win_rate`, `decisive_win_rate`, OAR, Squander Index, and
+      Longevity-Adjusted Value are deliberately *not* re-run — they're functions of `outcome`/
+      `objective_secured`/`decisiveness`/career years, none of which this resampling touches, so
+      Monte Carlo-ing them would just reproduce the same point estimate N times. `DEFAULT_N_RUNS=1000`.
+      Output is `result[general_id][metric_name] -> MetricDistribution(mean, ci_low, ci_high,
+      runs_used)` using the empirical 5th/95th percentile as the 90% interval. Resampled troop-strength
+      fields floor at 1 (not the schema's own `min_value=0`) to preserve the never-divide-by-zero
+      invariant `rate.py`/`war_residual.py` already rely on; casualties floor at the schema's actual 0.
+      Noted in the module docstring: `war_residual` is pooled across every battle passed in (by
+      `war_residual.py`'s own design), so it's the one metric here that is not purely general-local —
+      resampling another, less-certain general's rows can widen a High-confidence general's own
+      war_residual interval too, a faithful re-run of "the full pipeline" rather than a bug.
+- [x] Test: High-confidence general has near-zero interval width — `tests/test_metrics_uncertainty.py`,
+      an all-High two-battle synthetic general gets exactly zero width on every general-local metric
+      across 300 runs.
+- [x] Test: Low-confidence general has visibly wider interval — same file, a matched pair of
+      otherwise-identical High vs. Low-confidence generals resampled in the same call: the High
+      general's `total_own_troops`/`avg_force_ratio_faced` width is exactly 0, the Low general's is
+      not. Also sanity-checked against the real 83-row dataset (not a substitute for the unit tests):
+      the all-Low generals (Caesar, Alexander) show a visibly wider `avg_force_ratio_faced` 90% band
+      (width ~0.62-0.63) than Medium-heavy Frederick (~0.10) or mixed-confidence Grant (~0.07).
+      11 new tests total (noise-bound compliance, the troop-strength zero-division floor, the
+      never-qualifies-so-stays-None edge case, per-general separation, determinism for a fixed seed,
+      the empty-input edge case, and `DEFAULT_N_RUNS >= 1000`). `python scripts/validate_data.py`
+      still passes; full suite now 92/92 (81 prior + 11 new).
 
 ## Phase 5: Composite ranking
 - [ ] Configurable weights (single config location)
