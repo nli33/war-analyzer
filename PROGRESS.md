@@ -409,7 +409,25 @@
       still passes; full suite now 92/92 (81 prior + 11 new).
 
 ## Phase 5: Composite ranking
-- [ ] Configurable weights (single config location)
+- [x] Configurable weights (single config location) — `war/config.py` adds a frozen
+      `CompositeWeights` dataclass (`oar`, `war_residual`, `decisiveness`, `longevity` fields)
+      plus `DEFAULT_COMPOSITE_WEIGHTS`, the one place composite-ranking weights live per
+      SCOPE.md Phase 5 ("not hardcoded inline"). Judgment calls, documented in the module
+      docstring: (1) `decisiveness` maps to `rate.py`'s existing `decisive_win_rate` and
+      `longevity` maps to `longevity.py`'s existing `longevity_adjusted_value` — both already
+      literal matches for the PLAN.md-named concept, no new metric needed; (2) default weights
+      are an even split within two tiers (OAR/WAR-residual at 0.35 each as the two
+      opponent/context-adjusted "true skill" estimates, decisiveness/longevity at 0.15 each as
+      narrower career-shape slices) rather than a flat 25/25/25/25 — a placeholder to revisit at
+      Phase 7's sanity pass, not a historically validated weighting; (3) added `total()`/
+      `is_normalized()`/`normalized()` helpers since nothing yet enforces weights sum to 1, and
+      the not-yet-built composite-ranking code (next task) will need to decide whether to
+      normalize automatically or trust the config as given. This task is config only — no
+      composite-ranking computation wired up yet, that's the next unchecked item. Verified: 6 new
+      tests in `tests/test_config.py` (default sums to 1, covers all four PLAN.md inputs,
+      overridable, `normalized()` rescales correctly, zero-total raises, an unnormalized set
+      correctly reports `is_normalized()=False`). `python scripts/validate_data.py` still
+      passes; full suite now 98/98 (92 prior + 6 new).
 - [ ] Composite ranking output
 - [ ] Category rankings output
 - [ ] Test: changing a weight changes the order
