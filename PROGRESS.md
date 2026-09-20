@@ -117,7 +117,37 @@
       record is 11 wins / 2 losses (both Rout: Leipzig, Waterloo) / 1 Draw (Eylau, held over French
       claims of victory, same treatment as Frederick's Zorndorf). `python scripts/validate_data.py`
       passes; full test suite (32 tests) still green.
-- [ ] Ulysses S. Grant battles
+- [x] Ulysses S. Grant battles — 15 rows (Belmont, Fort Henry, Fort Donelson, Shiloh, Champion Hill,
+      Siege of Vicksburg, Chattanooga/Missionary Ridge, the Wilderness, Spotsylvania Court House, Cold
+      Harbor, and four separately-documented phases of the Siege of Petersburg: Second Battle of
+      Petersburg, the Crater, Globe Tavern, Third Battle of Petersburg, plus Appomattox Court House) in
+      `data/battles.csv` plus a `generals.csv` row; `era=Industrial`, `source_confidence` mixed
+      High/Medium/Low per-row reflecting real, well-documented cross-source (Wikipedia vs. American
+      Battlefield Trust) disagreement on several 1863-64 troop-strength figures (e.g. Spotsylvania and
+      Cold Harbor differ 40,000-55,000+ between sources, most likely ABT citing total army strength vs.
+      troops actually engaged). Web-researched via a delegated research pass across Wikipedia infoboxes
+      and American Battlefield Trust, cross-checked with follow-up searches for figures the first pass
+      didn't cover (the four Petersburg-siege phase battles' troop strengths). Deviation/judgment call:
+      `tech_era_tier=4`, the same tier as Napoleon rather than a new value, since the schema's 1-5 scale
+      cannot give a distinct tier to all 6 ERAS and its own tier-5 definition ("mechanised warfare with
+      radio and rail") is a closer match to the still-to-come WWII general than to the Civil War (rail
+      and telegraph, but no radio/mechanization) — full reasoning in `generals.csv`'s note in case Phase
+      7's sanity pass questions the flat tier. `resource_backing_tier` set per-row, rising from 2 at
+      Belmont (1861) to 5 from the 1864 Overland Campaign onward as Union industrial mobilization
+      matured, matching the per-row approach used for Frederick and Napoleon. Excludes four Vicksburg-
+      campaign battles (Port Gibson, Raymond, Jackson, Big Black River Bridge) fought primarily by
+      subordinate corps commanders, and the Battle of Corinth (Grant not present) — same personal-
+      command bar as prior generals' exclusions. The 1864 Overland Campaign battles (Wilderness,
+      Spotsylvania, Cold Harbor) and the Petersburg-siege rows are treated as Grant's own despite George
+      Meade holding the Army of the Potomac's formal tactical command, since Grant as general-in-chief
+      personally directed overall strategy — the same "personally supreme-commanded" standard already
+      used for Genghis Khan and Saladin, documented here since it's a closer call than most of this
+      dataset's command-attribution decisions. Fort Henry is flagged (not excluded) as fought mostly by
+      the Navy with minimal infantry combat, since Grant was present and in overall command throughout.
+      Net record is 9 wins (4 Rout-level: Fort Donelson, Vicksburg, Chattanooga, Appomattox) / 3 losses
+      (Cold Harbor, Second Petersburg, the Crater — none Rout-level, Grant's own army was checked but
+      never broke) / 3 draws (Belmont, the Wilderness, Spotsylvania). `python scripts/validate_data.py`
+      passes; full test suite (32 tests) still green.
 - [ ] Georgy Zhukov battles
 
 ## Phase 3: Metrics pipeline
