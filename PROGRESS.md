@@ -546,7 +546,37 @@
       undefeated, Saladin lowest at 0.375, matching the back-half losing
       streak). `python scripts/validate_data.py` still passes; full suite now
       121/121 (114 prior + 7 new).
-- [ ] Scatter: Tactical vs Strategic rating
+- [x] Scatter: Tactical vs Strategic rating — `war/viz/tactical_strategic.py` adds
+      `tactical_strategic_points` (pure data, one `(win_rate, decisive_win_rate)`
+      point per general via `rate.py`) and `render_tactical_strategic_figure` (a
+      plain matplotlib `Figure`, same test-without-a-display shape as
+      `volume_efficiency.py`) plus `plot_tactical_vs_strategic`, saving both a PNG
+      and matching CSV. PLAN.md names this plot's purpose ("brilliant tactician /
+      poor strategist" outliers) but not a formula for either axis — judgment call,
+      documented in the module docstring: Tactical rating = `win_rate` (raw
+      battlefield win-getting), Strategic rating = `decisive_win_rate`, which
+      PLAN.md Section 4 already defines as "wins converted to strategic gain vs.
+      tactical-only" — literally this axis, so reused rather than re-derived from
+      `decisiveness` the way `squander.py` does for a different stat. Generals
+      with zero wins (`decisive_win_rate is None`) are excluded from points, same
+      no-data-no-point convention as `squander.py`/`clutch.py`; not reachable on
+      this roster (all 8 have wins) but handled for later roster expansion. Both
+      axes are already bounded [0, 1], so no log-axis judgment call was needed
+      here the way `volume_efficiency.py` had for its axes. Verified per SCOPE.md
+      Phase 6's no-display method: 8 new tests in `tests/test_viz_tactical_strategic.py`
+      — hand-computed points, the no-wins exclusion, sorted output, the empty-input
+      case, figure scatter-point count/coordinates and text-label count/content
+      read off the returned `Axes`, an empty-input render not erroring, and the
+      saved-PNG test asserting file non-emptiness plus PNG magic bytes and a
+      matching CSV. `scripts/render_scatter_tactical_strategic.py` is the CLI
+      entry, run once against the real 83-row dataset to produce
+      `output/viz/tactical_vs_strategic.png`/`.csv`, committed as the deliverable —
+      no general in this roster lands in the "brilliant tactician, poor
+      strategist" bottom-right outlier zone (lowest strategic rating is Napoleon
+      at 0.91, still high), which reads as expected rather than a bug: this
+      8-general roster is all top-tier historically-consensus commanders, not a
+      sample built to contain that pattern. `python scripts/validate_data.py`
+      still passes; full suite now 129/129 (121 prior + 8 new).
 - [ ] Scatter: OAR vs Resource Backing
 - [ ] Ranking tables rendered
 

@@ -1,0 +1,9 @@
+general_id,display_name,tactical_rating,strategic_rating
+alexander-the-great,Alexander the Great,1.0,1.0
+frederick-the-great,Frederick the Great,0.75,1.0
+genghis-khan,Genghis Khan,1.0,0.875
+georgy-zhukov,Georgy Zhukov,0.8333333333333334,1.0
+julius-caesar,Julius Caesar,0.7272727272727273,1.0
+napoleon-bonaparte,Napoleon Bonaparte,0.7857142857142857,0.9090909090909091
+saladin,Saladin,0.375,1.0
+ulysses-s-grant,Ulysses S. Grant,0.6,1.0
