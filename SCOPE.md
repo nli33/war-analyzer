@@ -56,6 +56,13 @@ is fully working with time to spare:
 6. **Visualization** — the 3 scatter plots + ranking tables. Use the dataviz skill's guidance if
    producing HTML/artifact output. Verify: open the output and visually confirm axes, labels, and
    confidence bands render (a screenshot or manual render check counts as verification here).
+   Note: the overnight run happens in a CLI-only sandbox with no browser or display (see
+   OVERNIGHT.md) — Claude can't literally open and eyeball the rendered chart the way this
+   phase's verification implies. Favor outputs that can be checked without a display: write the
+   plotting code plus a script that asserts on the generated file (e.g. matplotlib output exists,
+   has the expected number of series/points, non-empty), or emit the chart data as a table/CSV
+   alongside the image so correctness can be checked from the numbers, not just the picture.
+   Actual visual review of the images happens later, by the user, once they're off the sandbox.
 7. **Sanity pass** — compare composite ranking top/bottom against historian-consensus expectations
    (e.g., does anyone universally considered a poor commander rank #1? does that flag a bug, not a
    "surprising insight"?). This is a bug-check, not a thumb on the scale — do not hand-tune weights

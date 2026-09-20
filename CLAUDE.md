@@ -42,6 +42,12 @@ padding, etc. Skip the "make it sound human" parts of that skill (added typos,
 inserted emotion) — just avoid the egregious patterns, keep the writing plain
 and direct. Use the global skill as-is — don't copy it into this repo.
 
+## Environment
+
+The overnight autonomous run happens in a CLI-only sandbox — no browser, no display. Don't rely
+on visually opening a rendered chart to verify it works; see SCOPE.md Phase 6 and OVERNIGHT.md
+for how to verify visualization output without a display.
+
 ## Adding new data fields or metrics
 
 See SCOPE.md's "Deciding whether to add a new data field/feature" section —

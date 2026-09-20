@@ -3,6 +3,12 @@
 How the overnight run in SCOPE.md is actually executed, with a focus on context management
 across many hours of unattended work.
 
+**Environment note:** the sandbox/container this runs in is CLI-only — no browser, no display.
+Any visualization work (Phase 6) can't be visually verified by Claude itself during the run; see
+the note in SCOPE.md's Phase 6. Write chart code so it can be sanity-checked from data/output
+files (non-empty, expected shape) rather than by looking at the rendered image, and leave the
+actual visual review to the user afterward.
+
 ## Architecture: fresh process per iteration, not one long session
 
 Don't try to keep a single Claude Code session alive all night and manage its context via
