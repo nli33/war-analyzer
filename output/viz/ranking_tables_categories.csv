@@ -1,0 +1,49 @@
+category,rank,general_id,display_name,value,ci_low,ci_high
+win_rate,1,genghis-khan,Genghis Khan,1.0,,
+win_rate,2,alexander-the-great,Alexander the Great,1.0,,
+win_rate,3,georgy-zhukov,Georgy Zhukov,0.8333333333333334,,
+win_rate,4,napoleon-bonaparte,Napoleon Bonaparte,0.7857142857142857,,
+win_rate,5,frederick-the-great,Frederick the Great,0.75,,
+win_rate,6,julius-caesar,Julius Caesar,0.7272727272727273,,
+win_rate,7,ulysses-s-grant,Ulysses S. Grant,0.6,,
+win_rate,8,saladin,Saladin,0.375,,
+casualty_efficiency,1,genghis-khan,Genghis Khan,21.596385542168676,,
+casualty_efficiency,2,alexander-the-great,Alexander the Great,7.178192831903079,,
+casualty_efficiency,3,julius-caesar,Julius Caesar,6.808247422680412,,
+casualty_efficiency,4,napoleon-bonaparte,Napoleon Bonaparte,1.3537120695533584,,
+casualty_efficiency,5,ulysses-s-grant,Ulysses S. Grant,1.3392517126985062,,
+casualty_efficiency,6,frederick-the-great,Frederick the Great,1.2649331861270796,,
+casualty_efficiency,7,saladin,Saladin,0.8289205702647657,,
+casualty_efficiency,8,georgy-zhukov,Georgy Zhukov,0.22396362795745312,,
+opponent_adjusted_rating,1,alexander-the-great,Alexander the Great,1878.4992738741867,,
+opponent_adjusted_rating,2,napoleon-bonaparte,Napoleon Bonaparte,1742.073916147805,,
+opponent_adjusted_rating,3,genghis-khan,Genghis Khan,1735.2838129893998,,
+opponent_adjusted_rating,4,georgy-zhukov,Georgy Zhukov,1703.946904119663,,
+opponent_adjusted_rating,5,ulysses-s-grant,Ulysses S. Grant,1680.5685933648588,,
+opponent_adjusted_rating,6,frederick-the-great,Frederick the Great,1675.5458300569078,,
+opponent_adjusted_rating,7,julius-caesar,Julius Caesar,1673.1914672683138,,
+opponent_adjusted_rating,8,saladin,Saladin,1429.8257397066568,,
+clutch_rating,1,genghis-khan,Genghis Khan,1.0,1.0,1.0
+clutch_rating,2,georgy-zhukov,Georgy Zhukov,1.0,1.0,1.0
+clutch_rating,3,alexander-the-great,Alexander the Great,1.0,1.0,1.0
+clutch_rating,4,julius-caesar,Julius Caesar,0.75,0.625,0.7777777777777778
+clutch_rating,5,frederick-the-great,Frederick the Great,0.75,0.7222222222222222,0.7727272727272727
+clutch_rating,6,napoleon-bonaparte,Napoleon Bonaparte,0.75,0.7222222222222222,0.8
+clutch_rating,7,ulysses-s-grant,Ulysses S. Grant,0.5,0.5,0.5
+clutch_rating,8,saladin,Saladin,0.0,0.0,0.6666666666666666
+squander_index,1,saladin,Saladin,0.0,,
+squander_index,2,julius-caesar,Julius Caesar,0.0,,
+squander_index,3,genghis-khan,Genghis Khan,0.0,,
+squander_index,4,georgy-zhukov,Georgy Zhukov,0.0,,
+squander_index,5,ulysses-s-grant,Ulysses S. Grant,0.0,,
+squander_index,6,alexander-the-great,Alexander the Great,0.2222222222222222,,
+squander_index,7,napoleon-bonaparte,Napoleon Bonaparte,0.2727272727272727,,
+squander_index,8,frederick-the-great,Frederick the Great,0.4444444444444444,,
+longevity_adjusted_value,1,ulysses-s-grant,Ulysses S. Grant,2.1,,
+longevity_adjusted_value,2,alexander-the-great,Alexander the Great,1.0,,
+longevity_adjusted_value,3,georgy-zhukov,Georgy Zhukov,0.7142857142857143,,
+longevity_adjusted_value,4,napoleon-bonaparte,Napoleon Bonaparte,0.575,,
+longevity_adjusted_value,5,julius-caesar,Julius Caesar,0.5714285714285714,,
+longevity_adjusted_value,6,frederick-the-great,Frederick the Great,0.475,,
+longevity_adjusted_value,7,genghis-khan,Genghis Khan,0.34782608695652173,,
+longevity_adjusted_value,8,saladin,Saladin,0.15,,

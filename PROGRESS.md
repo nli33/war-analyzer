@@ -608,7 +608,55 @@
       scripts/validate_data.py` still passes; full suite now 137/137 (129 prior + 8 new). This
       closes out the three PLAN.md Section 6 scatter plots; ranking tables (the next unchecked
       Phase 6 item) are still open.
-- [ ] Ranking tables rendered
+- [x] Ranking tables rendered — `war/viz/ranking_tables.py` adds
+      `composite_ranking_rows`/`category_ranking_rows` (pure data, joining
+      `composite.py`/`category.py`'s already-computed rankings with the raw
+      per-general values they're built from — `oar.py`, `rate.py`,
+      `longevity.py`, `war_residual.py` — plus display names/era from
+      `generals.csv`) and `render_ranking_tables_html`/`save_ranking_tables`,
+      producing one static HTML page (Composite Power Ranking + all six
+      PLAN.md Section 6.2 category tables) with two matching CSVs. Per the
+      dataviz skill's own form guidance ("more than ~7 meaningful classes ->
+      a table," `choosing-a-form.md`), this is a plain HTML table, not a
+      chart — no categorical palette to validate, light-mode only, matching
+      the other three Phase 6 modules' light-only treatment for consistency.
+      Judgment call, the substantive one: SCOPE.md's deliverable 3 and
+      PLAN.md Section 5's own example ("Caesar: OAR 82 +/- 15") ask for
+      rankings with confidence intervals, but `uncertainty.py`'s Monte Carlo
+      resampling deliberately never re-runs OAR, decisive_win_rate, or
+      Longevity-Adjusted Value (Phase 4's own documented reasoning — they're
+      pure functions of outcome/objective_secured/career years, untouched by
+      the resampled troop/casualty fields, so "resampling" them would just
+      repeat the same point estimate). Rather than fabricate a band for
+      those, this table attaches a genuine 90% Monte Carlo interval only
+      where the pipeline actually produces one: WAR-residual (one of the
+      composite's four inputs) and Clutch Rating (one of the six category
+      lists) — every other column is an honest point estimate with no
+      invented uncertainty. `mc` (the Monte Carlo result dict) is an
+      optional injected parameter rather than computed inside the module, so
+      tests can hand-build a two-entry `MetricDistribution` fixture instead
+      of paying for a real 1000-run resample just to check the CI columns
+      wire to the right cells. Verified per SCOPE.md Phase 6's no-display
+      method: 9 new tests in `tests/test_viz_ranking_tables.py` — hand-joined
+      row values cross-checked against independent calls to
+      `composite_ranking`/`oar_ratings`/`rate_stats_by_general`/
+      `longevity_adjusted_value_by_general`/`war_residual_by_general`, the
+      CI-attached-only-when-`mc`-given case (both present and
+      runs_used=0/absent), the category-CI-only-on-clutch-rating case, the
+      empty-input case for both row-builders, HTML content checks (all 7
+      table captions and both test generals' names present) without
+      decoding pixels, and the saved-file test asserting the HTML starts
+      with `<!DOCTYPE html>` plus both CSVs' header rows and row counts.
+      `scripts/render_ranking_tables.py` is the CLI entry (fixed
+      `MC_SEED=20260920` so the committed CSVs/HTML are reproducible run to
+      run), run once against the real 83-row dataset to produce
+      `output/viz/ranking_tables.html`/`_composite.csv`/`_categories.csv` —
+      sanity-checked against every prior phase's notes (Alexander/Genghis
+      top the composite ranking at 0.85/0.70, Saladin near the bottom at
+      -0.70, matching the back-half-losing-streak notes already logged
+      repeatedly). `python scripts/validate_data.py` still passes; full
+      suite now 146/146 (137 prior + 9 new). This closes out Phase 6 — all
+      three scatter plots plus the ranking tables are rendered.
 
 ## Phase 7: Sanity pass and dev log
 - [ ] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order
