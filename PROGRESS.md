@@ -282,7 +282,35 @@
       Richard I already noted in Phase 2), tracking the qualitative picture from the
       Phase 2 notes; the pooled weighted-residual sum is ~0 on real data too. `python
       scripts/validate_data.py` still passes; full suite now 59/59 (53 prior + 6 new).
-- [ ] Clutch rating + unit tests
+- [x] Clutch rating + unit tests — `war/metrics/clutch.py` adds
+      `clutch_rating_by_general`, PLAN.md's "playing from behind" stat.
+      Judgment calls not specified by PLAN.md, documented in the module
+      docstring: (1) a battle counts as "playing from behind" if
+      `enemy_troop_strength > own_troop_strength` (outnumbered, break-even at
+      exactly equal strength does not count) **or**
+      `resource_backing_tier <= 2` (bottom two of the schema's 1-5 tiers) —
+      the tier is read as an absolute standard rather than relative to the
+      opponent, since the schema only records `resource_backing_tier` for
+      the roster general's own side, nothing to compare it against
+      per-battle; (2) the stat is the **mean outcome score**
+      (Win/Draw/Loss -> 1.0/0.5/0.0, same mapping `oar.py`/`war_residual.py`
+      use) across only the qualifying battles — raw performance under
+      adversity, not a residual-against-expectation (that framing is already
+      covered separately by `war_residual.py`); (3) `None` with
+      `battles_used=0` for a general with zero qualifying battles, same
+      no-data convention as `rate.py`'s `casualty_exchange_ratio`/
+      `decisive_win_rate`. Verified per SCOPE.md Phase 3 method: 7 new
+      hand-computed tests in `tests/test_metrics_clutch.py` covering the
+      outnumbered condition, the equal-strength boundary (not outnumbered),
+      the resource-tier condition and its tier-3 boundary (not
+      disadvantaged), a mixed-battle mean-of-qualifying-only case, per-general
+      separation, and the empty-input edge case. Also ran against the real
+      83-row dataset as a sanity check: Alexander/Genghis/Zhukov sit at a
+      perfect 1.0 (consistent with their undefeated-or-near-undefeated
+      records from Phase 2), Saladin's single qualifying battle is a loss
+      (0.0), consistent with the back-half losing streak already noted.
+      `python scripts/validate_data.py` still passes; full suite now 66/66
+      (59 prior + 7 new).
 - [ ] Squander index + unit tests
 - [ ] Longevity-adjusted value + unit tests
 
