@@ -893,7 +893,43 @@ instruction).
       scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation
       doesn't add tests) still green. Dev log written to `~/notes/war-analyzer/dev-log.md` per
       CLAUDE.md (this repo's `notes/dev-log.md` remains superseded).
-- [ ] Wellington battles (Napoleonic)
+- [x] Wellington battles (Napoleonic) — 19 rows (Assaye, Argaon, Roliça, Vimeiro, Talavera,
+      Bussaco, Fuentes de Oñoro, Ciudad Rodrigo, Badajoz, Salamanca, Burgos, Vitoria, Sorauren,
+      Nivelle, Nive, Orthez, Toulouse, Quatre Bras, Waterloo) in `data/battles.csv` plus a
+      `generals.csv` row (`general_id=wellington`, matching the `opponent_general_id=wellington`
+      already used by the pre-existing `napoleon-waterloo-1815` row); `era=Napoleonic`,
+      `tech_era_tier=4` (matching Napoleon/Grant), `source_confidence` mostly Medium, downgraded
+      to Low on three rows with genuine cross-source casualty disagreement (Assaye/Argaon's
+      Maratha irregular-cavalry counts, Toulouse's disputed enemy_casualties). Delegated a research
+      pass first (candidate battles across the full 1803-1815 career, command attribution, draft
+      figures via `scripts/scrape_wikipedia_infobox.py` plus web research), then cross-checked its
+      citations and numbers by hand before writing rows — sources are Oman's 7-volume *A History of
+      the Peninsular War*, Napier, Esdaile, Weller, Fletcher's Osprey titles, and Chandler for
+      Waterloo, never "Wikipedia" alone. Deviation/judgment call, the big one: 19 rows is above
+      this dataset's usual 8-15 target — documented as a deliberate choice rather than an arbitrary
+      cut, since Wellington's career turned out to be the most comprehensively and consistently
+      sourced in the dataset so far (virtually no candidate battle failed the no-fabrication bar,
+      the opposite problem from Hannibal/Scipio/Subutai/Zhukov's under-target rosters), and cutting
+      bar-clearing rows purely to hit a round number would repeat, in reverse, the padding mistake
+      this dataset's Phase 2 notes already flagged as wrong; full reasoning in `generals.csv`'s
+      note. Includes the 1803 India campaign (Assaye, Argaon, fought under the Wellesley name years
+      before the Peninsular War) as a scope call matching Napoleon's Montenotte precedent for an
+      early independent command. Talavera isolates Wellesley's own British force from Cuesta's
+      separate, non-subordinate Spanish command; Vitoria by contrast combines the full multinational
+      Allied total since Spanish divisions were genuinely integrated into his order of battle by
+      1813 — two similar-looking situations resolved oppositely based on the actual command
+      relationship, not a fixed rule. Waterloo isolates Wellington's Anglo-allied force from
+      Blücher's Prussians (no protocol-supreme-command relationship existed, unlike Washington's
+      Yorktown), with enemy_troop_strength/enemy_casualties set to match `napoleon-waterloo-1815`'s
+      own-side figures exactly (72,000/34,500) — that existing Napoleon row's enemy figures remain
+      the combined Anglo+Prussian total, a documented, intentional asymmetry between the two rows
+      for the same battle. San Sebastián (run independently by Thomas Graham while Wellington fought
+      Sorauren simultaneously) is excluded under the same personal-command bar as Napoleon's
+      Auerstedt exclusion from Jena; the week-long "Battle of the Pyrenees" is narrowed to Sorauren,
+      the one action within it Wellington personally commanded. Net record is 18 wins (5
+      Rout-level) / 1 loss (Burgos, his clearest field failure, included for an honest record rather
+      than a highlight reel). `python scripts/validate_data.py` passes; full test suite (150 tests,
+      unchanged — data curation doesn't add tests) still green.
 - [ ] Robert E. Lee battles (Industrial)
 - [ ] Dwight D. Eisenhower battles (WWII)
 - [ ] Erwin Rommel battles (WWII)
