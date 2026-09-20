@@ -1,9 +1,20 @@
 general_id,display_name,tactical_rating,strategic_rating
 alexander-the-great,Alexander the Great,1.0,1.0
+douglas-macarthur,Douglas MacArthur,0.8333333333333334,1.0
+dwight-d-eisenhower,Dwight D. Eisenhower,1.0,1.0
+erich-von-manstein,Erich von Manstein,0.6,1.0
+erwin-rommel,Erwin Rommel,0.4444444444444444,0.75
 frederick-the-great,Frederick the Great,0.75,1.0
 genghis-khan,Genghis Khan,1.0,0.875
+george-washington,George Washington,0.5,1.0
 georgy-zhukov,Georgy Zhukov,0.8333333333333334,1.0
+hannibal-barca,Hannibal Barca,0.8571428571428571,1.0
 julius-caesar,Julius Caesar,0.7272727272727273,1.0
 napoleon-bonaparte,Napoleon Bonaparte,0.7857142857142857,0.9090909090909091
+robert-e-lee,Robert E. Lee,0.42857142857142855,1.0
 saladin,Saladin,0.375,1.0
+scipio-africanus,Scipio Africanus,1.0,0.8
+subutai,Subutai,1.0,1.0
+tokugawa-ieyasu,Tokugawa Ieyasu,0.8333333333333334,1.0
 ulysses-s-grant,Ulysses S. Grant,0.6,1.0
+wellington,Duke of Wellington,0.9473684210526315,0.8888888888888888

@@ -1,9 +1,20 @@
 general_id,display_name,battles_commanded,win_rate
 alexander-the-great,Alexander the Great,9,1.0
+douglas-macarthur,Douglas MacArthur,6,0.8333333333333334
+dwight-d-eisenhower,Dwight D. Eisenhower,6,1.0
+erich-von-manstein,Erich von Manstein,5,0.6
+erwin-rommel,Erwin Rommel,9,0.4444444444444444
 frederick-the-great,Frederick the Great,12,0.75
 genghis-khan,Genghis Khan,8,1.0
+george-washington,George Washington,12,0.5
 georgy-zhukov,Georgy Zhukov,6,0.8333333333333334
+hannibal-barca,Hannibal Barca,7,0.8571428571428571
 julius-caesar,Julius Caesar,11,0.7272727272727273
 napoleon-bonaparte,Napoleon Bonaparte,14,0.7857142857142857
+robert-e-lee,Robert E. Lee,14,0.42857142857142855
 saladin,Saladin,8,0.375
+scipio-africanus,Scipio Africanus,5,1.0
+subutai,Subutai,5,1.0
+tokugawa-ieyasu,Tokugawa Ieyasu,6,0.8333333333333334
 ulysses-s-grant,Ulysses S. Grant,15,0.6
+wellington,Duke of Wellington,19,0.9473684210526315

@@ -1,9 +1,20 @@
 general_id,display_name,oar_rating,avg_resource_backing_tier
-alexander-the-great,Alexander the Great,1878.4992738741867,2.7777777777777777
-frederick-the-great,Frederick the Great,1675.5458300569078,2.0833333333333335
-genghis-khan,Genghis Khan,1735.2838129893998,4.5
-georgy-zhukov,Georgy Zhukov,1703.946904119663,3.3333333333333335
-julius-caesar,Julius Caesar,1673.1914672683138,2.909090909090909
-napoleon-bonaparte,Napoleon Bonaparte,1742.073916147805,3.142857142857143
-saladin,Saladin,1429.8257397066568,4.125
-ulysses-s-grant,Ulysses S. Grant,1680.5685933648588,4.2
+alexander-the-great,Alexander the Great,1878.4992759398422,2.7777777777777777
+douglas-macarthur,Douglas MacArthur,1703.9469048982874,2.8333333333333335
+dwight-d-eisenhower,Dwight D. Eisenhower,1872.7365650618506,4.5
+erich-von-manstein,Erich von Manstein,1557.9786989384882,2.6
+erwin-rommel,Erwin Rommel,1499.1653943499703,2.111111111111111
+frederick-the-great,Frederick the Great,1675.5458301746453,2.0833333333333335
+genghis-khan,Genghis Khan,1735.283814742013,4.5
+george-washington,George Washington,1564.9820934603026,1.8333333333333333
+georgy-zhukov,Georgy Zhukov,1694.626472828427,3.3333333333333335
+hannibal-barca,Hannibal Barca,1701.4918935416465,2.142857142857143
+julius-caesar,Julius Caesar,1673.1914677906573,2.909090909090909
+napoleon-bonaparte,Napoleon Bonaparte,1755.6861003717902,3.142857142857143
+robert-e-lee,Robert E. Lee,1627.1239410748033,2.357142857142857
+saladin,Saladin,1429.8257396289432,4.125
+scipio-africanus,Scipio Africanus,1887.3830303796565,2.2
+subutai,Subutai,1782.685467152885,3.0
+tokugawa-ieyasu,Tokugawa Ieyasu,1715.1650910278054,3.3333333333333335
+ulysses-s-grant,Ulysses S. Grant,1676.2623440523907,4.2
+wellington,Duke of Wellington,1978.0995747035097,3.0526315789473686

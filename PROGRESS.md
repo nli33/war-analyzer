@@ -1128,10 +1128,110 @@ instruction).
       catastrophic early defeat to increasingly lopsided victories as US material superiority grew,
       matching historian consensus. `python scripts/validate_data.py` passes; full test suite (150
       tests, unchanged — data curation doesn't add tests) still green.
-- [ ] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
+- [x] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
       `pytest`, then re-run every `scripts/render_*.py` script to regenerate
       `output/viz/*.png`/`*.csv`/`*.html` from the expanded dataset (old output is stale the
       moment a new general lands). Re-run Phase 7's sanity pass against the new composite
       ranking/category tables — in particular check whether the n=2-era-cohort z-scoring issue
       flagged for Caesar (see Notes above) resolves now that Ancient/Medieval/WWII cohorts have
-      more members; log findings in Notes below, do not hand-tune weights.
+      more members; log findings in Notes below, do not hand-tune weights. — validate passes;
+      full suite 150/150 unchanged; all four `render_*.py` scripts re-ran clean against the
+      19-general/178-row dataset (`ranking_tables.py`'s Monte Carlo pass took >2min so it ran in
+      the background, no code issue). Sanity pass: the original Caesar n=2 artifact *is* resolved
+      (Ancient now has 4 members: Caesar/Alexander/Hannibal/Scipio; Medieval 4:
+      Genghis/Saladin/Subutai/Tokugawa; WWII 5: Zhukov/Eisenhower/Rommel/Manstein/MacArthur — none
+      are forced-mirror n=2 pairs anymore), but the *same* mechanical issue reappeared in three
+      different eras: Early Modern (Frederick+Washington), Napoleonic (Napoleon+Wellington), and
+      Industrial (Grant+Lee) each grew from a singleton to exactly 2 members, so those three pairs
+      now show the identical exact-mirror-magnitude artifact Caesar/Alexander had before
+      (Frederick 0.85 / Washington -0.85, Napoleon -0.70 / Wellington 0.70, Grant 0.85 / Lee
+      -0.85 — mathematically guaranteed for any 2-member population: z always resolves to exactly
+      ±1 regardless of how large or small the real gap between the two is). Full writeup with the
+      math and the rest of the findings (Rommel's last-place finish, Eisenhower's #1) in Notes
+      below — no weights touched.
+
+## Notes / deviations — Phase 2b sanity re-pass (19-general roster)
+
+- **Pipeline re-run, clean**: `python scripts/validate_data.py` passes on the full 178-row/
+  19-general dataset; `pytest` is still 150/150 (data curation tasks don't add tests, per
+  established convention); all four `scripts/render_*.py` scripts ran without error and
+  overwrote the stale (8-general, this-morning) `output/viz/*` files. `render_ranking_tables.py`
+  took long enough (Monte Carlo resampling over ~4x the rows) to exceed the interactive command
+  timeout and finished in the background — that's a runtime characteristic, not a bug; its fixed
+  `MC_SEED` means the output is still fully reproducible.
+- **The n=2-era-cohort exact-mirror artifact, previously flagged for Caesar/Alexander, is
+  resolved for Ancient/Medieval/WWII but has mechanically reappeared in three other eras.**
+  Ancient grew from 2 to 4 members (Caesar, Alexander, Hannibal, Scipio), Medieval from 2 to 4
+  (Genghis, Saladin, Subutai, Tokugawa), and WWII from a 1-member singleton to 5 (Zhukov,
+  Eisenhower, Rommel, Manstein, MacArthur) — none of those cohorts force the old ±1.0-mirror
+  z-score anymore, and Zhukov's composite score is no longer mechanically pinned at exactly 0.0.
+  But Early Modern (Frederick + Washington), Napoleonic (Napoleon + Wellington), and Industrial
+  (Grant + Lee) each grew from a 1-member singleton to *exactly* 2 members — one new general
+  added per era, no more — which reproduces the identical structural issue `composite.py`'s
+  docstring already names for n=2 cohorts. Confirmed against the regenerated
+  `output/viz/ranking_tables_composite.csv`: Frederick 0.85 / Washington -0.85, Napoleon -0.70 /
+  Wellington 0.70, Grant 0.8499999999999984 / Lee -0.8500000000000015 (floating-point noise on an
+  exact 0.85) — every pair's composite magnitude matches exactly. This isn't a coincidence of
+  this particular data; it's guaranteed by the math. For any 2-value population {a, b} with
+  population std (`ddof=0`), the deviation of each point from the mean is ±(a-b)/2 and the
+  population std is |a-b|/2, so z = deviation/std is always exactly ±1 regardless of how large or
+  small the real gap between a and b is. `_z_scores_within_era` in `war/metrics/composite.py`
+  (lines 81-102) does exactly this per metric per era, so any 2-member era cohort will always
+  produce mirror-magnitude z-scores, and therefore mirror-magnitude composite scores when the
+  other three inputs happen to agree in sign (as they do for two of these three pairs — see
+  below). **Practical read**: within an n=2 pair, the *sign* (who ranks above whom) is still
+  meaningful and, for these three pairs, matches historian consensus (Washington's overall record
+  is weaker than Frederick's; Wellington's largely-undefeated run edges Napoleon's mixed one
+  including the Russian disaster and Waterloo; Grant's material-advantage-backed record edges
+  Lee's harder fight against it) — but the *magnitude* (0.85, 0.70) is mechanically forced and
+  not comparable across eras or informative about the size of the real quality gap. This is the
+  same limitation already documented in Phase 5/Phase 7's original notes, just relocated to new
+  generals by the specific shape of this roster expansion (one general added per already-thin
+  era rather than several) — not a new bug, not something to weight-tune around per SCOPE.md's
+  explicit instruction, and expected to keep recurring for any era that stays at exactly 1-2
+  members. Noted here rather than patched.
+- **Julius Caesar's own placement (17th of 19, composite -0.90) no longer traces to the n=2
+  artifact, but is still worth a second look.** With Ancient now at n=4, Caesar's z-scores are a
+  real 4-way comparison, not a forced mirror of Alexander. Checked his category placements
+  directly: `casualty_efficiency` 5th of 19 (good), `squander_index` 8th (tied-good, 0.0, no
+  squandered wins), `clutch_rating` 11th (mid-pack), `win_rate` 13th (0.73, respectable) — none of
+  these are last-place. The two inputs actually pulling his composite down are `opponent_adjusted_
+  rating` (14th of 19 overall, and lowest of the four Ancient generals specifically) and
+  `war_residual` (-0.104, with a tight CI of -0.109 to -0.095 that doesn't cross zero, so it isn't
+  Monte Carlo noise). Both are real, not artifacts of the z-scoring bug. A plausible explanation,
+  not confirmed: this file's Phase 5 notes already document that off-roster opponents (most of
+  Caesar's — Gallic tribes, various Roman rivals with no `generals.csv` row of their own) get a
+  default rating in the OAR solver rather than a curated one, and Caesar's battles skew unusually
+  heavily toward off-roster opponents compared to Alexander/Hannibal/Scipio, who fought more of
+  each other or better-documented Successor-era commanders. That would understate his OAR without
+  it reflecting a real quality gap — but this is a hypothesis, not a verified root cause, and
+  fixing it (curating ratings for two dozen ancient tribal/political opponents) is a data-sourcing
+  effort beyond this task's scope. Flagged as a candidate follow-up, not acted on.
+- **Rommel finishes dead last (19th of 19, composite -1.24), just below Saladin.** Re-checked
+  against the reasoning already logged at data-entry time (see the Erwin Rommel entry above):
+  `win_rate` 17th (0.44), `opponent_adjusted_rating` 18th, and `squander_index` worst in the whole
+  roster (0.5, tied-worst previously held by Frederick at 0.44 in the 8-general run) all trace to
+  the same documented back-half-of-the-desert-campaign losing streak from Alam el Halfa through
+  Second Alamein — a real historical pattern this dataset's 9-row roster happens to weight toward
+  (it doesn't include his earlier, more successful 1941 battles as heavily). Historian consensus
+  rates Rommel as a top tactician whose campaign nonetheless ended in strategic defeat — a
+  last-place *composite* finish for a campaign-scoped dataset is consistent with that, not a
+  contradiction of it. No action taken; this is the same "matches consensus, not an artifact"
+  call already made once for this general.
+- **Eisenhower ranks 1st overall (composite 1.29), ahead of Alexander (2nd, 0.90).** This doesn't
+  trip SCOPE.md's named bug-check ("does anyone universally considered a poor commander rank
+  #1?") — Eisenhower is a well-regarded commander, so a surprising #1 isn't the same as a wrong
+  #1. But it's worth flagging as likely driven by roster composition rather than a uniquely
+  dominant record: his 6 rows are all wins (`decisive_win_rate`=1.0) in Allied campaigns fought
+  with growing material superiority, giving the highest `opponent_adjusted_rating` of any WWII
+  general (1872.7, above Zhukov/Manstein/MacArthur/Rommel) and a solidly positive `war_residual`
+  even after controlling for that superiority — this is the same "thin roster, all wins" shape
+  already flagged as a structural shortfall for Eisenhower/Zhukov/MacArthur at data-entry time,
+  not a new problem, just now visible in the composite ranking's top slot instead of a category
+  table. Left as-is per SCOPE.md's "do not hand-tune weights" instruction — the underlying data is
+  honestly sourced, and the composite formula is doing exactly what it's documented to do with it.
+- **No universally-recognized poor commander ranks at the top, and no universally-recognized great
+  commander ranks unaccountably at the bottom relative to their own documented record in this
+  dataset** — the two names at the extremes (Eisenhower #1, Rommel #19) both trace to real,
+  already-documented data/roster characteristics rather than a pipeline bug. This closes out the
+  re-run of Phase 7's sanity-pass instruction for the 19-general roster; no weights were changed.
