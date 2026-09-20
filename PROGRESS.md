@@ -344,7 +344,34 @@
       decisiveness labels in this dataset are Strategic/Rout only). `python
       scripts/validate_data.py` still passes; full suite now 76/76 (66 prior
       + 10 new).
-- [ ] Longevity-adjusted value + unit tests
+- [x] Longevity-adjusted value + unit tests — `war/metrics/longevity.py` adds
+      `longevity_adjusted_value_by_general`, PLAN.md's "career value normalized
+      for years active" stat. Judgment calls not specified by PLAN.md,
+      documented in the module docstring: (1) "career value" reuses the
+      Win/Draw/Loss -> 1.0/0.5/0.0 outcome-score mapping `oar.py`/
+      `war_residual.py`/`clutch.py` already use, summed across a general's
+      career; (2) "longevity" is read as calendar years
+      (`generals.csv`'s `career_end_year - career_start_year + 1`, inclusive),
+      not battle/campaign count — PLAN.md offers both, but campaign count is
+      already `raw_stats.battles_commanded` and every existing rate stat
+      already normalizes by battle count, so years is the only reading that
+      adds a genuinely new axis (and matches PLAN.md's own
+      Alexander-vs-Eisenhower, i.e. calendar-time, framing); (3) this is the
+      first metric to need both `battles.csv` and `generals.csv` as input,
+      since career span lives only in the latter. Verified per SCOPE.md Phase
+      3 method: 5 new hand-computed tests in `tests/test_metrics_longevity.py`
+      covering a single-battle one-year career, a mixed Win/Draw/Loss sum, an
+      explicit case pinning down that equal career value with a shorter span
+      scores higher (the "short dominant peak" property PLAN.md names), a
+      career spanning the BC/AD boundary to confirm the no-year-zero
+      arithmetic from `schema.py`'s docstring holds, and the no-battles
+      absent-general edge case. Also ran against the real dataset as a sanity
+      check (not a substitute for the unit tests): Grant (5-year career) and
+      Alexander (9-year, undefeated) top the list, Genghis Khan and Saladin
+      (23- and 20-year careers with comparatively few high-value wins) sit at
+      the bottom — matches the intended volume-vs-peak distinction. `python
+      scripts/validate_data.py` still passes; full suite now 81/81 (76 prior
+      + 5 new).
 
 ## Phase 4: Uncertainty
 - [ ] Monte Carlo resampling (N>=1000) for Low/Medium confidence battles
