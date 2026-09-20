@@ -659,7 +659,7 @@
       three scatter plots plus the ranking tables are rendered.
 
 ## Phase 7: Sanity pass and dev log
-- [ ] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order
+- [x] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order — reviewed `output/viz/ranking_tables_composite.csv`/`_categories.csv` against Phase 2's historian-consensus notes; top (Alexander/Genghis) and the Saladin/Frederick squander findings check out, but Julius Caesar ranking dead last (below Saladin) despite mid-pack-or-better standing in every individual category is a methodology artifact of n=2 era-cohort z-scoring, not a real finding — documented below, not hand-tuned.
 - [ ] `notes/` dev log via the project-notes skill (SCOPE.md deliverable 6), written from the Notes section below and the commit history
 
 ## Notes / deviations
@@ -681,3 +681,36 @@
   otherwise have hit it cold.
 - `opponent_general_id` may point at a commander with no row in generals.csv; off-roster
   opponents get a default rating in the OAR solver rather than forcing 100+ extra curated rows.
+- Phase 7 sanity pass on `output/viz/ranking_tables_composite.csv`/`_categories.csv` against
+  Phase 2's historian-consensus notes:
+  - **Checks out, no action**: Alexander #1 (0.85) and Genghis Khan #2 (0.70) at the top match
+    their undefeated/near-undefeated reputations. Saladin's #7 (-0.70) and last-place category
+    finishes (win_rate 0.375, clutch_rating 0.0, OAR lowest at 1430) track the documented
+    back-half losing streak against Richard I. Frederick topping the squander_index category
+    (0.44, worst) matches the "tactically brilliant, strategically indecisive" consensus
+    already noted in Phase 3. None of this looks like a bug.
+  - **Already-known, re-confirmed**: Frederick/Zhukov/Napoleon/Grant tie at composite 0.0 — this
+    is Phase 5's documented singleton-era-cohort z=0 convention (SCOPE.md's locked 8-general,
+    one-or-two-per-era roster puts these four alone in their era, so their z-score, and
+    therefore composite score, is exactly 0 regardless of underlying quality). Not new, not a
+    bug, still flagged here per this task's instructions.
+  - **New finding, methodology limitation not a data/code bug**: Julius Caesar ranks *last*
+    overall (composite -0.85, below Saladin) despite `decisive_win_rate`=1.0 (every recorded
+    win rated Strategic/Rout), `squander_index`=0.0 (tied-best, no squandered wins),
+    `casualty_efficiency` 3rd of 8, `win_rate` 6th of 8 (0.73, well above Saladin's 0.375), and
+    `clutch_rating` 4th of 8 — nowhere near a last-place profile, and starkly inconsistent with
+    the historian-consensus view of Caesar as a top-tier commander (routinely named alongside
+    Alexander and Napoleon in "greatest generals" lists). Root cause, confirmed by hand: Ancient
+    era has exactly 2 members (Caesar, Alexander), so `composite.py`'s within-era z-scoring
+    z-scores Caesar purely against Alexander with n=2 — a population of 2 forces the two
+    z-scores per metric to be exact mirror images (+1.0/-1.0), so Caesar's composite is
+    mechanically pulled toward -(Alexander's score) simply because Alexander is undefeated, not
+    because Caesar's underlying record is weak. The same z-scoring formula that correctly
+    separates Genghis/Saladin (a real quality gap, per Phase 5's notes) produces a misleading
+    result here because the *other* member of the pair happens to be a historical outlier
+    (undefeated) rather than a "typical" peer. This is a structural limitation of z-scoring
+    within tiny (n=2) cohorts on this locked 8-general roster, not a bug in the composite
+    formula or the underlying data — per SCOPE.md Phase 7 ("do not hand-tune weights to force a
+    specific order") and the "don't expand scope" guidance, left as-is and flagged here rather
+    than patched; would likely resolve itself with PLAN.md's fuller 15-25 general roster (more
+    members per era cohort) if this project is extended past the locked-8 scope.
