@@ -733,7 +733,38 @@ strength/casualties scaffold (unverified — cross-check every number against an
 before writing the row, same as always; see scripts/overnight.sh's amended prompt for the exact
 instruction).
 
-- [ ] Hannibal Barca battles (Ancient)
+- [x] Hannibal Barca battles (Ancient) — 7 rows (Ticinus, Trebia, Lake Trasimene, Cannae,
+      Battle of Capua 212bc, Battle of Petelia 208bc, Zama) in `data/battles.csv` plus a
+      `generals.csv` row; `era=Ancient`, `source_confidence=Low`, `tech_era_tier=1` for every
+      row, matching Caesar and Alexander (the existing Ancient-era rows). Web-researched via a
+      delegated research pass cross-checking Wikipedia infoboxes and the primary ancient sources
+      (Polybius, Livy, Appian) against named modern historians (Goldsworthy, Lazenby, Daly,
+      Clodfelter, Bagnall). `resource_backing_tier` set per-row (2 for the 218-217bc invasion
+      force, 3 at Cannae and Zama, 1 at Petelia's shrinking 208bc Bruttium foothold), same
+      per-row approach as Frederick/Napoleon/Grant. Deviation/judgment call: roster came in at 7
+      battles, short of the dataset's usual 8-15 range, and is documented rather than padded —
+      a real historiographical pattern turned up where Roman chroniclers meticulously recorded
+      their own dead for the long 212-207bc stalemate-years battles (Herdonia I/II, Canusium,
+      Silarus, Grumentum) but never gave a usable troop-strength figure for Hannibal's own side
+      in any of them, so those rows were dropped under the same no-fabrication bar as Alexander's
+      Persian Gate/Genghis's Khalakhaljid Sands, rather than lowering the bar to hit a row count
+      — the same kind of documented shortfall as Zhukov's 6-battle roster. Also dropped the 219bc
+      Siege of Saguntum, the 220bc Battle of the Tagus, the three Battles of Nola, and the Battle
+      of Numistro for the same reason. Two included rows (Ticinus, Capua) still have one flagged
+      order-of-magnitude placeholder field each (Ticinus's casualties are only ever described
+      qualitatively as "Light"/"Heavy"; Capua's own_casualties has no figure at all in any
+      source) — same treatment as several Genghis Khan/Saladin rows. Modern-corrective judgment
+      calls, documented per-row: Cannae's enemy_casualties (~50,000) uses a modern mid-range
+      estimate (Goldsworthy/Daly) over Polybius's 70,000/Livy's 48,200, which Clodfelter himself
+      calls implausible for a 50,000-man Carthaginian army to inflict; Trebia's own/enemy
+      casualties use Lazenby's modern estimates over the ancient sources' vaguer figures — same
+      "prefer the modern historian's corrective" precedent as Caesar/Genghis/Zhukov. Net record
+      is 6 wins / 1 loss: undefeated in every included Italian battle, with the sole loss being
+      Zama itself (`political_constraint_flag=true`: rushed recall from Italy, collapsed peace
+      talks, Masinissa's Numidian cavalry defection) — matches historian consensus of Hannibal as
+      tactically undefeated in Italy but strategically unable to force Rome to terms, losing only
+      the one battle that decided the war. `python scripts/validate_data.py` passes; full test
+      suite (150 tests) still green.
 - [ ] Scipio Africanus battles (Ancient)
 - [ ] Subutai battles (Medieval)
 - [ ] Tokugawa Ieyasu battles (Medieval)
