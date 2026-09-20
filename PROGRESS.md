@@ -1,7 +1,7 @@
 # Progress
 
 ## Phase 1: Scaffold
-- [ ] Repo structure + CSV schema matching PLAN.md Section 2
+- [x] Repo structure + CSV schema matching PLAN.md Section 2 — `war/schema.py` is the authoritative definition; `data/battles.csv` and `data/generals.csv` written with headers generated from it
 - [ ] pytest harness runs (0 tests is fine at this point)
 
 ## Phase 2: Data curation (8 generals, see SCOPE.md roster)
@@ -45,4 +45,15 @@
 - [ ] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order
 
 ## Notes / deviations
-(none yet)
+- Schema additions beyond PLAN.md Section 2: `battle_id` (stable row key), `notes` (free text
+  for source disagreements), and a second file `data/generals.csv` (display name, era, career
+  years) — all needed to make rows traceable and to compute longevity. Low complexity, no new
+  research burden per row.
+- Date format decision: `YYYY[-MM[-DD]]` with a leading minus for BC (`-0052` = 52 BC),
+  astronomical-style with no year-zero correction. `schema.parse_year` is the one place that
+  reads a year back out. A one-year offset is far below the resolution of anything computed here.
+- `decisiveness` is required for a Win but optional for Loss/Draw, where the outcome often says
+  everything (PLAN.md's four levels are phrased from the winner's side). For a Loss, `Rout` means
+  this general's own army broke.
+- `opponent_general_id` may point at a commander with no row in generals.csv; off-roster
+  opponents get a default rating in the OAR solver rather than forcing 100+ extra curated rows.
