@@ -202,7 +202,28 @@
       sane (e.g. Zhukov's ~2.07M own-casualties total is dominated by Battle of Moscow's
       1,029,234 row — checked against the CSV directly, not a rollup bug). Full suite: 36/36
       passing (32 prior + 4 new).
-- [ ] Rate stats
+- [x] Rate stats — `war/metrics/rate.py` adds `rate_stats_by_general`, computing PLAN.md
+      Section 4's four per-battle stats: `win_rate`, `casualty_exchange_ratio`,
+      `avg_force_ratio_faced`, `decisive_win_rate`. Judgment calls (PLAN.md names the four
+      stats but not their exact formulas), documented in the module docstring: (1)
+      `casualty_exchange_ratio` is enemy:own from **career-total** casualties (sum/sum), not an
+      average of each battle's own ratio — avoids one freak-ratio skirmish outweighing a
+      100x-larger battle, and avoids a divide-by-zero on any single zero-casualty row; `None`
+      when the general's own-casualty total is zero (schema permits `own_casualties=0`, so this
+      is a reachable case, not defensive over-engineering). (2) `avg_force_ratio_faced` is the
+      mean, per battle, of `enemy_troop_strength / own_troop_strength` — this one *is* a
+      per-battle average since it's about the typical fight, not a career total; >1 means
+      typically outnumbered. (3) `decisive_win_rate` reuses the existing `objective_secured`
+      bool (among wins only) rather than re-deriving "decisive" from the `decisiveness` enum,
+      since `objective_secured` is already defined as exactly that question; `None` for a
+      general with zero wins. Verified per SCOPE.md Phase 3 method: 8 new hand-computed tests in
+      `tests/test_metrics_rate.py` (including one that pins down totals-ratio vs
+      average-of-ratios behavior explicitly, and one each for the two `None`-producing edge
+      cases). Also ran against the real 83-row dataset as a sanity check (not a substitute for
+      the unit tests) — e.g. Zhukov's casualty_exchange_ratio of ~0.22 (worse than 1:1) tracks
+      Operation Mars' heavy losses pulling down an otherwise-winning record, Genghis's ~21.6 is
+      the highest in the roster and matches the historical reputation. `python
+      scripts/validate_data.py` still passes; full suite now 44/44 (36 prior + 8 new).
 - [ ] OAR (iterative Elo solver) + unit tests
 - [ ] WAR-residual (regression) + unit tests
 - [ ] Clutch rating + unit tests
