@@ -460,7 +460,36 @@
       Phase 3/4 metric so far has been a library function verified by unit tests, not a file-
       writing script; a results-to-file step is still open, likely alongside Phase 6's
       visualization output.
-- [ ] Category rankings output
+- [x] Category rankings output — `war/metrics/category.py` adds `category_rankings`,
+      PLAN.md Section 6.2's six separate ordered lists (Win Rate, Casualty Efficiency,
+      Opponent-Adjusted Rating, Clutch Rating, Squander Index, Longevity-Adjusted Value),
+      each sorted independently by its own already-computed metric value rather than any
+      combined score. Judgment calls not specified by PLAN.md, documented in the module
+      docstring: (1) unlike `composite.py`, no z-scoring/era-cohorting — PLAN.md's era-
+      normalization rule is scoped to cross-era *combinations*, and a single-stat list
+      combines nothing; (2) sort direction is metric-specific — five categories are
+      descending (higher is better) but Squander Index sorts ascending, since PLAN.md
+      defines it as a failure rate where lower is the better outcome; (3) each category
+      independently drops generals whose value is `None` for that one metric (e.g.
+      zero-career-casualties excluded from Casualty Efficiency, zero-qualifying-battles
+      excluded from Clutch Rating) rather than assigning a placeholder or excluding them
+      from every other category too; (4) "roster" (eligible for any category) is every
+      `general_id` that commands at least one row, `rate_stats_by_general`'s keys — this
+      excludes off-roster `opponent_general_id`s from Opponent-Adjusted Rating even though
+      `oar_ratings` solves a rating for them, same reasoning `composite.py` already gives.
+      Verified per SCOPE.md Phase 3 method: 7 new hand-computed tests in
+      `tests/test_metrics_category.py` covering the empty-input case (all six categories
+      present as empty lists), win-rate descending order with rank starting at 1,
+      casualty-efficiency's zero-casualty exclusion, the off-roster-opponent exclusion,
+      clutch-rating's no-qualifying-battle exclusion, squander-index's ascending sort plus
+      its unlabeled-win exclusion, and longevity being present for every roster general.
+      Also ran against the real 83-row dataset as a sanity check (not a substitute for the
+      unit tests): Alexander/Genghis top most categories, Saladin bottom most (0.0 clutch
+      rating, lowest OAR) — matches the Phase 2 notes on the back-half losing streak.
+      `python scripts/validate_data.py` still passes; full suite now 113/113 (106 prior + 7
+      new). Output is a library function returning typed lists, same "no CSV/JSON file yet"
+      convention `composite.py` left for this same reason — deferred to a combined
+      results-to-file step alongside Phase 6's visualization output.
 - [ ] Test: changing a weight changes the order
 
 ## Phase 6: Visualization
