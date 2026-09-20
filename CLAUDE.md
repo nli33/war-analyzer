@@ -48,6 +48,12 @@ The overnight autonomous run happens in a CLI-only sandbox — no browser, no di
 on visually opening a rendered chart to verify it works; see SCOPE.md Phase 6 and OVERNIGHT.md
 for how to verify visualization output without a display.
 
+No human is watching this run in real time — this overrides the global "if uncertain, ask" rule
+during the overnight loop. If something is ambiguous, don't stop and wait for an answer: make
+the most reasonable judgment call, write it down as a decision/assumption in PROGRESS.md's Notes
+section, and keep going. Only genuinely halt the loop (per SCOPE.md's "stop and flag" conditions)
+when you can't proceed at all — not merely when you're unsure of the best choice.
+
 ## Adding new data fields or metrics
 
 See SCOPE.md's "Deciding whether to add a new data field/feature" section —

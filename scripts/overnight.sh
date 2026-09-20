@@ -9,7 +9,12 @@ STALL_LIMIT="${STALL_LIMIT:-3}"
 stall_count=0
 prev_commit="$(git rev-parse HEAD)"
 
-PROMPT='Read PROGRESS.md and CLAUDE.md. Pick up the next unchecked task. Do the work for
+PROMPT='You are running unattended overnight - no human will see or answer anything you write.
+Never stop to ask a question or wait for input. If something is ambiguous, make the most
+reasonable judgment call, note it as a decision/assumption in PROGRESS.md, and keep going.
+Only halt per the "stop and flag" conditions in SCOPE.md, where you genuinely cannot proceed.
+
+Read PROGRESS.md and CLAUDE.md. Pick up the next unchecked task. Do the work for
 that ONE task only - do not jump ahead. Follow SCOPE.md'"'"'s verification method for that phase
 before marking it done. Update PROGRESS.md (check the task, add a one-line note on what
 happened or any deviation) and commit your work with a message per CLAUDE.md'"'"'s commit rules.
