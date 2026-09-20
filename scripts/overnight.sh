@@ -22,7 +22,8 @@ for i in $(seq 1 "$MAX_ITERATIONS"); do
 
   claude -p "$PROMPT" \
     --dangerously-skip-permissions \
-    --output-format stream-json
+    --output-format stream-json \
+    --verbose
 
   new_commit="$(git rev-parse HEAD)"
   if [ "$new_commit" = "$prev_commit" ]; then
