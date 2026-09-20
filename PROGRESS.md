@@ -186,7 +186,22 @@
       still green.
 
 ## Phase 3: Metrics pipeline
-- [ ] Raw/counting stats
+- [x] Raw/counting stats — `war/records.py` adds typed `Battle`/`General` dataclasses plus
+      `load_battles`/`load_generals` (the CSV-loading layer every metrics module from here on
+      builds on; validation stays a separate pre-check in `scripts/validate_data.py`, loading
+      does not re-validate). `war/metrics/raw.py` adds `raw_stats_by_general`, rolling up
+      `battles_commanded`, `wins`/`losses`/`draws`, `total_own_troops` (career volume),
+      `total_enemy_casualties_inflicted`, `total_own_casualties_taken` per general. Deviation:
+      PLAN.md Section 4 lists "battles commanded" and "campaigns commanded" as two separate
+      counts, but PLAN.md Section 1 defines this project's atomic unit as "individual
+      battle/campaign commanded" — one row is a battle *or* a campaign, never both distinctly —
+      so the two counts are always identical; only `battles_commanded` is exposed rather than a
+      duplicate field under a second name. Verified per SCOPE.md Phase 3 method: hand-computed
+      expected values on synthetic battle sets in `tests/test_metrics_raw.py` (4 new tests), plus
+      a manual run against the real 83-row dataset to eyeball the per-general totals look
+      sane (e.g. Zhukov's ~2.07M own-casualties total is dominated by Battle of Moscow's
+      1,029,234 row — checked against the CSV directly, not a rollup bug). Full suite: 36/36
+      passing (32 prior + 4 new).
 - [ ] Rate stats
 - [ ] OAR (iterative Elo solver) + unit tests
 - [ ] WAR-residual (regression) + unit tests
