@@ -311,7 +311,39 @@
       (0.0), consistent with the back-half losing streak already noted.
       `python scripts/validate_data.py` still passes; full suite now 66/66
       (59 prior + 7 new).
-- [ ] Squander index + unit tests
+- [x] Squander index + unit tests — `war/metrics/squander.py` adds
+      `squander_index_by_general`, PLAN.md's "brilliant on the field, lost
+      the war" stat (rate at which wins fail to convert into
+      strategic/political gains). Judgment calls not specified by PLAN.md,
+      documented in the module docstring: (1) reuses the existing
+      `decisiveness` enum rather than re-deriving conversion from troop/
+      casualty numbers, since the enum's own definitions already answer the
+      question directly — `Tactical` ("won the field, but it bought no
+      lasting strategic gain") and `Pyrrhic` ("nominally the winner, but the
+      cost gutted the force") count as squandered; `Strategic` and `Rout`
+      count as converted — same reuse-over-re-derive reasoning `rate.py`
+      gives for `decisive_win_rate`/`objective_secured`; (2) `decisiveness`
+      is schema-required for a Win but `validate.py` only checks the
+      column's unconditional `required` flag (`False`, to allow empty on
+      Loss/Draw), so a Win with no `decisiveness` recorded is reachable data,
+      not hypothetical — such rows are excluded from both numerator and
+      denominator rather than assumed either way, with `wins_used` reporting
+      the denominator actually used; (3) `None`/`wins_used=0` for a general
+      with no decisiveness-labeled wins, same no-data convention as
+      `rate.py`/`clutch.py`. Verified per SCOPE.md Phase 3 method: 10 new
+      hand-computed tests in `tests/test_metrics_squander.py` covering each
+      of the four `decisiveness` values in isolation, Losses/Draws being
+      excluded regardless of their `decisiveness`, the unlabeled-Win
+      exclusion case, a mixed-wins fraction case, per-general separation, and
+      both `None`-producing edge cases (wins but no labels; no wins at all).
+      Also ran against the real 83-row dataset as a sanity check (not a
+      substitute for the unit tests): Frederick the Great comes out highest
+      (0.44 — matches the historical picture of tactically sharp Prussian
+      wins that repeatedly failed to end the wars decisively) and Napoleon
+      second (0.27), while Caesar/Genghis/Grant/Zhukov sit at 0.0 (their
+      decisiveness labels in this dataset are Strategic/Rout only). `python
+      scripts/validate_data.py` still passes; full suite now 76/76 (66 prior
+      + 10 new).
 - [ ] Longevity-adjusted value + unit tests
 
 ## Phase 4: Uncertainty
