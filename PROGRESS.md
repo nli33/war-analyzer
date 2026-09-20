@@ -1052,7 +1052,42 @@ instruction).
       matching historian consensus rather than reading as a data artifact. `python
       scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation doesn't add
       tests) still green.
-- [ ] Erich von Manstein battles (WWII)
+- [x] Erich von Manstein battles (WWII) — 5 rows (Operation Trappenjagd/Kerch Peninsula, Siege of
+      Sevastopol/Operation Stoerfang, Third Battle of Kharkov, Zhitomir-Berdichev Offensive,
+      Korsun-Cherkassy Pocket) in `data/battles.csv` plus a `generals.csv` row; `era=WWII`,
+      `tech_era_tier=5` matching Zhukov/Eisenhower/Rommel, `resource_backing_tier` declining 3→4→3→2→1
+      tracking Germany's real 1942-44 collapse. Delegated a research pass first (candidate battles
+      across the full 1939-44 career, command attribution, casualty-sourcing gaps flagged), then
+      independently re-ran `scripts/scrape_wikipedia_infobox.py` on every candidate myself plus several
+      further web searches to cross-check every figure against named academic sources (Forczyk's
+      *Where the Iron Crosses Grow*/*Sevastopol 1942*, Glantz's *From the Don to the Dnepr* and his
+      translated Soviet General Staff Study *The Battle for the Ukraine*, Citino's *The Wehrmacht
+      Retreats*, Barratt's *Zhitomir-Berdichev*, Nash's *Hell's Gate*, Zetterling & Frankson's *The
+      Korsun Pocket*) before writing rows — `source_citation` names those historians, never
+      "Wikipedia" alone. Deviation/judgment call, the central one: 5 rows is this dataset's thinnest
+      roster (tied with Scipio Africanus/Subutai), a documented consequence of the no-fabrication bar
+      cutting unusually hard here — dropped Operation Citadel's southern pincer (Kursk, Army Group
+      South sector) despite Manstein clearing the personal-command bar *more* cleanly than Zhukov's
+      excluded Stavka-coordinator role at the same battle, purely because no source gives a casualty
+      figure isolated to Army Group South's push (only whole-Kursk or single-corps-subset totals
+      exist) — flagged in `generals.csv`'s note as the biggest omission for Phase 7's eventual
+      sanity-pass re-run. Also dropped Operation Winter Storm (German casualties known, no Soviet
+      figure found) and the Fourth Battle of Kharkov (the commonly-cited casualty figure turned out on
+      checking to be Soviet losses for a broader offensive, not this battle specifically) under the
+      same rule, plus the 1939 Polish campaign (chief-of-staff, not command) and the 1940 France
+      campaign (authored the Manstein Plan but his own corps command is undocumented at
+      engagement-level) on command-attribution/no-fabrication grounds. Third Kharkov's own_casualties
+      (11,500) is itself flagged as a known-partial SS-Panzer-Corps-only figure, not a full
+      Army-Group-South total — same "documented floor, not a full count" treatment already used for
+      several Genghis Khan/Saladin rows. Korsun-Cherkassy's enemy_casualties (80,188, the Soviet
+      General Staff Study's own figure) is flagged as disputed/likely-inflated by Zetterling &
+      Frankson's modern statistical study, with no clean replacement figure found — same "document the
+      disagreement, don't silently resolve it" precedent as Zhukov's Operation Mars/Rommel's Second
+      Alamein. Net record is 3 wins (2 Rout-level: Kerch, Sevastopol) / 2 losses (Zhitomir-Berdichev,
+      Korsun-Cherkassy, both in the 1943-44 Ukraine retreat) — matches historian consensus of Manstein
+      as operationally brilliant through early 1943 followed by a losing fighting withdrawal that got
+      him dismissed by Hitler in March 1944. `python scripts/validate_data.py` passes; full test suite
+      (150 tests, unchanged — data curation doesn't add tests) still green.
 - [ ] Douglas MacArthur battles (WWII)
 - [ ] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
       `pytest`, then re-run every `scripts/render_*.py` script to regenerate
