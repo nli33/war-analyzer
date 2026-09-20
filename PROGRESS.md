@@ -428,7 +428,38 @@
       overridable, `normalized()` rescales correctly, zero-total raises, an unnormalized set
       correctly reports `is_normalized()=False`). `python scripts/validate_data.py` still
       passes; full suite now 98/98 (92 prior + 6 new).
-- [ ] Composite ranking output
+- [x] Composite ranking output — `war/metrics/composite.py` adds `composite_ranking`,
+      combining `oar.py`/`war_residual.py`/`rate.py`'s `decisive_win_rate`/`longevity.py` into
+      one score-sorted list via `war/config.py`'s `CompositeWeights`. Implements PLAN.md Section
+      4's "Era normalization" requirement (z-score each input within era-cohort before combining
+      cross-era) — the first module to actually need it, since no earlier metric compares
+      generals against each other. Judgment calls, documented in the module docstring: (1)
+      population std (`ddof=0`) per era cohort, since a cohort is this roster's full population
+      for that era, not a sample; (2) a zero-variance cohort (`std==0`) gets `z=0.0` for every
+      member rather than dividing by zero; (3) a general with no wins (`decisive_win_rate=None`)
+      is excluded from that one metric's cohort and falls back to `z=0.0`, independent of the
+      other three metrics. Deviation/limitation surfaced by running this against the real
+      83-row dataset: this run's locked 8-general/one-per-era roster (SCOPE.md) puts 4 of the 8
+      generals (Frederick, Napoleon, Grant, Zhukov) alone in their era, so every one of their
+      z-scores — and therefore their composite score — is exactly 0.0 by the zero-variance
+      convention above; they tie for the middle of the ranking regardless of weights. This is a
+      structural consequence of a real-population z-score with n=1, not a bug in the formula, and
+      the two-per-era cohorts (Caesar/Alexander, Genghis/Saladin) show the intended behavior
+      cleanly (Alexander/Genghis rank 1-2, Caesar/Saladin rank 7-8, matching Phase 2's
+      undefeated-vs-losing-streak notes on those four). Flagging for Phase 7's sanity pass rather
+      than reweighting or hand-fixing now, per SCOPE.md's "don't hand-tune to force an order."
+      Verified per SCOPE.md Phase 3 method (composite ranking has no dedicated Phase 5 method
+      beyond "changing a weight changes the order," reused Phase 3's hand-computed style since
+      it's the tighter check): 8 new hand-computed tests in `tests/test_metrics_composite.py`
+      covering the empty-input case, the singleton-cohort zero-z-score case, exact 2-member
+      population z-scores (±1.0) across all four inputs, the configured-weighted-sum formula,
+      sort order, the no-wins/None-exclusion case, off-roster-opponent exclusion, and a
+      weight-change producing a different composite score. `python scripts/validate_data.py`
+      still passes; full suite now 106/106 (98 prior + 8 new). This task is the composite-scoring
+      function only — no CSV/JSON output file yet (SCOPE.md's deliverable #3), matching how every
+      Phase 3/4 metric so far has been a library function verified by unit tests, not a file-
+      writing script; a results-to-file step is still open, likely alongside Phase 6's
+      visualization output.
 - [ ] Category rankings output
 - [ ] Test: changing a weight changes the order
 
