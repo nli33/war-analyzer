@@ -577,7 +577,37 @@
       8-general roster is all top-tier historically-consensus commanders, not a
       sample built to contain that pattern. `python scripts/validate_data.py`
       still passes; full suite now 129/129 (121 prior + 8 new).
-- [ ] Scatter: OAR vs Resource Backing
+- [x] Scatter: OAR vs Resource Backing — `war/viz/oar_resource_backing.py` adds
+      `oar_resource_backing_points` (pure data, one `(oar_rating, avg_resource_backing_tier)`
+      point per general) and `render_oar_resource_backing_figure` (a plain matplotlib `Figure`,
+      same test-without-a-display shape as the other two scatters) plus
+      `plot_oar_vs_resource_backing`, saving both a PNG and matching CSV. PLAN.md names both axes
+      directly here (unlike the other two scatters) — x = `oar_ratings(battles)[gid].rating`
+      (`oar.py`), reused as-is, roster generals only (same exclusion of off-roster
+      `opponent_general_id`s that `composite.py` already applies, for the same reason: this
+      ranks the roster, not everyone who ever opposed it). Judgment call: y = mean
+      `resource_backing_tier` across a general's own battles — the schema records this field
+      per-battle (already read that way by `war_residual.py`/`clutch.py`), so a single
+      per-general axis value needs an aggregation no existing metric computes yet; mean was
+      chosen over latest/max so a career-spanning point reflects the whole career's typical
+      material position (Frederick's tier drops 3→1 across the Seven Years' War per this file's
+      earlier notes; Napoleon's rises 2→5→1) — small enough to compute directly in the viz module
+      rather than adding a new `rate.py` stat nothing else needs. Y-axis gets a fixed `[0.5, 5.5]`
+      limit (the schema's known `[1, 5]` tier range) since, unlike the other two scatters, OAR
+      itself is an open-ended Elo-style number with no natural axis bound. Verified per SCOPE.md
+      Phase 6's no-display method: 8 new tests in `tests/test_viz_oar_resource_backing.py` — the
+      resource-backing mean hand-computed, the OAR value cross-checked against an independent
+      `oar_ratings` call (not hand-derivable as a one-line fraction, same caveat `oar.py`'s own
+      tests note), sorted output, the empty-input case, figure scatter-point count/coordinates and
+      text-label count/content read off the returned `Axes`, an empty-input render not erroring,
+      and the saved-PNG test asserting file non-emptiness plus PNG magic bytes and a matching CSV.
+      `scripts/render_scatter_oar_resource_backing.py` is the CLI entry, run once against the real
+      83-row dataset to produce `output/viz/oar_vs_resource_backing.png`/`.csv`, committed as the
+      deliverable — sanity-checked against Phase 3's OAR notes (Alexander highest at ~1878,
+      Saladin lowest at ~1430), consistent with the earlier two scatters' checks. `python
+      scripts/validate_data.py` still passes; full suite now 137/137 (129 prior + 8 new). This
+      closes out the three PLAN.md Section 6 scatter plots; ranking tables (the next unchecked
+      Phase 6 item) are still open.
 - [ ] Ranking tables rendered
 
 ## Phase 7: Sanity pass and dev log
