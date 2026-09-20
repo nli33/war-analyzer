@@ -41,8 +41,9 @@
 - [ ] Scatter: OAR vs Resource Backing
 - [ ] Ranking tables rendered
 
-## Phase 7: Sanity pass
+## Phase 7: Sanity pass and dev log
 - [ ] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order
+- [ ] `notes/` dev log via the project-notes skill (SCOPE.md deliverable 6), written from the Notes section below and the commit history
 
 ## Notes / deviations
 - Schema additions beyond PLAN.md Section 2: `battle_id` (stable row key), `notes` (free text
