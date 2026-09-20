@@ -831,7 +831,29 @@ instruction).
       only nominal supreme command — a documented, genuine constraint on his formal authority, not
       just normal hierarchy). `python scripts/validate_data.py` passes; full test suite (150 tests,
       unchanged — data curation doesn't add tests) still green.
-- [ ] Tokugawa Ieyasu battles (Medieval)
+- [x] Tokugawa Ieyasu battles (Medieval) -- 6 rows (Anegawa, Mikatagahara, Siege of Takatenjin,
+      Nagakute, Sekigahara, Tennoji/Summer Siege of Osaka) in `data/battles.csv` plus a
+      `generals.csv` row; `era=Medieval` (per SCOPE.md's roster bucketing) but `tech_era_tier=3`
+      for every row rather than the 2 used for this dataset's other Medieval generals -- a
+      deliberate divergence since tech_era_tier tracks actual battlefield technology
+      (gunpowder-era Sengoku Japan) independent of the era-cohort label. Delegated a research
+      agent first to survey candidate battles and command attribution, then independently
+      cross-checked troop/casualty figures via web research against named sources (Turnbull's
+      Osprey titles, Sadler's *The Maker of Modern Japan*, Bryant's *Sekigahara 1600*, Sansom's
+      *A History of Japan*). Deviation/judgment call, the big one: excluded the Battle of
+      Nagashino (1575) despite Tokugawa being a named commander -- sources state Nobunaga "took
+      command of the entire army," the same personal-command bar already used for Saladin's
+      al-Babein and Zhukov's Stalingrad/Kursk. Also excluded the Komaki standoff (no single
+      quantifiable pitched-battle casualty figure; Nagakute, the one attributable clash within
+      that campaign, is included separately), the Winter Campaign of the Siege of Osaka (troop
+      strength known, no campaign casualty figure found), and three personally-commanded battles
+      with no quantifiable casualties in any source found (Azukizaka, Wakamiko/Tensho-Jingo,
+      First Ueda). Sekigahara's casualty figures have no clean modern-historian corrective
+      available (Bryant's own modern figure sits *above* the Edo-period chronicle range rather
+      than revising it downward) -- used a documented midpoint of the primary chronicle range
+      instead and flagged the unresolved disagreement rather than implying false consensus.
+      `python scripts/validate_data.py` passes; full test suite (150 tests, unchanged -- data
+      curation doesn't add tests) still green.
 - [ ] George Washington battles (Early Modern)
 - [ ] Wellington battles (Napoleonic)
 - [ ] Robert E. Lee battles (Industrial)
