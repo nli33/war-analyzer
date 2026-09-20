@@ -975,7 +975,42 @@ instruction).
       "brilliant on the field, lost the war" pattern PLAN.md's Squander Index targets). `python
       scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation
       doesn't add tests) still green.
-- [ ] Dwight D. Eisenhower battles (WWII)
+- [x] Dwight D. Eisenhower battles (WWII) — 6 rows (Operation Torch, Tunisian Campaign, Operation
+      Husky, Operation Overlord/Normandy Campaign, Battle of the Bulge, the Rhine crossing/final
+      drive into Germany) in `data/battles.csv` plus a `generals.csv` row; `era=WWII`,
+      `tech_era_tier=5` matching Zhukov, `resource_backing_tier` rising 4→5 across 1942-45 (real
+      landing-craft/amphibious-lift shortages through 1943, per Ambrose/D'Este, easing once full
+      Allied mobilization matured), `source_confidence` Medium except the Rhine row (Low, see
+      below). Delegated a research pass first (candidate operations, command-structure evidence,
+      draft figures via `scripts/scrape_wikipedia_infobox.py` plus web research), then
+      independently re-ran the scraper myself and cross-checked casualty figures against named
+      academic sources (Atkinson's Liberation Trilogy, Ambrose, D'Este, Beevor, MacDonald,
+      Clodfelter) via further web research before writing rows — `source_citation` names those
+      historians, never "Wikipedia" alone. Deviation/judgment call, the central one: as Supreme
+      Allied Commander, Eisenhower ran every campaign from a headquarters through subordinate
+      army-group commanders (Alexander, Montgomery, Bradley, Patton, Devers), a genuinely harder
+      "personally commanded" case than Zhukov's Front-command or Grant's Meade-as-tactical-
+      commander precedent — resolved by applying the same "singular top of the chain, personally
+      made a documented top-level decision" standard, with Normandy flagged as this general's
+      single biggest stretch of that standard (Eisenhower delegated ground command of the *entire*
+      Allied force, both army groups, to Montgomery until 1 Sept 1944, a bigger delegation than
+      Grant/Meade). Kasserine Pass is folded into the Tunisian Campaign row rather than excluded or
+      split out, since Eisenhower's own decisive response (relieving Fredendall, installing
+      Alexander) followed within days. Falaise Gap, Operation Market Garden, and Operation Plunder
+      are excluded on the same Stalingrad-style no-documented-Eisenhower-decision basis used for
+      Zhukov's Stavka-coordinator exclusions; Falaise's dates also sit entirely inside the Overlord
+      row's window and would double-count. The Rhine-crossing row's enemy_casualties uses the Ruhr
+      Pocket's ~317,000 POWs (the largest well-documented West-front-specific capture event in the
+      window) as a flagged lower bound rather than the infobox's own casualty range, which is
+      explicitly scoped to "all fronts" and not usable — the one Low-confidence row in this roster,
+      for that reason. Roster size (6) is below the dataset's usual 8-15 range, the same structural
+      shortfall as Zhukov's 6-battle roster and for the same reason (few operations clear the
+      singular-command bar once subordinate-army-group-led actions are excluded), documented rather
+      than padded. Net record is 6 wins / 0 losses / 0 draws — a real, structurally different shape
+      from every other general in this dataset, flagged explicitly in `generals.csv`'s note for
+      Phase 7's eventual sanity-pass re-run so a perfect record isn't mistaken for a metrics bug.
+      `python scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data
+      curation doesn't add tests) still green.
 - [ ] Erwin Rommel battles (WWII)
 - [ ] Erich von Manstein battles (WWII)
 - [ ] Douglas MacArthur battles (WWII)
