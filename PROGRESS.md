@@ -77,7 +77,23 @@
       Jerusalem, not a data-entry red flag; noted here in case Phase 7's sanity pass flags the
       losing streak as suspicious. `python scripts/validate_data.py` passes; full test suite (32
       tests) still green.
-- [ ] Frederick the Great battles
+- [x] Frederick the Great battles — 12 rows (Mollwitz, Chotusitz, Hohenfriedberg, Soor, Lobositz,
+      Prague, Kolin, Rossbach, Leuthen, Zorndorf, Kunersdorf, Torgau) in `data/battles.csv` plus a
+      `generals.csv` row; `era=Early Modern`, `tech_era_tier=3` (one above the Medieval generals'
+      tier 2 — linear gunpowder warfare, still pre-industrial logistics). Deviation:
+      `source_confidence=Medium` rather than the ancient/medieval rosters' `Low` — 18th-century
+      Prussian/Austrian muster-roll figures are meaningfully better corroborated across sources,
+      though real disagreement of a few thousand troops still turns up per battle (e.g. Mollwitz's
+      Prussian strength is quoted 16,000-23,000), so `High` isn't claimed either. `resource_backing_tier`
+      is set per-row rather than fixed for the whole career (3 during the Silesian Wars, dropping to
+      2 then 1 as the Seven Years' War coalition and Prussia's manpower/treasury crisis deepen) —
+      reasoning recorded in `generals.csv`'s note. Excluded Kesselsdorf (1745) since it was fought
+      and won by Leopold I of Anhalt-Dessau while Frederick's own army was elsewhere, same
+      personal-command bar used for Genghis Khan and Saladin. Net record is 9 wins (2 Rout-level:
+      Rossbach, Leuthen; 2 Pyrrhic: Prague, Torgau) / 2 losses (Kolin, and Kunersdorf — his one
+      Rout-level defeat, the only Loss-with-Rout in the dataset so far) / 1 Draw (Zorndorf, held
+      per modern historiography over 18th-century Prussian claims of outright victory). `python
+      scripts/validate_data.py` passes; full test suite (32 tests) still green.
 - [ ] Napoleon Bonaparte battles
 - [ ] Ulysses S. Grant battles
 - [ ] Georgy Zhukov battles
