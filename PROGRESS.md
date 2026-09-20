@@ -94,7 +94,29 @@
       Rout-level defeat, the only Loss-with-Rout in the dataset so far) / 1 Draw (Zorndorf, held
       per modern historiography over 18th-century Prussian claims of outright victory). `python
       scripts/validate_data.py` passes; full test suite (32 tests) still green.
-- [ ] Napoleon Bonaparte battles
+- [x] Napoleon Bonaparte battles — 14 rows (Montenotte, Lodi, Arcole, Rivoli, Pyramids, Marengo,
+      Austerlitz, Jena, Friedland, Eylau, Wagram, Borodino, Leipzig, Waterloo) in `data/battles.csv`
+      plus a `generals.csv` row; `era=Napoleonic`, `source_confidence=Medium` (matching Frederick),
+      downgraded to `Low` for two rows (Eylau, Borodino) whose own-side casualty figures disagree by
+      nearly 2x across historians. Web-researched per-battle via a delegated research pass
+      cross-checking Wikipedia infoboxes against standard references (Chandler, Digby Smith,
+      Esposito & Elting). Deviation/judgment call: `tech_era_tier=4`, one above Frederick's 3 to
+      keep the tier sequence monotonic with era order, even though Napoleonic weapons/logistics/
+      comms technology (flintlock muskets, smoothbore cannon, no rail/telegraph) is arguably
+      identical to Frederick's era on the schema's own axis — the real Napoleonic innovation was
+      organizational (corps system), not covered by this field; full reasoning in `generals.csv`'s
+      note in case Phase 7's sanity pass questions the tier gap. `resource_backing_tier` set per-row
+      (2 during the resource-starved Italian/Egyptian campaigns, rising to 5 at the imperial peak,
+      falling back to 2 by Leipzig and 1 for the isolated Hundred Days army at Waterloo), same
+      per-row approach as Frederick. The Jena row covers only Napoleon's own engagement against
+      Hohenlohe, excluding the simultaneous Davout-commanded Battle of Auerstedt — same
+      personal-command bar as Genghis/Saladin/Frederick's Kesselsdorf exclusion. Borodino is
+      recorded as a Win (French held the field) but with `decisiveness=Pyrrhic` and
+      `objective_secured=false`, since the Russian army escaped intact and the campaign ended in
+      disaster — the clearest tactical-win-no-strategic-payoff case in the dataset so far. Net
+      record is 11 wins / 2 losses (both Rout: Leipzig, Waterloo) / 1 Draw (Eylau, held over French
+      claims of victory, same treatment as Frederick's Zorndorf). `python scripts/validate_data.py`
+      passes; full test suite (32 tests) still green.
 - [ ] Ulysses S. Grant battles
 - [ ] Georgy Zhukov battles
 
