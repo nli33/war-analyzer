@@ -224,7 +224,35 @@
       Operation Mars' heavy losses pulling down an otherwise-winning record, Genghis's ~21.6 is
       the highest in the roster and matches the historical reputation. `python
       scripts/validate_data.py` still passes; full suite now 44/44 (36 prior + 8 new).
-- [ ] OAR (iterative Elo solver) + unit tests
+- [x] OAR (iterative Elo solver) + unit tests — `war/metrics/oar.py` adds `oar_ratings`,
+      a synchronous-batch iterative Elo solver over every `general_id`/`opponent_general_id`
+      pair in the dataset (standard expected-score formula, Win/Draw/Loss -> 1/0.5/0 actual
+      score). Judgment call not specified by PLAN.md: uses a **decaying step size**
+      (`k_factor * decay**epoch`) rather than a constant K, because a constant-K iterative
+      Elo never reaches a fixed point for a general with a perfect record in this dataset
+      (Alexander the Great — every row a Win) or a winless one — the rating gap keeps
+      growing without bound each epoch since there's no offsetting loss to balance the
+      expected-score math (confirmed by hand-simulating a single repeated one-sided matchup:
+      it didn't converge inside 200k epochs at constant K). Decay guarantees the sum of all
+      future per-epoch deltas is a bounded geometric series, so the solver always terminates
+      at a finite rating; full reasoning in the module docstring. Off-roster opponents (most
+      `opponent_general_id` values — see this file's Notes section, decided before this task)
+      get a real solved rating alongside the roster, not a fixed default, since they're full
+      participants in the same rating graph. Battles with no `opponent_general_id` recorded
+      (a handful of multi-faction sieges) are skipped for rating purposes only — they still
+      count in raw/rate stats elsewhere. Verified per SCOPE.md Phase 3 method: since Elo
+      iteration doesn't reduce to a hand-computable one-line fraction the way the rate stats
+      did, `tests/test_metrics_oar.py` (9 new tests) instead pins down the properties the
+      docstring claims on small synthetic battle sets — zero-sum conservation across a single
+      matchup, winner-up/loser-down direction, equal-and-opposite records converging to equal
+      ratings, the core PLAN.md-named property that beating a higher-rated opponent earns
+      more than beating an average one, the no-opponent-recorded and off-roster-opponent edge
+      cases, and solver determinism. Also ran against the real 83-row dataset as a sanity
+      check: ratings roughly track the qualitative reputations already visible in Phase 2's
+      win/loss notes (Alexander highest at ~1879, undefeated; Saladin lowest at ~1430, the
+      only roster general with a losing stretch against a named opponent, Richard I) — not a
+      substitute for the unit tests. `python scripts/validate_data.py` still passes; full
+      suite now 53/53 (44 prior + 9 new).
 - [ ] WAR-residual (regression) + unit tests
 - [ ] Clutch rating + unit tests
 - [ ] Squander index + unit tests
