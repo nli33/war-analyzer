@@ -765,7 +765,42 @@ instruction).
       tactically undefeated in Italy but strategically unable to force Rome to terms, losing only
       the one battle that decided the war. `python scripts/validate_data.py` passes; full test
       suite (150 tests) still green.
-- [ ] Scipio Africanus battles (Ancient)
+- [x] Scipio Africanus battles (Ancient) — 5 rows (Siege of New Carthage, Baecula, Ilipa, Battle
+      of the Camps/Utica, Zama) in `data/battles.csv` plus a `generals.csv` row; `era=Ancient`,
+      `source_confidence=Low`, `tech_era_tier=1`, matching Caesar/Alexander/Hannibal. First ran
+      `scripts/scrape_wikipedia_infobox.py` per battle for a draft scaffold, then cross-checked
+      every figure against Polybius/Livy chapter citations and named modern historians
+      (Goldsworthy, Lazenby, Scullard, Bagnall, Hoyos) via web research; `source_citation` cites
+      the primary ancient sources plus the modern historian, never "Wikipedia" alone, matching
+      this dataset's established citation convention. Deviation/judgment call: dropped the Battle
+      of the Great Plains (203 BC) despite it being well-attested tactically in both Polybius and
+      Livy — neither source gives any casualty figure for either side, same no-fabrication bar as
+      Alexander's Persian Gate/Genghis's Khalakhaljid Sands/Hannibal's dropped Nola battles. Also
+      dropped the Battle of Cirta (fought by legate Gaius Laelius and Masinissa) and the battle
+      against Vermina (fought by Gnaeus Octavius after Zama) for the same subordinate-command bar
+      used elsewhere in this dataset, and excluded Scipio's presence at Ticinus/Cannae as a junior
+      officer under his father's/others' command (Ticinus is already a Hannibal-roster row with
+      his father as opponent). Net roster is 5 rows — thinner than the usual 8-15 range but a
+      documented structural consequence (short 7-year independent-command career, several famous
+      battles failing the no-fabrication or personal-command bar), the same kind of shortfall
+      already logged for Zhukov (6) and Hannibal (7). The Battle of the Camps (203 BC, night
+      assault on the Carthaginian/Numidian winter camps, Wikipedia's actual page title is "Battle
+      of Utica (203 BC)") is a distinct row from the separate, inconclusive multi-year Siege of
+      Utica, which is excluded for having no attached casualty/outcome figures of its own; its
+      `opponent_general_id` is left blank since command was genuinely split between two co-equal
+      allied kings (Hasdrubal Gisco for Carthage, Syphax for Numidia), same treatment as Petelia's
+      blank field. Baecula is recorded as a Win with `decisiveness=Tactical`/
+      `objective_secured=false` since Hasdrubal Barca escaped with his veteran core intact and
+      marched to Italy the following year — the same tactical-win-no-strategic-payoff pattern as
+      Napoleon's Borodino elsewhere in this dataset. The Zama row is the mirror of the existing
+      `hannibal-zama-202bc` row (troop/casualty figures swapped so both rows agree on the same
+      battle) with an independently-justified `resource_backing_tier=2` one tier below Hannibal's
+      3, reflecting Scipio's chronically under-resourced, politically constrained African
+      expedition (fought largely with the stigmatized Cannae-legion volunteers over Fabius
+      Maximus's Senate opposition) versus Hannibal's freely-mobilized home-soil levy — flagged
+      `political_constraint_flag=true` on both the Camps and Zama rows for this reason,
+      independent of Hannibal's own flag on his side. `python scripts/validate_data.py` passes;
+      full test suite (150 tests) still green — data curation doesn't add new tests.
 - [ ] Subutai battles (Medieval)
 - [ ] Tokugawa Ieyasu battles (Medieval)
 - [ ] George Washington battles (Early Modern)
