@@ -253,7 +253,35 @@
       only roster general with a losing stretch against a named opponent, Richard I) — not a
       substitute for the unit tests. `python scripts/validate_data.py` still passes; full
       suite now 53/53 (44 prior + 9 new).
-- [ ] WAR-residual (regression) + unit tests
+- [x] WAR-residual (regression) + unit tests — `war/metrics/war_residual.py` adds
+      `war_residual_by_general`, an OLS fit (`numpy.linalg.lstsq`) of battle outcome
+      score (Win/Draw/Loss -> 1.0/0.5/0.0, same mapping `oar.py` already uses) against
+      `force_ratio` (enemy/own troop strength), `resource_backing_tier`, and
+      `tech_era_tier`, **pooled across every battle in the input** so the fit is a
+      shared "expectation given the inputs" baseline, not each general graded against
+      their own average. Judgment calls not specified by PLAN.md, documented in the
+      module docstring: (1) regression target is outcome score rather than casualty
+      ratio — PLAN.md offers both, but casualty ratio is undefined at zero own
+      casualties and skew-prone, the same problem already flagged for
+      `casualty_exchange_ratio` in `rate.py`; (2) the per-general stat is the **mean**
+      residual across that general's battles (a rate stat, like
+      `avg_force_ratio_faced`), not a summed total, so battle count alone doesn't move
+      it. Verified per SCOPE.md Phase 3 method: `tests/test_metrics_war_residual.py`
+      (6 new tests) leans on two facts that make OLS genuinely hand-computable here,
+      unlike OAR's iterative solver — when every row shares identical predictors the
+      design matrix collapses to the all-ones vector and `predicted = mean(actual)`
+      for every row (used for an exact hand-computed case: one general's lone Win
+      against seven Losses from two other generals resolves to residual +0.875 for
+      the winner and exactly -0.125 for each loser); and OLS-with-intercept always
+      makes residuals sum to exactly zero, checked as an invariant on a separately
+      varied dataset. Plus a perfect-linear-fit-gives-zero-residual case, and the
+      empty-input/general-absent edge cases matching `raw_stats_by_general`'s
+      convention. Also ran against the real 83-row dataset as a sanity check (not a
+      substitute for the unit tests): Alexander the Great ranks highest (+0.21,
+      undefeated) and Saladin lowest (-0.41, the back-half losing streak against
+      Richard I already noted in Phase 2), tracking the qualitative picture from the
+      Phase 2 notes; the pooled weighted-residual sum is ~0 on real data too. `python
+      scripts/validate_data.py` still passes; full suite now 59/59 (53 prior + 6 new).
 - [ ] Clutch rating + unit tests
 - [ ] Squander index + unit tests
 - [ ] Longevity-adjusted value + unit tests
