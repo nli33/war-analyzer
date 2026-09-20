@@ -1011,7 +1011,47 @@ instruction).
       Phase 7's eventual sanity-pass re-run so a perfect record isn't mistaken for a metrics bug.
       `python scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data
       curation doesn't add tests) still green.
-- [ ] Erwin Rommel battles (WWII)
+- [x] Erwin Rommel battles (WWII) — 9 rows (Battle of Arras 1940, Siege of Tobruk 1941/first siege,
+      Operation Battleaxe, Operation Crusader, Battle of Gazala incl. fall of Tobruk, First Battle of
+      El Alamein, Alam el Halfa, Second Battle of El Alamein, Battle of Kasserine Pass) in
+      `data/battles.csv` plus a `generals.csv` row; `era=WWII`, `tech_era_tier=5` matching Zhukov/
+      Eisenhower, `resource_backing_tier` set per-row on a 4→2→3→2→1→1→2 arc (full 1940 Wehrmacht
+      backing down to the chronically fuel/supply-starved Panzer Army Africa of late 1942, ticking back
+      up slightly for Kasserine's fresher Tunisia reinforcements) — full reasoning in `generals.csv`'s
+      note. Delegated a research pass first (candidate battles across the full 1940-43 career, command
+      attribution, draft figures via Wikipedia infoboxes), then independently re-ran
+      `scripts/scrape_wikipedia_infobox.py` on every candidate myself and cross-checked contested
+      figures via further web research against named academic sources (Fraser's *Knight's Cross*,
+      Frieser's *The Blitzkrieg Legend*, Ellis's UK official history, Playfair's *The Mediterranean and
+      Middle East*, Barnett's *The Desert Generals*, Barr's *Pendulum of War*, Kitchen's *Rommel's
+      Desert War*, Atkinson's *An Army at Dawn*, Bungay's *Alamein*) before writing rows —
+      `source_citation` names those historians, never "Wikipedia" alone. Deviation/judgment call, the
+      central one: dropped two of Rommel's most famous engagements for the no-fabrication bar —
+      Operation Sonnenblume (Feb-May 1941, his legendary opening Cyrenaica counteroffensive) has no
+      Axis personnel-casualty figure in any source found despite extensive searching, and the Battle of
+      Medenine (6 March 1943, his last African battle) has no Axis troop-strength headcount in any
+      source found (only tank counts and unit names) — same bar as Alexander's Persian Gate/Genghis's
+      Khalakhaljid Sands, both documented as real losses to the roster's narrative rather than silently
+      worked around with a constructed estimate. Also dropped the 1940 Meuse crossing at Dinant/Houx and
+      the Saint-Valery-en-Caux surrender (numbers not isolated to those specific actions apart from the
+      whole 1940-campaign total already folded into the Arras row) and excluded Normandy 1944/Army Group
+      B entirely on personal-command grounds (Rommel was absent for D-Day itself, and tactical command
+      of the Caen sector sat with Panzer Group West/Seventh Army's own commanders throughout, the same
+      standard as Zhukov's Stalingrad/Kursk/Bagration and Eisenhower's Market Garden/Plunder exclusions).
+      Kasserine Pass is a genuine mirrored pair with the existing `eisenhower-tunisia-1943` row (that
+      row's own notes already name Rommel as the opposing commander there) but at different granularity —
+      Eisenhower's row is the whole campaign-spanning aggregate with von Arnim as opponent, this new row
+      is the narrow 19-22 Feb battle Rommel personally commanded, opponent Fredendall — documented as
+      deliberately not a duplicate. Second Alamein's own_casualties (41,800, Playfair's low end of a
+      41,800-73,000 cited range) is this roster's most contested figure, on the same scale as Zhukov's
+      Operation Mars dispute — Niall Barr's own detailed breakdown sums to roughly 30,500, a third source
+      cites 36,939 — documented rather than resolved, hence the one `source_confidence=Low` row in this
+      roster. Net record is 3 wins (1 Rout: Gazala) / 5 losses (1 Rout: Second Alamein) / 1 draw (First
+      Alamein, coded Draw per the existing Zorndorf/Eylau "modern historiography over contemporary claims"
+      precedent) — a strong 1940-42 start giving way to a losing back half from Alam el Halfa onward,
+      matching historian consensus rather than reading as a data artifact. `python
+      scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation doesn't add
+      tests) still green.
 - [ ] Erich von Manstein battles (WWII)
 - [ ] Douglas MacArthur battles (WWII)
 - [ ] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
