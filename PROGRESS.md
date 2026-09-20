@@ -17,7 +17,19 @@
       combines the besieged garrison and relief army (documented in its notes) since the schema
       has one enemy-strength field per row. `python scripts/validate_data.py` passes; full test
       suite (32 tests) still green.
-- [ ] Alexander the Great battles
+- [x] Alexander the Great battles — 9 rows (Granicus, Halicarnassus, Issus, Tyre, Gaza,
+      Gaugamela, Cyropolis, Jaxartes, Hydaspes) in `data/battles.csv` plus a `generals.csv` row;
+      all `source_confidence=Low`, `tech_era_tier=1`, web-researched per-battle against modern
+      estimates the same way as the Caesar rows. Deviation: dropped the Battle of the Persian
+      Gate (330 BC) after research turned up no casualty figure at all for either side, not even
+      a disputed one (Wikipedia itself says "unknown, but moderate to heavy") — every numeric
+      field is required by the schema, so a battle with no attested number doesn't get a row
+      rather than a fabricated one. Every row is a Win: Alexander is universally regarded as
+      undefeated in pitched battle, unlike Caesar's mixed record, so that's a legitimate feature
+      of the data, not a coverage gap. Gaza's own_casualties (10,000, from Wikipedia's infobox)
+      is flagged as unusually high with no primary-source breakdown found, rather than silently
+      accepted or silently replaced with an uncited "corrected" figure. `python
+      scripts/validate_data.py` passes; full test suite (32 tests) still green.
 - [ ] Genghis Khan battles
 - [ ] Saladin battles
 - [ ] Frederick the Great battles
