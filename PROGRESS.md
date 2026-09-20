@@ -30,7 +30,28 @@
       is flagged as unusually high with no primary-source breakdown found, rather than silently
       accepted or silently replaced with an uncited "corrected" figure. `python
       scripts/validate_data.py` passes; full test suite (32 tests) still green.
-- [ ] Genghis Khan battles
+- [x] Genghis Khan battles — 8 rows (Chakirmaut, Siege of Zhongxing, Yehuling, Siege of Otrar,
+      Siege of Bukhara, Siege of Samarkand, Battle of the Indus, Battle of the Yellow River) in
+      `data/battles.csv` plus a `generals.csv` row; `era=Medieval`, `source_confidence=Low`,
+      `tech_era_tier=2` for every row (one tier above the Ancient generals' tier 1 — stirrup
+      cavalry and siege engineering, still pre-gunpowder — fixed now so it stays comparable with
+      Saladin, the next Medieval general). Dropped Thirteen Sides/Koyiten (1201), Khalakhaljid
+      Sands (1203, Genghis's one clear personal defeat), and the 1213-1215 Siege of Zhongdu for
+      having no troop/casualty figures in any source, same no-fabrication bar as Alexander's
+      Persian Gate; also excluded battles led by subordinates without Genghis personally
+      present/directing (Irtysh River, Parwan, the 1221 sieges of Merv/Nishapur/Gurganj).
+      Deviation/judgment call: unlike the Roman/Greek sources behind the Caesar/Alexander rows,
+      Mongol-era sources (Secret History, Juvaini, Rashid al-Din, Yuan Shi) essentially never
+      quantify Mongol-side losses at all, even qualitatively, for several of these battles
+      (Bukhara, Samarkand, Indus, Yellow River). Rather than dropping otherwise well-documented,
+      historically pivotal sieges over one unattested field, `own_casualties` in those rows is an
+      explicitly-flagged order-of-magnitude placeholder (not a source-derived figure) — a
+      materially weaker standard than the rest of the dataset, but the alternative (cutting
+      Bukhara/Samarkand/Indus) would have lost more real signal than it preserved integrity;
+      every affected row's `notes` and the `generals.csv` note call this out by name so it reads
+      honestly rather than as false precision, and Phase 4's Monte Carlo resampling is exactly
+      the mechanism built to absorb this kind of soft figure. `python scripts/validate_data.py`
+      passes; full test suite (32 tests) still green.
 - [ ] Saladin battles
 - [ ] Frederick the Great battles
 - [ ] Napoleon Bonaparte battles
