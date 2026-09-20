@@ -506,7 +506,46 @@
       114/114 (113 prior + 1 new). This closes out Phase 5.
 
 ## Phase 6: Visualization
-- [ ] Scatter: Volume vs Efficiency
+- [x] Scatter: Volume vs Efficiency — `war/viz/volume_efficiency.py` adds
+      `volume_efficiency_points` (pure data: one `(battles_commanded, win_rate)`
+      point per general, joining `raw.py`/`rate.py`) and
+      `render_volume_efficiency_figure` (a plain matplotlib `Figure`, no file I/O,
+      so tests can inspect scatter points/labels directly rather than decoding a
+      PNG) plus `plot_volume_vs_efficiency`, which renders and saves both a PNG
+      and a same-named CSV of the exact plotted values. Uses the `Agg` backend
+      (headless, matches the no-display overnight sandbox per OVERNIGHT.md).
+      Judgment calls (PLAN.md names two options per axis, not one formula),
+      documented in the module docstring: (1) Volume = `battles_commanded`
+      rather than total troops commanded — troop totals span orders of
+      magnitude across this roster's eras (thousands for Caesar/Alexander vs.
+      low millions for Zhukov) and would force a log axis that compresses the
+      comparison; battles commanded (6-15 across this roster) reads cleanly on
+      a linear axis. (2) Efficiency = `win_rate` rather than casualty exchange
+      ratio — the latter is `None`-able and unbounded (`rate.py`'s own
+      docstring), `win_rate` is always defined and bounded to [0, 1], and is
+      literally PLAN.md's own first-listed option. (3) Per the dataviz skill:
+      with only 8 points, every point is directly labeled by name rather than
+      color-coded/legend'd by era — "a single series needs no legend box" — and
+      all markers use one hue (palette.md's categorical slot 1), since an
+      8-color categorical palette can't pass this chart form's all-pairs CVD
+      check past 3 slots per the skill's own palette notes anyway; era-color
+      coding would also just re-state identity the label already gives with
+      only 1-2 generals per era (SCOPE.md's locked 8-general/one-per-era
+      roster). Verified per SCOPE.md Phase 6's no-display method: 7 new tests
+      in `tests/test_viz_volume_efficiency.py` — hand-computed points, sorted
+      output, the empty-input case, the figure's scatter-point count/
+      coordinates and text-label count/content read directly off the returned
+      `Axes` (no pixel decoding), an empty-input render not erroring, and the
+      saved-PNG test asserting file non-emptiness plus the actual PNG magic
+      bytes and a matching CSV. `scripts/render_scatter_volume_efficiency.py`
+      is the CLI entry, run once against the real 83-row dataset to produce
+      `output/viz/volume_vs_efficiency.png`/`.csv`, committed as the actual
+      deliverable (SCOPE.md's "rendered as static files" requirement) — visual
+      review deferred to the user off-sandbox, but the CSV's own numbers
+      already track Phase 2/3's notes (Alexander/Genghis win_rate 1.0
+      undefeated, Saladin lowest at 0.375, matching the back-half losing
+      streak). `python scripts/validate_data.py` still passes; full suite now
+      121/121 (114 prior + 7 new).
 - [ ] Scatter: Tactical vs Strategic rating
 - [ ] Scatter: OAR vs Resource Backing
 - [ ] Ranking tables rendered
