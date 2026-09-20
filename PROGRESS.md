@@ -660,7 +660,7 @@
 
 ## Phase 7: Sanity pass and dev log
 - [x] Review composite ranking top/bottom against historian-consensus expectations, log findings (bug vs. legitimate surprise) in Notes below — do not hand-tune weights to force an order — reviewed `output/viz/ranking_tables_composite.csv`/`_categories.csv` against Phase 2's historian-consensus notes; top (Alexander/Genghis) and the Saladin/Frederick squander findings check out, but Julius Caesar ranking dead last (below Saladin) despite mid-pack-or-better standing in every individual category is a methodology artifact of n=2 era-cohort z-scoring, not a real finding — documented below, not hand-tuned.
-- [ ] `notes/` dev log via the project-notes skill (SCOPE.md deliverable 6), written from the Notes section below and the commit history
+- [x] `notes/` dev log via the project-notes skill (SCOPE.md deliverable 6), written from the Notes section below and the commit history — deviation: the `project-notes` skill named in CLAUDE.md isn't installed in this sandbox (checked `~/.claude/skills/`, not present), and neither is the `ai-writing` skill CLAUDE.md calls for on prose docs. Per this run's "don't stop, make the call, note it" instruction, wrote `notes/dev-log.md` by hand instead, covering the same ground a notes skill would (deviations, decisions, tradeoffs, narrative including dead ends) sourced from this file's per-task notes, the module docstrings, and `git log`. This closes out Phase 7 and every phase in SCOPE.md.
 
 ## Notes / deviations
 - Schema additions beyond PLAN.md Section 2: `battle_id` (stable row key), `notes` (free text
@@ -714,3 +714,9 @@
     specific order") and the "don't expand scope" guidance, left as-is and flagged here rather
     than patched; would likely resolve itself with PLAN.md's fuller 15-25 general roster (more
     members per era cohort) if this project is extended past the locked-8 scope.
+- The `project-notes` and `ai-writing` skills CLAUDE.md names for this repo aren't installed in
+  this sandbox. `notes/dev-log.md` was written directly instead of via the skill, covering the
+  same ground (deviations/decisions/tradeoffs/narrative) using this file's notes, module
+  docstrings, and `git log` as source material.
+
+DONE
