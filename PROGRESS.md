@@ -6,7 +6,17 @@
 
 ## Phase 2: Data curation (8 generals, see SCOPE.md roster)
 - [x] Data validation script (required fields, valid enums, non-negative numerics, citation present) — `war/validate.py` walks every row against the `Column` specs already in `war/schema.py` (so "valid enums"/"non-negative numerics" fall out of the existing `choices`/`min_value` metadata for free) plus two invariants the schema docstrings claim but a single column can't check alone: `battle_id`/`general_id` uniqueness and that every battle's `general_id` exists in `generals.csv`. `scripts/validate_data.py` is the CLI entry (`python scripts/validate_data.py`, exit 0/1). Verified: 12 new tests in `tests/test_validate.py` (per-column checks + whole-file checks on synthetic tmp CSVs) plus a check that the current header-only `data/*.csv` validates clean — 32/32 tests pass.
-- [ ] Julius Caesar battles
+- [x] Julius Caesar battles — 11 rows (Bibracte, Sabis, Gergovia, Alesia, Ilerda, Dyrrhachium,
+      Pharsalus, Zela, Ruspina, Thapsus, Munda) in `data/battles.csv` plus a `generals.csv` row;
+      all tagged `source_confidence=Low` per the ancient-sourcing caveat. `tech_era_tier=1` for
+      every Ancient-era row (a convention to hold consistent across Caesar and Alexander).
+      Web-researched per-battle to cross-check Caesar's own *Commentarii* figures against modern
+      historian estimates (Delbrück-range); several rows deviate materially from Caesar's own
+      numbers (e.g. Bibracte enemy dead, Pharsalus own casualties) with the discrepancy and the
+      chosen modern estimate recorded in each row's `notes`. Alesia's `enemy_troop_strength`
+      combines the besieged garrison and relief army (documented in its notes) since the schema
+      has one enemy-strength field per row. `python scripts/validate_data.py` passes; full test
+      suite (32 tests) still green.
 - [ ] Alexander the Great battles
 - [ ] Genghis Khan battles
 - [ ] Saladin battles
