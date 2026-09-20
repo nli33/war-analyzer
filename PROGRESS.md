@@ -801,7 +801,36 @@ instruction).
       `political_constraint_flag=true` on both the Camps and Zama rows for this reason,
       independent of Hannibal's own flag on his side. `python scripts/validate_data.py` passes;
       full test suite (150 tests) still green — data curation doesn't add new tests.
-- [ ] Subutai battles (Medieval)
+- [x] Subutai battles (Medieval) — 5 rows (Battle of Khunan, Battle of Khankala, Battle of the
+      Kalka River, Battle of Mohi, Siege of Kaifeng) in `data/battles.csv` plus a `generals.csv`
+      row; `era=Medieval`, `source_confidence=Low`, `tech_era_tier=2` for every row, matching
+      Genghis Khan/Saladin. Delegated a research pass first (candidate battles across Subutai's
+      full career), then cross-checked command attribution and numbers by hand via
+      `scripts/scrape_wikipedia_infobox.py` plus targeted web research against named academic/
+      primary sources (Sverdrup's *The Mongol Conquests*, Gabriel's *Subotai the Valiant*, Timothy
+      May, plus primary chronicles per row) before writing each row, per this run's amended
+      instruction. Deviation/judgment call, the big one: applied the existing "personally
+      supreme-commanded" bar unusually strictly, which cuts this roster down to 5 rows (tied with
+      Scipio Africanus for thinnest in the dataset) — most of Subutai's famous campaigns turned out
+      to be either subordinate-led (Kolomna's own Wikipedia infobox names Burundai/Kulkan as
+      commander, not Subutai, despite secondary summaries placing him with the invasion force; also
+      Sit River, Legnica, Nishapur, the 1216-19 Merkit campaign) or genuinely disputed between
+      sources on whether Subutai or Tolui held tactical command (Sanfengshan, Daohuigu) — dropped
+      both disputed-attribution cases rather than pick a side, the same strict standard already
+      used for Zhukov's Stavka-coordinator exclusions. Also dropped 4 battles for the usual
+      no-fabrication bar (Irghiz River, Sagim, Samara Bend, the Rayy/Qazvin pursuit) — no
+      quantifiable casualty figure for one or both sides in any source found. Net effect: Daohuigu
+      was Subutai's one credible documented personal defeat, and it's exactly the one dropped for
+      attribution ambiguity, so this 5-battle roster reads as undefeated (5 wins, 0 losses) despite
+      that not being a claim about his real career — flagged explicitly in `generals.csv`'s note so
+      Phase 2b's eventual re-run of Phase 7's sanity pass doesn't mistake it for a data error.
+      `resource_backing_tier` set per-row (2 for the 1222-23 Caucasus/Kalka reconnaissance-in-force,
+      4 for Mohi's empire-scale western campaign, 5 for Kaifeng's converged main imperial siege
+      army), same per-row approach as Frederick/Napoleon/Grant. `political_constraint_flag=true`
+      for Mohi specifically (Yuan Shi credits Subutai as the real tactical author while Batu held
+      only nominal supreme command — a documented, genuine constraint on his formal authority, not
+      just normal hierarchy). `python scripts/validate_data.py` passes; full test suite (150 tests,
+      unchanged — data curation doesn't add tests) still green.
 - [ ] Tokugawa Ieyasu battles (Medieval)
 - [ ] George Washington battles (Early Modern)
 - [ ] Wellington battles (Napoleonic)
