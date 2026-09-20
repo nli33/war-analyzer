@@ -52,7 +52,31 @@
       honestly rather than as false precision, and Phase 4's Monte Carlo resampling is exactly
       the mechanism built to absorb this kind of soft figure. `python scripts/validate_data.py`
       passes; full test suite (32 tests) still green.
-- [ ] Saladin battles
+- [x] Saladin battles — 8 rows (Horns of Hama, Montgisard, Hattin, Siege of Jerusalem, Siege of
+      Tyre, Siege of Acre, Arsuf, Jaffa) in `data/battles.csv` plus a `generals.csv` row;
+      `era=Medieval`, `source_confidence=Low`, `tech_era_tier=2` (matching Genghis Khan, the other
+      Medieval-era general). Web-researched per-battle the same way as the other three generals so
+      far. Deviation/judgment call: dropped five candidate battles (Battle of Hama 1178, Marj Ayyun
+      1179, the Siege of Jacob's Ford 1179, al-Fule 1183, Belvoir/Le Forbelet 1182) for having no
+      quantifiable troop-strength or casualty figure for Saladin's own side in any source found —
+      same no-fabrication bar as Alexander's Persian Gate and Genghis's Khalakhaljid Sands. Also
+      dropped the 1167 Battle of al-Babein since Shirkuh, not Saladin, held overall command there
+      (Saladin was his senior lieutenant) — same "personally/supreme commanded" bar used to exclude
+      subordinate-led battles from Genghis's roster. Three rows (Horns of Hama, Siege of Jerusalem,
+      Siege of Tyre) have only qualitative casualty language ("minimal", "light"/"heavy") rather
+      than a source-given count and use flagged order-of-magnitude placeholders, per the precedent
+      set by several Genghis rows. Two multi-year/multi-force sieges (Siege of Acre combining
+      Saladin's relief army with the besieged garrison, matching how Caesar's Alesia combines
+      garrison and relief force) needed a chronicle-inflated figure rejected in favor of a more
+      conservative modern-plausible estimate (Acre's "up to 60,000" Ayyubid losses; Arsuf's
+      chronicle claim of 7,000+ dead, itself hedged by the source as possibly too high) — same
+      treatment as Genghis's rejection of Juvaini's inflated Samarkand death toll. Net record is 3
+      wins / 5 losses, all 5 losses in the back half of the career (Montgisard 1177, then every
+      Third Crusade battle against Richard I from 1189 on) — this matches historian consensus that
+      Saladin was Richard's tactical inferior in the field even while winning the war for
+      Jerusalem, not a data-entry red flag; noted here in case Phase 7's sanity pass flags the
+      losing streak as suspicious. `python scripts/validate_data.py` passes; full test suite (32
+      tests) still green.
 - [ ] Frederick the Great battles
 - [ ] Napoleon Bonaparte battles
 - [ ] Ulysses S. Grant battles
