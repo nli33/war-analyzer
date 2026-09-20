@@ -854,7 +854,45 @@ instruction).
       instead and flagged the unresolved disagreement rather than implying false consensus.
       `python scripts/validate_data.py` passes; full test suite (150 tests, unchanged -- data
       curation doesn't add tests) still green.
-- [ ] George Washington battles (Early Modern)
+- [x] George Washington battles (Early Modern) — 12 rows (Jumonville Glen, Fort Necessity,
+      Harlem Heights, White Plains, Trenton, Assunpink Creek, Princeton, Brandywine, Germantown,
+      Whitemarsh, Monmouth, Siege of Yorktown) in `data/battles.csv` plus a `generals.csv` row;
+      `era=Early Modern` (matching Frederick the Great's SCOPE.md bucket), `tech_era_tier=3` for
+      every row (same contemporaneous linear-gunpowder tier as Frederick — the French and Indian
+      War and the Seven Years' War are the same global conflict). Two delegated research passes:
+      one to survey candidate battles/command attribution across both the French and Indian War
+      (1754) and the Revolution (1776-81), a second specifically to cross-check every figure
+      against a named academic source (Fred Anderson, David Hackett Fischer's *Washington's
+      Crossing*, Thomas McGuire's *Philadelphia Campaign* volumes, Henry P. Johnston's 1897
+      Harlem Heights monograph, Lender & Stone's *Fatal Sunday*, Harris & Ecelbarger's 2021
+      *Journal of the American Revolution* muster-record reconstruction) per this run's amended
+      instruction, rather than trusting Wikipedia/American Battlefield Trust's first-pass figures
+      directly — this caught two real errors (Princeton's American strength was off by ~25% at
+      the first pass; Trenton's enemy-casualty figure double-counted wounded that Fischer's own
+      prose nests inside the captured total). Deviation/judgment call, the big one: applied the
+      existing personal-command bar strictly, excluding Monongahela (Washington was an aide to
+      Braddock with no command authority), Long Island/Kip's Bay/Fort Washington-Fort Lee
+      (Putnam/Stirling/Sullivan/Greene/Magaw ran the fighting), and Stony Point/Springfield
+      (Wayne/Greene) — but included White Plains and Monmouth as qualified cases (Washington
+      personally directed the overall army-level plan even though a subordinate ran one specific
+      phase: Chatterton's Hill at White Plains, Charles Lee's opening vanguard at Monmouth before
+      Washington relieved him mid-battle), applying the same "personally directed the overall
+      plan" standard already used for Grant's Overland Campaign rows. Yorktown combines American
+      and French troop/casualty figures into one field under Washington's protocol-supreme
+      command (confirmed by Rochambeau's own memoir), the same friendly-multi-force treatment
+      already used for Zhukov's Vistula-Oder Offensive — its French-casualty component (254) is
+      flagged as the weakest-sourced figure in this roster, traceable only to tertiary web sources
+      rather than a named academic historian. Roster has a genuine 22-year gap (1754-1776) with no
+      personally-commanded battle in the middle of the career, not at either end — unlike any
+      prior general in this dataset; `career_start_year`/`career_end_year` (1754/1781) will read
+      as a long 28-year career for only 12 battles once Phase 2b's pipeline re-run happens, flagged
+      in `generals.csv`'s note now so it doesn't look like a longevity-metric bug later. Net record
+      is 5 wins (2 Rout-level: Trenton, Princeton; Jumonville Glen and Yorktown also Rout) / 3
+      losses (Fort Necessity, Brandywine, Germantown) / 2 draws (Assunpink Creek, Monmouth) / 1
+      additional loss (White Plains, a withdrawal) / 1 minor defensive win (Whitemarsh). `python
+      scripts/validate_data.py` passes; full test suite (150 tests, unchanged — data curation
+      doesn't add tests) still green. Dev log written to `~/notes/war-analyzer/dev-log.md` per
+      CLAUDE.md (this repo's `notes/dev-log.md` remains superseded).
 - [ ] Wellington battles (Napoleonic)
 - [ ] Robert E. Lee battles (Industrial)
 - [ ] Dwight D. Eisenhower battles (WWII)
