@@ -31,7 +31,10 @@ not just what was built, but:
 - tradeoffs taken (e.g., data coverage vs. time, a metric simplified)
 - rough narrative of how the work actually went, including dead ends
 
-Use the global project-notes skill as-is — don't copy it into this repo.
+Use the global project-notes skill as-is — don't copy it into this repo. At the start of a
+session, check `~/notes/war-analyzer/` (via the skill) for existing entries before writing new
+ones. `notes/dev-log.md` in this repo predates the skill being available in this sandbox and is
+superseded — keep maintaining the dev log in `~/notes/war-analyzer/` from here on, not there.
 
 ## Writing documentation
 
