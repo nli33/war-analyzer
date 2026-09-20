@@ -206,3 +206,48 @@ def test_changing_weights_changes_the_composite_score():
     dave_alt = next(e for e in alt_result if e.general_id == "dave").composite_score
 
     assert dave_default != dave_alt
+
+
+def _crossed_signals_cohort():
+    # alice and bob are the only two generals in Ancient. alice has a
+    # strictly better win/loss record (2 wins, 0 losses) than bob (1 win, 1
+    # loss against comparable opponents), so she comes out ahead on the two
+    # record-driven inputs: OAR and war_residual. But neither of alice's
+    # wins is objective_secured, while bob's lone win is, and alice's
+    # 21-year career (1900-1920) dilutes her longevity value far more than
+    # bob's 1-year career (1900) does -- so bob comes out ahead on
+    # decisiveness and longevity. This 2-vs-2 split (unlike every other
+    # fixture in this file, where one general sweeps all four z-scores) is
+    # what SCOPE.md's Phase 5 verification actually needs: a case where
+    # *which* general ranks first depends on *which* metrics the weights
+    # favor, not just by how much.
+    battles = [
+        make_battle("alice", "Win", "opp1", objective_secured=False, era="Ancient", battle_id="a1"),
+        make_battle("alice", "Win", "opp2", objective_secured=False, era="Ancient", battle_id="a2"),
+        make_battle("bob", "Win", "opp1", objective_secured=True, era="Ancient", battle_id="b1"),
+        make_battle("bob", "Loss", "opp2", era="Ancient", battle_id="b2"),
+    ]
+    generals = [
+        make_general("alice", era="Ancient", career_start_year=1900, career_end_year=1920),
+        make_general("bob", era="Ancient", career_start_year=1900, career_end_year=1900),
+    ]
+    return battles, generals
+
+
+def test_changing_weights_changes_the_ranking_order():
+    # SCOPE.md Phase 5's verification method, verbatim: "changing a weight
+    # and re-running produces a different order." A different composite
+    # *score* (already covered by `test_changing_weights_changes_the_
+    # composite_score` above) isn't the same claim -- this confirms the
+    # sort order of the output list itself flips.
+    battles, generals = _crossed_signals_cohort()
+
+    default_result = composite_ranking(battles, generals)
+    assert [entry.general_id for entry in default_result] == ["alice", "bob"]
+
+    # flip the weighting onto the two inputs alice loses on
+    decisiveness_and_longevity_weighted = CompositeWeights(
+        oar=0.05, war_residual=0.05, decisiveness=0.45, longevity=0.45
+    )
+    alt_result = composite_ranking(battles, generals, weights=decisiveness_and_longevity_weighted)
+    assert [entry.general_id for entry in alt_result] == ["bob", "alice"]

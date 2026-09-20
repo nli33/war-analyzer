@@ -490,7 +490,20 @@
       new). Output is a library function returning typed lists, same "no CSV/JSON file yet"
       convention `composite.py` left for this same reason — deferred to a combined
       results-to-file step alongside Phase 6's visualization output.
-- [ ] Test: changing a weight changes the order
+- [x] Test: changing a weight changes the order — `tests/test_metrics_composite.py` already had
+      a test confirming a weight change moves a general's raw composite *score*, but SCOPE.md
+      Phase 5's verification method is specifically "produces a different order," which a score
+      change alone doesn't guarantee (e.g. two generals whose scores both move but stay in the
+      same relative sequence). Added `test_changing_weights_changes_the_ranking_order` with a new
+      two-general fixture (`_crossed_signals_cohort`) deliberately split 2-vs-2 across the four
+      inputs — alice leads on OAR/war_residual (better win/loss record), bob leads on
+      decisiveness/longevity (his one win is objective_secured, his 1-year career isn't diluted
+      the way alice's 21-year career is) — unlike every prior fixture in that file where one
+      general sweeps all four z-scores. Verified the default weights rank `[alice, bob]` and an
+      alternate weighting concentrated on decisiveness+longevity (0.05/0.05/0.45/0.45) flips the
+      output list to `[bob, alice]`, hand-checked against the actual computed z-scores before
+      writing the assertion. `python scripts/validate_data.py` still passes; full suite now
+      114/114 (113 prior + 1 new). This closes out Phase 5.
 
 ## Phase 6: Visualization
 - [ ] Scatter: Volume vs Efficiency
