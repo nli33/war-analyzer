@@ -719,4 +719,35 @@
   same ground (deviations/decisions/tradeoffs/narrative) using this file's notes, module
   docstrings, and `git log` as source material.
 
-DONE
+## Phase 2b: Roster expansion (11 new generals, per PLAN.md's original 15-25 target)
+
+Phase 1-7 above covered the locked 8-general validation roster only. That pipeline works
+end-to-end now, so per PLAN.md Section 7 step 5 ("expand dataset to full roster") this phase adds
+the rest of PLAN.md's originally-listed roster (dropping only Sun Tzu — flagged there as
+conditional on "enough battle data," and there isn't any at battle-row granularity). Same rules
+as Phase 2: one checkbox per general, `data/generals.csv` row + 8-15 cited `data/battles.csv` rows
+each, same personal-command/no-fabrication bars already established and documented in this file's
+Phase 2 notes, `source_confidence` tagged honestly per source era. New for this phase: first run
+`python scripts/scrape_wikipedia_infobox.py "<battle name>"` per battle for a draft
+strength/casualties scaffold (unverified — cross-check every number against an academic source
+before writing the row, same as always; see scripts/overnight.sh's amended prompt for the exact
+instruction).
+
+- [ ] Hannibal Barca battles (Ancient)
+- [ ] Scipio Africanus battles (Ancient)
+- [ ] Subutai battles (Medieval)
+- [ ] Tokugawa Ieyasu battles (Medieval)
+- [ ] George Washington battles (Early Modern)
+- [ ] Wellington battles (Napoleonic)
+- [ ] Robert E. Lee battles (Industrial)
+- [ ] Dwight D. Eisenhower battles (WWII)
+- [ ] Erwin Rommel battles (WWII)
+- [ ] Erich von Manstein battles (WWII)
+- [ ] Douglas MacArthur battles (WWII)
+- [ ] Re-run full pipeline against the 19-general roster: `python scripts/validate_data.py`,
+      `pytest`, then re-run every `scripts/render_*.py` script to regenerate
+      `output/viz/*.png`/`*.csv`/`*.html` from the expanded dataset (old output is stale the
+      moment a new general lands). Re-run Phase 7's sanity pass against the new composite
+      ranking/category tables — in particular check whether the n=2-era-cohort z-scoring issue
+      flagged for Caesar (see Notes above) resolves now that Ancient/Medieval/WWII cohorts have
+      more members; log findings in Notes below, do not hand-tune weights.

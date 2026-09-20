@@ -18,11 +18,13 @@ By morning, the repo must contain:
 6. A `notes/` dev log (via project-notes skill) documenting deviations, decisions, and tradeoffs made
    along the way.
 
-## Roster for this run (locked, not 15-25)
+## Roster
 
-Start with **8 generals, one per era**, per PLAN.md Section 7 step 1 — this is the actual scope for
-tonight, not the full 15-25 roster. Expanding beyond 8 is out of scope unless the 8-general pipeline
-is fully working with time to spare:
+The initial run locked scope to **8 generals, one per era** (PLAN.md Section 7 step 1) to validate
+the pipeline end-to-end before committing to full data-curation effort. That pipeline now works
+end-to-end (Phases 1-7 complete, see PROGRESS.md). Per PLAN.md Section 7 step 5, roster expansion
+to the full 15-25 target is now in scope — see PROGRESS.md's "Phase 2b: Roster expansion" for the
+11 additional generals and their tasks. The original locked-8 list:
 
 - Ancient: Julius Caesar
 - Ancient: Alexander the Great
