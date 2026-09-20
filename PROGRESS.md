@@ -148,7 +148,42 @@
       (Cold Harbor, Second Petersburg, the Crater — none Rout-level, Grant's own army was checked but
       never broke) / 3 draws (Belmont, the Wilderness, Spotsylvania). `python scripts/validate_data.py`
       passes; full test suite (32 tests) still green.
-- [ ] Georgy Zhukov battles
+- [x] Georgy Zhukov battles — 6 rows (Battle of Khalkhin Gol, Yelnya Offensive, Battle of Moscow,
+      Operation Mars, Vistula-Oder Offensive, Battle of Seelow Heights) in `data/battles.csv` plus a
+      `generals.csv` row; `era=WWII`, `tech_era_tier=5` for every row (first general in the dataset to
+      reach the schema's top tier — mechanised warfare with radio and rail — a deliberate step up from
+      Napoleon/Grant's tier 4, reasoning in `generals.csv`'s note). Web-researched via a delegated
+      research pass plus several of my own follow-up searches for gaps it flagged, cross-checking
+      Wikipedia infoboxes against Glantz & House, Krivosheev, Beevor, Hastings, and Isaev.
+      Deviation/judgment call, the big one for this general: applied the existing "personally
+      supreme-commanded" bar (used for Genghis/Saladin/Frederick/Grant) strictly, which excludes the
+      Battle of Stalingrad, the Battle of Kursk, and Operation Bagration — Zhukov coordinated these as
+      a Stavka representative/Deputy Supreme Commander while named front commanders (Yeremenko/
+      Rokossovsky/Vatutin at Stalingrad and Kursk; Rokossovsky at 1st Belorussian Front for all of
+      Bagration) held direct command. This is a materially stricter cut than any prior general's roster
+      and drops three of Zhukov's most famous battles. Also excluded, for the opposite reason (no
+      fabrication, same bar as Alexander's Persian Gate/Genghis's Khalakhaljid Sands): the Leningrad
+      Front command (Sept-Oct 1941, a genuine personal command but the single worst-sourced gap in the
+      whole dataset — no quantifiable troop or casualty figure found for that specific five-week window
+      despite a dedicated search) and the First Rzhev-Vyazma Offensive (Jan-Apr 1942, personally
+      commanded, but no German-side troop-strength or casualty figure isolated to that specific
+      operation as opposed to the broader multi-year Rzhev campaign total). The Battle of Berlin
+      (April-May 1945 city assault) is excluded as a separate row from Seelow Heights specifically to
+      avoid double-counting: Seelow was the opening battle of the same operation on Zhukov's own front,
+      and Berlin's only available figures are an undifferentiated three-marshal (Zhukov+Konev+
+      Rokossovsky) combined total for the same window — unlike Alesia/Vistula-Oder's "combine
+      multi-force figures into one field and document it" treatment, this is a direct overlap with an
+      already-included row. Net result is 6 rows (5 wins, 2 Rout-level: Khalkhin Gol, Vistula-Oder;
+      1 loss: Operation Mars, well-documented via Glantz's "Zhukov's Greatest Defeat") — smaller than
+      every other general in this roster (range 8-15), a structural consequence of the Red Army's
+      Stavka system putting multiple named front commanders under one coordinating deputy for exactly
+      the largest, best-quantified operations, not a research shortfall; full reasoning in
+      `generals.csv`'s note in case Phase 7's sanity pass questions the thin roster. Operation Mars's
+      own_casualties uses Glantz's revised 335,000 over the official Krivosheev figure of 215,674 (a
+      ~55% gap, the most contested figure in this dataset), following the same "prefer the modern
+      historian's corrective over the self-serving/official lower figure" precedent already used for
+      Caesar and Genghis Khan. `python scripts/validate_data.py` passes; full test suite (32 tests)
+      still green.
 
 ## Phase 3: Metrics pipeline
 - [ ] Raw/counting stats
