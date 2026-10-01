@@ -15,7 +15,7 @@ generals, and compares it to the ranking on the unperturbed gold set:
 
 This answers task A5's question directly: composite_ranking's four inputs are
 `oar.py` (outcome-only, no strength/casualties), `rate.py`'s decisive_win_rate (uses
-`objective_secured`, not strength/casualties), `longevity.py` (outcome-only), and
+`decisiveness`, not strength/casualties), `longevity.py` (outcome-only), and
 `war_residual.py` (the only one of the four that reads troop strength, via
 `enemy_troop_strength / own_troop_strength` as one of three OLS regressors). So this test mostly
 measures how sensitive one of the four composite inputs, at 0.35 weight, is to strength noise;

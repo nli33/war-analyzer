@@ -6,20 +6,19 @@ estimate; run the full pipeline N times to produce a distribution of each
 general's rating." Design choices, since PLAN.md names the mechanism but not
 the exact noise model or which of Phase 3's metrics to re-run:
 
-* Every battle's `source_confidence` sets a per-run multiplicative noise
-  half-width applied independently to each of the four numeric fields
-  (own/enemy troop strength, own/enemy casualties): High = 0 (the recorded
-  figure is trusted as-is, so a High-confidence-only general's distribution
-  collapses to a single repeated point -- the exact property SCOPE.md's
-  Phase 4 test asks for), Medium = 10% (matches the scale of real
-  cross-source disagreement logged in Phase 2 for 18th/19th-century muster
-  rolls, e.g. Mollwitz's 16,000-23,000 range), Low = 40% (matches the wider
-  ancient/medieval/contested-modern disagreements logged in Phase 2, e.g.
-  Operation Mars' ~55% Krivosheev/Glantz gap or the Genghis/Saladin
-  order-of-magnitude placeholder figures). Each run draws its factor
-  uniformly from `[1 - half_width, 1 + half_width]`, independently per field
-  per battle, so own troop strength and enemy casualties on the same row are
-  not forced to move together.
+* Each of the four numeric fields (own/enemy troop strength, own/enemy
+  casualties) carries its own optional `_low`/`_high` range in the schema
+  (see `war/schema.py`'s module docstring) for when two sources disagree.
+  Each run resamples a field by drawing uniformly from `[low, high]` when
+  both bounds are recorded; a field with no range (one source, or sources
+  that agree) is left at its point estimate every run, so a general whose
+  battles carry no ranges at all collapses to a single repeated point --
+  the exact property SCOPE.md's Phase 4 test asks for. This replaced an
+  earlier design keyed off a hand-entered `source_confidence` tag
+  (High/Medium/Low) that set a fixed per-tag noise width; dropped per
+  PROGRESS.md Phase B in favor of letting an actual recorded disagreement
+  between sources set the spread, not a judgment call about how reliable a
+  single figure feels.
 * Resampled troop-strength fields are floored at 1, not the schema's
   `min_value=0` -- `rate.py` and `war_residual.py` both divide by
   `own_troop_strength` and document that it's never recorded as 0 in this
@@ -35,7 +34,7 @@ the exact noise model or which of Phase 3's metrics to re-run:
   battles even qualify as "playing from behind" can change run to run).
   `win_rate`, `decisive_win_rate`, OAR, Squander Index, and
   Longevity-Adjusted Value are deliberately excluded: every one of them is a
-  function of `outcome`, `objective_secured`, `decisiveness`, or career
+  function of `outcome`, `decisiveness`, or career
   years, none of which this resampling touches, so re-running them N times
   would just reproduce the same point estimate N times -- a degenerate,
   not-actually-uncertain "distribution".
@@ -51,6 +50,9 @@ the exact noise model or which of Phase 3's metrics to re-run:
   runs (a 90% interval, per SCOPE.md), not a parametric fit -- nothing here
   is assumed Gaussian, and empirical percentiles degrade gracefully to a
   single repeated point when noise is 0.
+* A field with a recorded point estimate but a missing low or high bound
+  (or vice versa) is left unresampled -- a partial range isn't a usable
+  sampling interval, so this is treated the same as no range at all.
 * `war_residual` is the one metric here that is *not* purely general-local:
   `war_residual_by_general` fits its regression pooled across every battle
   passed in, so resampling another general's Low-confidence rows shifts the
@@ -75,8 +77,6 @@ from war.metrics.war_residual import war_residual_by_general
 from war.records import Battle
 
 DEFAULT_N_RUNS = 1000
-
-_NOISE_HALF_WIDTH = {"High": 0.0, "Medium": 0.10, "Low": 0.40}
 
 # field -> floor applied to a resampled value (see module docstring for why
 # troop strength floors at 1 rather than the schema's own min_value=0).
@@ -118,13 +118,15 @@ class MetricDistribution:
 
 
 def _resample_battle(battle: Battle, rng: np.random.Generator) -> Battle:
-    half_width = _NOISE_HALF_WIDTH[battle.source_confidence]
-    if half_width == 0.0:
-        return battle
     updates = {}
     for field, floor in _FIELD_FLOORS.items():
-        factor = 1.0 + rng.uniform(-half_width, half_width)
-        updates[field] = max(floor, round(getattr(battle, field) * factor))
+        low = getattr(battle, f"{field}_low")
+        high = getattr(battle, f"{field}_high")
+        if low is None or high is None:
+            continue  # no recorded disagreement (or a partial range) -- trust the point estimate
+        updates[field] = max(floor, round(rng.uniform(low, high)))
+    if not updates:
+        return battle
     return replace(battle, **updates)
 
 

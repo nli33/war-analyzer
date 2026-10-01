@@ -21,7 +21,7 @@ Design choices not fully specified by PLAN.md/SCOPE.md:
   own example phrases this in terms of OAR ("Caesar: OAR 82 +/- 15"). But
   `uncertainty.py`'s Monte Carlo resampling deliberately does *not* re-run
   OAR, decisive_win_rate, or Longevity-Adjusted Value — they are pure
-  functions of `outcome`/`objective_secured`/career years, untouched by the
+  functions of `outcome`/`decisiveness`/career years, untouched by the
   troop/casualty resampling, so a "distribution" for them would just be the
   same point estimate N times (see `uncertainty.py`'s own docstring). Rather
   than fabricate a band for those metrics, this module attaches a genuine

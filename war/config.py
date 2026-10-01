@@ -11,10 +11,8 @@ whatever composite-ranking code ends up consuming these weights.
 Judgment calls, since PLAN.md doesn't specify a formula:
 
 * "decisiveness" maps to `rate.py`'s `decisive_win_rate` — the fraction of
-  wins with `objective_secured=true`. It's the one existing metric that is
-  literally named for this PLAN.md concept, same reuse-over-re-derive
-  reasoning `rate.py` itself gives for not re-deriving "decisive" from the
-  `decisiveness` enum a second time.
+  (decisiveness-labeled) wins marked `Strategic` or `Rout`. It's the one
+  existing metric that is literally named for this PLAN.md concept.
 * "longevity" maps to `longevity.py`'s `longevity_adjusted_value`, not raw
   career value — the whole point of that metric is already "career value
   normalized for years active," which is what PLAN.md asks the composite

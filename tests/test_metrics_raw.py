@@ -18,12 +18,9 @@ def make_battle(general_id, outcome, own_troops, own_casualties, enemy_casualtie
         enemy_casualties=enemy_casualties,
         outcome=outcome,
         decisiveness="Tactical" if outcome == "Win" else None,
-        objective_secured=outcome == "Win",
         opponent_general_id=None,
         resource_backing_tier=3,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )

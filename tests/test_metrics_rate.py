@@ -11,7 +11,7 @@ def make_battle(
     enemy_troops,
     own_casualties,
     enemy_casualties,
-    objective_secured=False,
+    decisiveness=None,
 ):
     """A Battle with only the fields rate_stats_by_general reads set meaningfully."""
     return Battle(
@@ -25,13 +25,10 @@ def make_battle(
         own_casualties=own_casualties,
         enemy_casualties=enemy_casualties,
         outcome=outcome,
-        decisiveness="Strategic" if objective_secured else None,
-        objective_secured=objective_secured,
+        decisiveness=decisiveness,
         opponent_general_id=None,
         resource_backing_tier=3,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )
@@ -39,10 +36,10 @@ def make_battle(
 
 def test_win_rate():
     battles = [
-        make_battle("alice", "Win", 10_000, 10_000, 500, 2_000, objective_secured=True),
+        make_battle("alice", "Win", 10_000, 10_000, 500, 2_000, decisiveness="Strategic"),
         make_battle("alice", "Loss", 8_000, 8_000, 3_000, 1_000),
         make_battle("alice", "Draw", 5_000, 5_000, 200, 200),
-        make_battle("alice", "Win", 5_000, 5_000, 100, 500, objective_secured=False),
+        make_battle("alice", "Win", 5_000, 5_000, 100, 500, decisiveness="Tactical"),
     ]
 
     stats = rate_stats_by_general(battles)["alice"]
@@ -52,7 +49,7 @@ def test_win_rate():
 
 def test_casualty_exchange_ratio_uses_career_totals_not_average_of_ratios():
     battles = [
-        make_battle("bob", "Win", 10_000, 10_000, 1_000, 4_000, objective_secured=True),
+        make_battle("bob", "Win", 10_000, 10_000, 1_000, 4_000, decisiveness="Strategic"),
         make_battle("bob", "Loss", 10_000, 10_000, 3_000, 1_000),
     ]
 
@@ -63,7 +60,7 @@ def test_casualty_exchange_ratio_uses_career_totals_not_average_of_ratios():
 
 
 def test_casualty_exchange_ratio_none_when_no_own_casualties():
-    battles = [make_battle("carol", "Win", 1_000, 1_000, 0, 500, objective_secured=True)]
+    battles = [make_battle("carol", "Win", 1_000, 1_000, 0, 500, decisiveness="Strategic")]
 
     stats = rate_stats_by_general(battles)["carol"]
 
@@ -72,8 +69,8 @@ def test_casualty_exchange_ratio_none_when_no_own_casualties():
 
 def test_avg_force_ratio_faced_is_mean_of_per_battle_ratios():
     battles = [
-        make_battle("dave", "Win", 5_000, 10_000, 1, 1, objective_secured=True),
-        make_battle("dave", "Win", 10_000, 5_000, 1, 1, objective_secured=True),
+        make_battle("dave", "Win", 5_000, 10_000, 1, 1, decisiveness="Strategic"),
+        make_battle("dave", "Win", 10_000, 5_000, 1, 1, decisiveness="Strategic"),
     ]
 
     stats = rate_stats_by_general(battles)["dave"]
@@ -82,16 +79,29 @@ def test_avg_force_ratio_faced_is_mean_of_per_battle_ratios():
     assert stats.avg_force_ratio_faced == 1.25
 
 
-def test_decisive_win_rate_only_counts_objective_secured_among_wins():
+def test_decisive_win_rate_only_counts_strategic_or_rout_among_rated_wins():
     battles = [
-        make_battle("erin", "Win", 1, 1, 0, 1, objective_secured=True),
-        make_battle("erin", "Win", 1, 1, 0, 1, objective_secured=False),
+        make_battle("erin", "Win", 1, 1, 0, 1, decisiveness="Strategic"),
+        make_battle("erin", "Win", 1, 1, 0, 1, decisiveness="Tactical"),
         make_battle("erin", "Loss", 1, 1, 1, 0),
     ]
 
     stats = rate_stats_by_general(battles)["erin"]
 
     assert stats.decisive_win_rate == 1 / 2
+
+
+def test_decisive_win_rate_excludes_wins_without_a_decisiveness_label():
+    battles = [
+        make_battle("gail", "Win", 1, 1, 0, 1, decisiveness="Strategic"),
+        make_battle("gail", "Win", 1, 1, 0, 1),  # no decisiveness recorded
+    ]
+
+    stats = rate_stats_by_general(battles)["gail"]
+
+    # the unlabeled win is excluded from both numerator and denominator, not
+    # counted as "not decisive" -- same convention as squander.py's wins_used.
+    assert stats.decisive_win_rate == 1.0
 
 
 def test_decisive_win_rate_none_with_no_wins():
@@ -104,7 +114,7 @@ def test_decisive_win_rate_none_with_no_wins():
 
 def test_generals_kept_separate():
     battles = [
-        make_battle("alice", "Win", 1, 1, 0, 1, objective_secured=True),
+        make_battle("alice", "Win", 1, 1, 0, 1, decisiveness="Strategic"),
         make_battle("bob", "Loss", 1, 1, 1, 0),
     ]
 

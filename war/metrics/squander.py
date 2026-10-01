@@ -14,8 +14,8 @@ but not the exact formula:
   general's wins, the fraction labeled `Tactical` or `Pyrrhic` — no separate
   threshold or re-derivation needed, since re-deriving "failed to convert"
   from troop/casualty numbers would just rebuild what the enum already
-  records, the same reasoning `rate.py`'s `decisive_win_rate` gives for
-  reusing `objective_secured` instead of re-deriving decisiveness.
+  records. `rate.py`'s `decisive_win_rate` makes the identical Strategic/Rout
+  split (just inverted) for the same reason.
 * `decisiveness` is required by `war/schema.py` for a Win but `validate.py`
   does not actually enforce that conditional requirement (it only checks the
   unconditional `required` flag, which is `False` for this column so Loss/Draw

@@ -160,9 +160,28 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
 
 ## Phase B: Simplify the schema
 
-- [ ] B1. Schema change: nullable strength/casualty fields, drop `source_confidence` and
+- [x] B1. Schema change: nullable strength/casualty fields, drop `source_confidence` and
       `political_constraint_flag`, decide on `objective_secured`, add a per-field low/high range
       for when two sources disagree. Migrate the gold set mechanically. Validator and schema tests green.
+      Made all four strength/casualty columns `required=False` and added an optional `_low`/`_high`
+      sibling pair for each (8 new columns); `validate.py` gained `validate_ranges` to check
+      `low <= high` and that a recorded point estimate falls inside its own range. Dropped
+      `source_confidence` and `political_constraint_flag` outright (decided in A6, unused outside
+      schema/records). Decision on `objective_secured`: dropped it too, not just left alone — unlike
+      `decisiveness`, which C2 can read off a Wikipedia infobox result string by rule, "was the
+      general's stated objective achieved" has no deterministic source and would stay a permanent
+      manual judgment call. `rate.py`'s `decisive_win_rate` now derives the identical concept from
+      `decisiveness` (Strategic/Rout = converted, same split `squander.py` already used, wins with no
+      label excluded from both num/denom). This forced `uncertainty.py`'s Monte Carlo off the old
+      confidence-tag noise model onto the new low/high ranges (uniform sample in `[low, high]` when
+      both present, point estimate trusted otherwise) — functionally this is B3's "Monte Carlo uses
+      source ranges instead of confidence tags" bullet, done now because leaving `source_confidence`
+      referenced after deleting the column would crash the whole metrics suite, not a decision to
+      skip ahead on B3's other work (missing-value policy for rate.py/war_residual.py when strength
+      is genuinely null — nothing in the gold set exercises that yet, so left for B3). Gold set
+      (`data/battles.csv`, 177 rows) migrated mechanically: 3 columns dropped, 8 empty columns added,
+      no values re-researched. `validate_all()` returns `[]`; full suite (178 tests across all of
+      `tests/` and `war/`, including every file that constructs a `Battle` by hand) green.
 - [ ] B2. Rules in place of hand judgment: `tech_era_tier` from a date lookup table,
       `resource_backing_tier` from COW CINC after 1816 and a coarse per-era default before that
       (only if A4 shows CINC is cheap to load), `decisiveness` from the infobox result text.

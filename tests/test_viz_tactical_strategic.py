@@ -15,7 +15,7 @@ from war.viz.tactical_strategic import (
 )
 
 
-def make_battle(general_id, outcome, objective_secured, battle_id=None):
+def make_battle(general_id, outcome, strategic, battle_id=None):
     """A Battle with only the fields win_rate/decisive_win_rate read meaningfully."""
     return Battle(
         battle_id=battle_id or f"{general_id}-{outcome}-{id(object())}",
@@ -28,13 +28,10 @@ def make_battle(general_id, outcome, objective_secured, battle_id=None):
         own_casualties=1,
         enemy_casualties=1,
         outcome=outcome,
-        decisiveness="Strategic" if objective_secured else "Tactical",
-        objective_secured=objective_secured,
+        decisiveness="Strategic" if strategic else "Tactical",
         opponent_general_id=None,
         resource_backing_tier=3,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )
@@ -65,7 +62,7 @@ def test_points_hand_computed():
 
     by_id = {p.general_id: p for p in points}
     assert by_id["alice"].tactical_rating == 0.5  # 2 wins / 4 battles
-    assert by_id["alice"].strategic_rating == 0.5  # 1 of 2 wins objective_secured
+    assert by_id["alice"].strategic_rating == 0.5  # 1 of 2 wins Strategic
     assert by_id["alice"].display_name == "Alice"
     assert by_id["bob"].tactical_rating == 1.0
     assert by_id["bob"].strategic_rating == 1.0
@@ -111,8 +108,8 @@ def test_figure_has_one_scatter_point_per_general():
 
     assert len(offsets) == 2
     plotted = {tuple(offset) for offset in offsets}
-    assert (1.0, 0.5) in plotted  # alice: 2 wins, 1 objective_secured
-    assert (1.0, 1.0) in plotted  # bob: 1 win, objective_secured
+    assert (1.0, 0.5) in plotted  # alice: 2 wins, 1 Strategic
+    assert (1.0, 1.0) in plotted  # bob: 1 win, Strategic
 
 
 def test_figure_labels_every_point_by_display_name():

@@ -25,12 +25,9 @@ _BASE_BATTLE = Battle(
     enemy_casualties=0,
     outcome="Win",
     decisiveness="Strategic",
-    objective_secured=True,
     opponent_general_id="g2",
     resource_backing_tier=2,
     tech_era_tier=1,
-    political_constraint_flag=False,
-    source_confidence="High",
     source_citation="test",
     notes=None,
 )

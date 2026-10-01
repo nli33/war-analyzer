@@ -13,11 +13,17 @@ def make_battle(
     general_id,
     outcome,
     opponent_general_id=None,
-    objective_secured=False,
+    decisive=False,
     era="Industrial",
     battle_id=None,
 ):
-    """A Battle with only the fields the four composite inputs read set meaningfully."""
+    """A Battle with only the fields the four composite inputs read set meaningfully.
+
+    `decisive` controls `decisive_win_rate` (rate.py): True -> "Strategic"
+    (converts), False -> "Tactical" (a rated win that didn't convert) -- both
+    are always labeled, so a win here is never excluded from that metric's
+    denominator the way an unlabeled win would be.
+    """
     return Battle(
         battle_id=battle_id or f"{general_id}-{outcome}-{opponent_general_id}",
         general_id=general_id,
@@ -29,13 +35,10 @@ def make_battle(
         own_casualties=1,
         enemy_casualties=1,
         outcome=outcome,
-        decisiveness=None,
-        objective_secured=objective_secured,
+        decisiveness="Strategic" if decisive else "Tactical",
         opponent_general_id=opponent_general_id,
         resource_backing_tier=3,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )
@@ -60,7 +63,7 @@ def test_singleton_era_cohort_gets_zero_z_scores_and_zero_composite_score():
     # alice is the only general in her era: no cohort-mate to compare against,
     # so every z-score (and therefore the composite score) is exactly 0.0,
     # regardless of how good her raw record is.
-    battles = [make_battle("alice", "Win", "bob", objective_secured=True, era="WWII")]
+    battles = [make_battle("alice", "Win", "bob", decisive=True, era="WWII")]
     generals = [make_general("alice", era="WWII")]
 
     result = composite_ranking(battles, generals)
@@ -87,7 +90,7 @@ def _clean_two_general_cohort():
     #     so pooled OLS degenerates to predicted = mean(actual) = 2/3 for
     #     every row. alice: 1 - 2/3 = +1/3. bob: mean(1 - 2/3, 0 - 2/3) =
     #     mean(+1/3, -2/3) = -1/6.
-    #   * decisiveness: alice's win is objective_secured=True (rate 1.0),
+    #   * decisiveness: alice's win is decisive=True (rate 1.0),
     #     bob's is False (rate 0.0).
     #   * longevity: alice's 1-year career banks her 1.0 career value ->
     #     longevity 1.0; bob's 2-year career banks 1.0 (win) + 0 (loss) = 1.0
@@ -97,8 +100,8 @@ def _clean_two_general_cohort():
     # whenever the two values differ, regardless of the input's raw scale --
     # so every one of alice's four z-scores is +1.0 and bob's is -1.0.
     battles = [
-        make_battle("alice", "Win", "riven", objective_secured=True, era="Ancient", battle_id="a1"),
-        make_battle("bob", "Win", "quill", objective_secured=False, era="Ancient", battle_id="b1"),
+        make_battle("alice", "Win", "riven", decisive=True, era="Ancient", battle_id="a1"),
+        make_battle("bob", "Win", "quill", decisive=False, era="Ancient", battle_id="b1"),
         make_battle("bob", "Loss", "worvo", era="Ancient", battle_id="b2"),
     ]
     generals = [
@@ -159,7 +162,7 @@ def _winless_loser_cohort():
     # weight is large, not just the weights' total.
     battles = [
         make_battle("carol", "Loss", "dave", era="Medieval", battle_id="c1"),
-        make_battle("dave", "Win", "carol", objective_secured=True, era="Medieval", battle_id="d1"),
+        make_battle("dave", "Win", "carol", decisive=True, era="Medieval", battle_id="d1"),
     ]
     generals = [
         make_general("carol", era="Medieval"),
@@ -213,7 +216,7 @@ def _crossed_signals_cohort():
     # strictly better win/loss record (2 wins, 0 losses) than bob (1 win, 1
     # loss against comparable opponents), so she comes out ahead on the two
     # record-driven inputs: OAR and war_residual. But neither of alice's
-    # wins is objective_secured, while bob's lone win is, and alice's
+    # wins is decisive, while bob's lone win is, and alice's
     # 21-year career (1900-1920) dilutes her longevity value far more than
     # bob's 1-year career (1900) does -- so bob comes out ahead on
     # decisiveness and longevity. This 2-vs-2 split (unlike every other
@@ -222,9 +225,9 @@ def _crossed_signals_cohort():
     # *which* general ranks first depends on *which* metrics the weights
     # favor, not just by how much.
     battles = [
-        make_battle("alice", "Win", "opp1", objective_secured=False, era="Ancient", battle_id="a1"),
-        make_battle("alice", "Win", "opp2", objective_secured=False, era="Ancient", battle_id="a2"),
-        make_battle("bob", "Win", "opp1", objective_secured=True, era="Ancient", battle_id="b1"),
+        make_battle("alice", "Win", "opp1", decisive=False, era="Ancient", battle_id="a1"),
+        make_battle("alice", "Win", "opp2", decisive=False, era="Ancient", battle_id="a2"),
+        make_battle("bob", "Win", "opp1", decisive=True, era="Ancient", battle_id="b1"),
         make_battle("bob", "Loss", "opp2", era="Ancient", battle_id="b2"),
     ]
     generals = [

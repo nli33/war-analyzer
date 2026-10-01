@@ -18,12 +18,9 @@ def make_battle(general_id, outcome, battle_id=None):
         enemy_casualties=1,
         outcome=outcome,
         decisiveness=None,
-        objective_secured=False,
         opponent_general_id=None,
         resource_backing_tier=3,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )

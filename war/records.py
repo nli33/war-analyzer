@@ -27,20 +27,27 @@ class Battle:
     battle_name: str
     date: str
     era: str
-    own_troop_strength: int
-    enemy_troop_strength: int
-    own_casualties: int
-    enemy_casualties: int
+    own_troop_strength: int | None
+    enemy_troop_strength: int | None
+    own_casualties: int | None
+    enemy_casualties: int | None
     outcome: str
     decisiveness: str | None
-    objective_secured: bool
     opponent_general_id: str | None
     resource_backing_tier: int
     tech_era_tier: int
-    political_constraint_flag: bool
-    source_confidence: str
     source_citation: str
     notes: str | None
+    # Low/high range siblings for when two sources disagree (see schema.py's
+    # module docstring); default None since most battles have a single source.
+    own_troop_strength_low: int | None = None
+    own_troop_strength_high: int | None = None
+    enemy_troop_strength_low: int | None = None
+    enemy_troop_strength_high: int | None = None
+    own_casualties_low: int | None = None
+    own_casualties_high: int | None = None
+    enemy_casualties_low: int | None = None
+    enemy_casualties_high: int | None = None
 
 
 @dataclass(frozen=True)
@@ -60,6 +67,11 @@ def _optional(value: str) -> str | None:
     return value if value else None
 
 
+def _optional_int(value: str) -> int | None:
+    value = value.strip()
+    return int(value) if value else None
+
+
 def _battle_from_row(row: dict) -> Battle:
     return Battle(
         battle_id=row["battle_id"].strip(),
@@ -67,18 +79,23 @@ def _battle_from_row(row: dict) -> Battle:
         battle_name=row["battle_name"].strip(),
         date=row["date"].strip(),
         era=row["era"].strip(),
-        own_troop_strength=int(row["own_troop_strength"]),
-        enemy_troop_strength=int(row["enemy_troop_strength"]),
-        own_casualties=int(row["own_casualties"]),
-        enemy_casualties=int(row["enemy_casualties"]),
+        own_troop_strength=_optional_int(row["own_troop_strength"]),
+        own_troop_strength_low=_optional_int(row["own_troop_strength_low"]),
+        own_troop_strength_high=_optional_int(row["own_troop_strength_high"]),
+        enemy_troop_strength=_optional_int(row["enemy_troop_strength"]),
+        enemy_troop_strength_low=_optional_int(row["enemy_troop_strength_low"]),
+        enemy_troop_strength_high=_optional_int(row["enemy_troop_strength_high"]),
+        own_casualties=_optional_int(row["own_casualties"]),
+        own_casualties_low=_optional_int(row["own_casualties_low"]),
+        own_casualties_high=_optional_int(row["own_casualties_high"]),
+        enemy_casualties=_optional_int(row["enemy_casualties"]),
+        enemy_casualties_low=_optional_int(row["enemy_casualties_low"]),
+        enemy_casualties_high=_optional_int(row["enemy_casualties_high"]),
         outcome=row["outcome"].strip(),
         decisiveness=_optional(row["decisiveness"]),
-        objective_secured=schema.parse_bool(row["objective_secured"]),
         opponent_general_id=_optional(row["opponent_general_id"]),
         resource_backing_tier=int(row["resource_backing_tier"]),
         tech_era_tier=int(row["tech_era_tier"]),
-        political_constraint_flag=schema.parse_bool(row["political_constraint_flag"]),
-        source_confidence=row["source_confidence"].strip(),
         source_citation=row["source_citation"].strip(),
         notes=_optional(row["notes"]),
     )

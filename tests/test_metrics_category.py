@@ -13,7 +13,6 @@ def make_battle(
     battle_id,
     opponent_general_id=None,
     decisiveness=None,
-    objective_secured=False,
     own_troop_strength=10_000,
     enemy_troop_strength=10_000,
     own_casualties=100,
@@ -33,12 +32,9 @@ def make_battle(
         enemy_casualties=enemy_casualties,
         outcome=outcome,
         decisiveness=decisiveness,
-        objective_secured=objective_secured,
         opponent_general_id=opponent_general_id,
         resource_backing_tier=resource_backing_tier,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence="High",
         source_citation="test fixture",
         notes=None,
     )
@@ -145,9 +141,9 @@ def test_clutch_rating_excludes_general_with_no_qualifying_battles():
 def test_squander_index_sorts_ascending_lower_is_better_and_excludes_unlabeled_wins():
     battles = [
         # alice's win converted (Strategic): squander_index 0.0, the "best" result.
-        make_battle("alice", "Win", "a1", decisiveness="Strategic", objective_secured=True),
+        make_battle("alice", "Win", "a1", decisiveness="Strategic"),
         # bob's win did not convert (Tactical): squander_index 1.0, the "worst" result.
-        make_battle("bob", "Win", "b1", decisiveness="Tactical", objective_secured=False),
+        make_battle("bob", "Win", "b1", decisiveness="Tactical"),
         # carol's win has no decisiveness label at all: excluded, wins_used=0.
         make_battle("carol", "Win", "c1", decisiveness=None),
     ]

@@ -15,9 +15,13 @@ Conventions used across both files:
 * Booleans are the lowercase strings `true` / `false`.
 * Empty cells mean "not recorded". Required fields may not be empty; optional
   fields may.
-* Numeric estimates (strengths, casualties) are best single-point estimates. The
-  honesty about how good that estimate is lives in `source_confidence`, which is
-  what drives the Monte Carlo resampling later in the pipeline.
+* Numeric estimates (strengths, casualties) are best single-point estimates, and
+  may be empty when no source gives a usable number. When two sources disagree,
+  the spread lives in that field's `_low`/`_high` sibling columns (e.g.
+  `own_troop_strength_low`/`_high`); both are empty when only one source exists
+  or sources agree. That range is what drives the Monte Carlo resampling later
+  in the pipeline — a field with no range recorded is resampled with zero
+  noise (the point estimate is trusted as-is).
 """
 
 from dataclasses import dataclass
@@ -43,8 +47,6 @@ OUTCOMES = ("Win", "Loss", "Draw")
 #   Rout      - one side's army broke and was destroyed or scattered
 # For a Loss, "Rout" means this general's own army was the one that broke.
 DECISIVENESS_LEVELS = ("Tactical", "Strategic", "Pyrrhic", "Rout")
-
-SOURCE_CONFIDENCE_LEVELS = ("High", "Medium", "Low")
 
 BOOL_STRINGS = ("true", "false")
 
@@ -106,24 +108,84 @@ BATTLE_COLUMNS: tuple[Column, ...] = (
         name="own_troop_strength",
         kind="int",
         description="Estimated troops under this general's command at the battle.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="own_troop_strength_low",
+        kind="int",
+        description="Low end of own_troop_strength when sources disagree; empty if one source or agreement.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="own_troop_strength_high",
+        kind="int",
+        description="High end of own_troop_strength when sources disagree; empty if one source or agreement.",
+        required=False,
         min_value=0,
     ),
     Column(
         name="enemy_troop_strength",
         kind="int",
         description="Estimated troops on the opposing side.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="enemy_troop_strength_low",
+        kind="int",
+        description="Low end of enemy_troop_strength when sources disagree; empty if one source or agreement.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="enemy_troop_strength_high",
+        kind="int",
+        description="High end of enemy_troop_strength when sources disagree; empty if one source or agreement.",
+        required=False,
         min_value=0,
     ),
     Column(
         name="own_casualties",
         kind="int",
         description="Estimated killed, wounded, captured, and missing on this general's side.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="own_casualties_low",
+        kind="int",
+        description="Low end of own_casualties when sources disagree; empty if one source or agreement.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="own_casualties_high",
+        kind="int",
+        description="High end of own_casualties when sources disagree; empty if one source or agreement.",
+        required=False,
         min_value=0,
     ),
     Column(
         name="enemy_casualties",
         kind="int",
         description="Estimated killed, wounded, captured, and missing on the opposing side.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="enemy_casualties_low",
+        kind="int",
+        description="Low end of enemy_casualties when sources disagree; empty if one source or agreement.",
+        required=False,
+        min_value=0,
+    ),
+    Column(
+        name="enemy_casualties_high",
+        kind="int",
+        description="High end of enemy_casualties when sources disagree; empty if one source or agreement.",
+        required=False,
         min_value=0,
     ),
     Column(
@@ -141,11 +203,6 @@ BATTLE_COLUMNS: tuple[Column, ...] = (
         ),
         required=False,
         choices=DECISIVENESS_LEVELS,
-    ),
-    Column(
-        name="objective_secured",
-        kind="bool",
-        description="Was the general's stated objective (territory, siege, destruction of a force) achieved.",
     ),
     Column(
         name="opponent_general_id",
@@ -169,17 +226,6 @@ BATTLE_COLUMNS: tuple[Column, ...] = (
         description="1-5, technology level of the period (see module constants).",
         min_value=TIER_MIN,
         max_value=TIER_MAX,
-    ),
-    Column(
-        name="political_constraint_flag",
-        kind="bool",
-        description="Was the general under significant political interference in this battle.",
-    ),
-    Column(
-        name="source_confidence",
-        kind="enum",
-        description="How reliable the strength/casualty figures are; drives Monte Carlo spread.",
-        choices=SOURCE_CONFIDENCE_LEVELS,
     ),
     Column(
         name="source_citation",

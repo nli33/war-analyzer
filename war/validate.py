@@ -4,10 +4,12 @@ Checks every row against the `Column` specs in `war/schema.py`: required fields
 are present, enums (including `outcome`) hold a listed value, numeric fields
 respect their `min_value`/`max_value` (this is where "non-negative" is
 enforced, since every numeric column's `min_value` is 0), dates parse, and
-booleans are `true`/`false`. Also checks two invariants the schema docstrings
+booleans are `true`/`false`. Also checks invariants the schema docstrings
 claim but a single `Column` spec can't express on its own: `battle_id` and
-`general_id` are unique within their file, and every battle's `general_id`
-resolves to a row in `generals.csv`.
+`general_id` are unique within their file, every battle's `general_id`
+resolves to a row in `generals.csv`, and for each of the four strength/
+casualty fields, if its `_low`/`_high` range is recorded then `low <= high`
+and the point estimate (when also recorded) falls within that range.
 """
 
 import csv
@@ -68,6 +70,52 @@ def _read_rows(path: Path) -> list[dict]:
         return list(csv.DictReader(handle))
 
 
+# Base strength/casualty fields that carry an optional "<field>_low"/"<field>_high"
+# sibling pair for when two sources disagree (see war/schema.py's module docstring).
+_RANGE_FIELDS = (
+    "own_troop_strength",
+    "enemy_troop_strength",
+    "own_casualties",
+    "enemy_casualties",
+)
+
+
+def validate_ranges(path: Path) -> list[str]:
+    """Check that each row's recorded `<field>_low`/`_high` pairs make sense.
+
+    Only runs on rows where both bounds are present (either may be empty).
+    """
+    errors = []
+    for line_number, row in enumerate(_read_rows(path), start=2):  # header is line 1
+        row_id = row.get("battle_id", "").strip()
+        for field in _RANGE_FIELDS:
+            low_text = row.get(f"{field}_low", "").strip()
+            high_text = row.get(f"{field}_high", "").strip()
+            if not low_text or not high_text:
+                continue
+            try:
+                low, high = int(low_text), int(high_text)
+            except ValueError:
+                continue  # validate_value already reports the malformed int
+            if low > high:
+                errors.append(
+                    f"{path.name}:{line_number} ({row_id or '?'}): "
+                    f"{field}_low={low} is above {field}_high={high}"
+                )
+                continue
+            point_text = row.get(field, "").strip()
+            try:
+                point = int(point_text) if point_text else None
+            except ValueError:
+                continue  # validate_value already reports the malformed int
+            if point is not None and not (low <= point <= high):
+                errors.append(
+                    f"{path.name}:{line_number} ({row_id or '?'}): "
+                    f"{field}={point_text} falls outside its own range [{low}, {high}]"
+                )
+    return errors
+
+
 def validate_file(path: Path, columns: tuple[schema.Column, ...]) -> list[str]:
     """Return human-readable errors for one CSV; empty list means the file is clean.
 
@@ -101,6 +149,7 @@ def validate_all(repo_root: Path = REPO_ROOT) -> list[str]:
 
     errors = validate_file(battles_path, schema.BATTLE_COLUMNS)
     errors += validate_file(generals_path, schema.GENERAL_COLUMNS)
+    errors += validate_ranges(battles_path)
 
     known_generals = {row["general_id"].strip() for row in _read_rows(generals_path)}
     for line_number, row in enumerate(_read_rows(battles_path), start=2):

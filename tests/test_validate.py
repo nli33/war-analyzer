@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from war import schema
-from war.validate import ValidationError, validate_all, validate_file, validate_value
+from war.validate import ValidationError, validate_all, validate_file, validate_ranges, validate_value
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -53,7 +53,9 @@ def test_tier_out_of_range_is_rejected():
 
 
 def test_bad_bool_is_rejected():
-    flag_spec = schema.column(schema.BATTLE_COLUMNS, "objective_secured")
+    # No BATTLE_COLUMNS entry is bool-kind anymore; exercise validate_value's
+    # bool branch directly with a synthetic column instead.
+    flag_spec = schema.Column(name="test_flag", kind="bool", description="test")
     with pytest.raises(ValidationError):
         validate_value(flag_spec, "yes")
 
@@ -87,17 +89,22 @@ def _valid_battle_row(battle_id: str = "b1", general_id: str = "gen-a") -> list[
         "date": "1800-01-01",
         "era": "Napoleonic",
         "own_troop_strength": "10000",
+        "own_troop_strength_low": "",
+        "own_troop_strength_high": "",
         "enemy_troop_strength": "12000",
+        "enemy_troop_strength_low": "",
+        "enemy_troop_strength_high": "",
         "own_casualties": "1000",
+        "own_casualties_low": "",
+        "own_casualties_high": "",
         "enemy_casualties": "2000",
+        "enemy_casualties_low": "",
+        "enemy_casualties_high": "",
         "outcome": "Win",
         "decisiveness": "Strategic",
-        "objective_secured": "true",
         "opponent_general_id": "",
         "resource_backing_tier": "3",
         "tech_era_tier": "3",
-        "political_constraint_flag": "false",
-        "source_confidence": "High",
         "source_citation": "Some Source, 1900",
         "notes": "",
     }
@@ -139,6 +146,43 @@ def test_validate_all_catches_orphan_general_id(tmp_path):
 
     errors = validate_all(repo_root=tmp_path)
     assert any("nobody" in error and "generals.csv" in error for error in errors)
+
+
+# --- validate_ranges: low/high sibling columns -------------------------------
+
+def test_validate_ranges_accepts_no_range_recorded(tmp_path):
+    csv_path = tmp_path / "battles.csv"
+    _write_csv(csv_path, list(schema.BATTLE_FIELD_NAMES), [_valid_battle_row()])
+    assert validate_ranges(csv_path) == []
+
+
+def test_validate_ranges_accepts_point_within_range(tmp_path):
+    csv_path = tmp_path / "battles.csv"
+    row = _valid_battle_row()
+    row[schema.BATTLE_FIELD_NAMES.index("own_troop_strength_low")] = "8000"
+    row[schema.BATTLE_FIELD_NAMES.index("own_troop_strength_high")] = "12000"
+    _write_csv(csv_path, list(schema.BATTLE_FIELD_NAMES), [row])
+    assert validate_ranges(csv_path) == []
+
+
+def test_validate_ranges_rejects_low_above_high(tmp_path):
+    csv_path = tmp_path / "battles.csv"
+    row = _valid_battle_row()
+    row[schema.BATTLE_FIELD_NAMES.index("own_casualties_low")] = "2000"
+    row[schema.BATTLE_FIELD_NAMES.index("own_casualties_high")] = "1000"
+    _write_csv(csv_path, list(schema.BATTLE_FIELD_NAMES), [row])
+    errors = validate_ranges(csv_path)
+    assert any("own_casualties_low" in error for error in errors)
+
+
+def test_validate_ranges_rejects_point_outside_range(tmp_path):
+    csv_path = tmp_path / "battles.csv"
+    row = _valid_battle_row()
+    row[schema.BATTLE_FIELD_NAMES.index("enemy_troop_strength_low")] = "13000"
+    row[schema.BATTLE_FIELD_NAMES.index("enemy_troop_strength_high")] = "15000"
+    _write_csv(csv_path, list(schema.BATTLE_FIELD_NAMES), [row])
+    errors = validate_ranges(csv_path)
+    assert any("enemy_troop_strength" in error and "outside" in error for error in errors)
 
 
 def test_current_repo_data_is_clean():

@@ -14,6 +14,20 @@ from war.metrics.uncertainty import (
 from war.records import Battle
 
 
+# Stand-in for the old source_confidence tags, now expressed as the actual
+# low/high range the schema carries: "High" means no recorded disagreement
+# (None/None, never resampled), "Low" means a +/-40% range around the point
+# estimate, matching the noise width the old confidence-tag model used.
+_HALF_WIDTH = {"High": 0.0, "Low": 0.40}
+
+
+def _range(point, confidence):
+    half_width = _HALF_WIDTH[confidence]
+    if half_width == 0.0:
+        return None, None
+    return round(point * (1 - half_width)), round(point * (1 + half_width))
+
+
 def make_battle(
     general_id,
     outcome="Win",
@@ -22,28 +36,37 @@ def make_battle(
     own_casualties=1_000,
     enemy_casualties=2_000,
     resource_backing_tier=3,
-    source_confidence="High",
+    confidence="High",
     battle_id=None,
 ):
     """A Battle with only the fields the resampling-sensitive metrics read set meaningfully."""
+    own_low, own_high = _range(own_troops, confidence)
+    enemy_low, enemy_high = _range(enemy_troops, confidence)
+    own_cas_low, own_cas_high = _range(own_casualties, confidence)
+    enemy_cas_low, enemy_cas_high = _range(enemy_casualties, confidence)
     return Battle(
-        battle_id=battle_id or f"{general_id}-{outcome}-{own_troops}-{source_confidence}",
+        battle_id=battle_id or f"{general_id}-{outcome}-{own_troops}-{confidence}",
         general_id=general_id,
         battle_name="Test Battle",
         date="1900",
         era="Industrial",
         own_troop_strength=own_troops,
+        own_troop_strength_low=own_low,
+        own_troop_strength_high=own_high,
         enemy_troop_strength=enemy_troops,
+        enemy_troop_strength_low=enemy_low,
+        enemy_troop_strength_high=enemy_high,
         own_casualties=own_casualties,
+        own_casualties_low=own_cas_low,
+        own_casualties_high=own_cas_high,
         enemy_casualties=enemy_casualties,
+        enemy_casualties_low=enemy_cas_low,
+        enemy_casualties_high=enemy_cas_high,
         outcome=outcome,
         decisiveness=None,
-        objective_secured=False,
         opponent_general_id=None,
         resource_backing_tier=resource_backing_tier,
         tech_era_tier=3,
-        political_constraint_flag=False,
-        source_confidence=source_confidence,
         source_citation="test fixture",
         notes=None,
     )
@@ -54,7 +77,7 @@ def test_default_n_runs_meets_scope_minimum():
 
 
 def test_high_confidence_battle_is_never_perturbed():
-    battle = make_battle("alice", source_confidence="High")
+    battle = make_battle("alice", confidence="High")
     rng = np.random.default_rng(0)
 
     for _ in range(50):
@@ -63,8 +86,8 @@ def test_high_confidence_battle_is_never_perturbed():
 
 def test_high_confidence_only_general_has_near_zero_interval_width():
     battles = [
-        make_battle("alice", "Win", own_troops=10_000, enemy_troops=8_000, source_confidence="High"),
-        make_battle("alice", "Loss", own_troops=12_000, enemy_troops=15_000, source_confidence="High"),
+        make_battle("alice", "Win", own_troops=10_000, enemy_troops=8_000, confidence="High"),
+        make_battle("alice", "Loss", own_troops=12_000, enemy_troops=15_000, confidence="High"),
     ]
 
     dist = monte_carlo_uncertainty(battles, n_runs=300, seed=1)["alice"]
@@ -79,15 +102,15 @@ def test_high_confidence_only_general_has_near_zero_interval_width():
 
 def test_low_confidence_general_has_visibly_wider_interval_than_high_confidence_general():
     high_battles = [
-        make_battle("bob", "Win", own_troops=10_000, enemy_troops=8_000, source_confidence="High"),
-        make_battle("bob", "Loss", own_troops=12_000, enemy_troops=15_000, source_confidence="High"),
+        make_battle("bob", "Win", own_troops=10_000, enemy_troops=8_000, confidence="High"),
+        make_battle("bob", "Loss", own_troops=12_000, enemy_troops=15_000, confidence="High"),
     ]
     low_battles = [
         make_battle(
-            "carol", "Win", own_troops=10_000, enemy_troops=8_000, source_confidence="Low", battle_id="c1"
+            "carol", "Win", own_troops=10_000, enemy_troops=8_000, confidence="Low", battle_id="c1"
         ),
         make_battle(
-            "carol", "Loss", own_troops=12_000, enemy_troops=15_000, source_confidence="Low", battle_id="c2"
+            "carol", "Loss", own_troops=12_000, enemy_troops=15_000, confidence="Low", battle_id="c2"
         ),
     ]
 
@@ -110,7 +133,7 @@ def test_low_confidence_general_has_visibly_wider_interval_than_high_confidence_
 def test_resampled_values_stay_within_declared_noise_bounds():
     battle = make_battle(
         "dave", own_troops=10_000, enemy_troops=10_000, own_casualties=1_000,
-        enemy_casualties=1_000, source_confidence="Low",
+        enemy_casualties=1_000, confidence="Low",
     )
     rng = np.random.default_rng(3)
 
@@ -127,7 +150,7 @@ def test_troop_strength_floors_at_one_not_zero():
     # troop-strength floor documented in the module docstring; that would
     # blow up war_residual's enemy/own division.
     battle = make_battle(
-        "erin", own_troops=1, enemy_troops=1, source_confidence="Low",
+        "erin", own_troops=1, enemy_troops=1, confidence="Low",
     )
     rng = np.random.default_rng(4)
 
@@ -139,7 +162,7 @@ def test_troop_strength_floors_at_one_not_zero():
 
 def test_monte_carlo_uncertainty_runs_without_error_on_extreme_low_confidence_battle():
     battles = [
-        make_battle("erin", own_troops=1, enemy_troops=1, source_confidence="Low"),
+        make_battle("erin", own_troops=1, enemy_troops=1, confidence="Low"),
     ]
 
     dist = monte_carlo_uncertainty(battles, n_runs=200, seed=5)["erin"]
@@ -154,7 +177,7 @@ def test_metric_is_none_when_never_defined_across_any_run():
     battles = [
         make_battle(
             "frank", "Win", own_troops=10_000, enemy_troops=10_000,
-            resource_backing_tier=5, source_confidence="High",
+            resource_backing_tier=5, confidence="High",
         )
     ]
 
@@ -166,8 +189,8 @@ def test_metric_is_none_when_never_defined_across_any_run():
 
 def test_generals_kept_separate():
     battles = [
-        make_battle("alice", "Win", own_troops=10_000, source_confidence="Low", battle_id="a"),
-        make_battle("bob", "Loss", own_troops=5_000, source_confidence="Low", battle_id="b"),
+        make_battle("alice", "Win", own_troops=10_000, confidence="Low", battle_id="a"),
+        make_battle("bob", "Loss", own_troops=5_000, confidence="Low", battle_id="b"),
     ]
 
     result = monte_carlo_uncertainty(battles, n_runs=100, seed=7)
@@ -182,7 +205,7 @@ def test_general_absent_from_battles_is_absent_from_result():
 
 def test_deterministic_for_fixed_seed():
     battles = [
-        make_battle("alice", "Win", own_troops=10_000, source_confidence="Low"),
+        make_battle("alice", "Win", own_troops=10_000, confidence="Low"),
     ]
 
     first = monte_carlo_uncertainty(battles, n_runs=100, seed=42)
