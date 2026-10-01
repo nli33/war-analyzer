@@ -234,10 +234,56 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       `tests/test_scrape.py` cover keyword filtering, dedup, fragment-stripping, namespace
       exclusion, and both markup shapes. Full suite green (210 passed). No schema/extractor
       change, so `validate_data.py`/`eval_ingest.py` don't apply to this task.
-- [ ] C2. Deterministic infobox extractor with unit tests. Cover at least: ranges, "c."/"~", k/m
+- [x] C2. Deterministic infobox extractor with unit tests. Cover at least: ranges, "c."/"~", k/m
       suffixes, multi-segment fields, plainlist/ubl templates, killed/wounded/captured sums,
       per-nation breakdowns, qualitative words ("heavy", "light") become null. Add a test for each
       failure mode that A3 shows.
+      Pulling real wikitext (Waterloo/Borodino/Pharsalus, already cached from A3) showed the old
+      `parse_military_infobox` had a real truncation bug beyond anything A3's naive-parser numbers
+      exposed: its param splitter used a `(?=\n}}|\Z)` lookahead that stops at the *first* `}}` it
+      sees, which is wrong as soon as a field's value contains a nested template (a `{{efn|...}}`
+      multi-estimate citation, a `{{ubl|...}}` breakdown) whose own closing `}}` comes first —
+      confirmed it silently cut off Waterloo's `strength1` mid-citation. Fixed at the root: added
+      `war/wikitext.py` (brace-depth-aware `balanced_template_end`/`split_top_level`/
+      `strip_templates`) and rewrote `war/scrape.py`'s body/param splitting
+      (`find_infobox_body`/`split_infobox_params`) to track nesting depth instead of guessing from
+      the next literal `}}`. `parse_military_infobox`'s own output contract (dict of cleaned
+      strings) is unchanged and its existing tests pass unmodified, so this is a drop-in
+      correctness fix for every field, not just the numeric ones — `eval_ingest.py`'s naive-parser
+      baseline shifted slightly (coverage down ~2pts e.g. own_troop_strength 66%->64%; within-3x
+      shares essentially unchanged) now that it's reading correctly-bounded text instead of
+      occasionally over-scanned text that happened to contain a lucky number.
+      Built `war/infobox_numbers.py` for the real numeric parse (kept separate from
+      `parse_military_infobox`'s generic text cleanup, which collapses whitespace and deletes
+      templates in ways that lose exactly the structure numbers need). Pipeline per field: strip
+      citation/footnote wrapper templates whole (`efn`/`efn-lr`/`sfn`/`sfnp`/`sfnm`/`cite*`/
+      `#tag:ref`/etc. — recursing into kept templates so a citation nested inside a kept `{{ubl}}`
+      still gets removed), substitute small inline templates (`{{approximately|X}}`, `{{circa}}`,
+      `{{ndash}}`, `{{*}}`, `{{tree list}}`), unwrap `{{ubl|...}}`/`{{plainlist|...}}`/
+      `{{bulletedlist|...}}` into one item per line, drop equipment-only segments ("40+ cannon",
+      "20 ships" — not personnel), then decide per field: if the first parseable segment is a bare
+      number/range (optionally "Total: ..."), trust it alone — real infobox fields almost always
+      state the headline total first, with everything after it being an alternative citation, a
+      breakdown of that same total, or a different unit, never an addend; summing it in would
+      double-count. Only when the first parseable segment *isn't* bare (names a casualty category,
+      "500 killed"; a unit type, "7,000 infantry"; or a per-nation "<label>: <number>" line) is
+      there no stated total, and every parsed segment is summed — this is what makes
+      killed/wounded/captured and per-nation breakdowns work. Verified this rule against every real
+      example pulled (not just synthetic fixtures) before trusting it, including Waterloo's
+      genuinely brutal `strength2`/`casualties1` fields (nested `{{tree list}}`/`{{Ubl}}`/`{{efn}}`
+      several layers deep) — all four fields on all three battles came out matching the
+      well-known historical headline figures. One real bug caught this way, not from a synthetic
+      test: unwrapping a list template that directly abuts preceding text with no separator (e.g.
+      a headline number immediately followed by `{{Ubl|...}}`) was concatenating the two into one
+      unparseable segment; fixed by always prefixing an unwrapped list's items with `\n`.
+      41 new tests in `tests/test_infobox_numbers.py` (one or more per named failure mode, plus
+      integration tests against the real cached Waterloo/Borodino/Pharsalus text), 3 regression
+      tests in `tests/test_scrape.py` for the truncation fix, and 5 doctests (`war/wikitext.py`,
+      `war/infobox_numbers.py`); full suite 259 passed (210 + 49).
+      `scripts/validate_data.py` still passes (schema untouched). `scripts/eval_ingest.py` doesn't
+      score this module — it's wired in by C6/C7, not C2 — but was re-run anyway as a sanity check
+      per the note above. Not yet wired into any pipeline (same "built standalone, C3/C6 call it
+      later" pattern as `war/rules.py` from B2).
 - [ ] C3. Commanders and sides: parse infobox commander links per side, set `opponent_general_id`,
       and invert into general to battles. A general counts as personally commanding a battle if
       they are listed first on their side (document this rule and its known misses).

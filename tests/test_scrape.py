@@ -6,7 +6,13 @@ import urllib.error
 from io import BytesIO
 from unittest.mock import patch
 
-from war.scrape import extract_battle_titles, fetch_wikitext_batch, parse_military_infobox
+from war.scrape import (
+    extract_battle_titles,
+    fetch_wikitext_batch,
+    find_infobox_body,
+    parse_military_infobox,
+    split_infobox_params,
+)
 
 # Trimmed from enwiki's actual "Battle of Cannae" infobox as of research time, with
 # refs/templates left in deliberately to exercise the cleanup regexes.
@@ -56,6 +62,47 @@ def test_resolves_wikilinks_to_display_text():
 
 def test_no_infobox_returns_empty():
     assert parse_military_infobox("Just some plain article text, no template here.") == {}
+
+
+def test_split_infobox_params_does_not_truncate_on_nested_template_close():
+    # Regression test (C2): a value containing a nested multi-line {{efn|...}} citation has its
+    # own "}}" before the field's real end. The old single-regex param splitter
+    # (`(?=\n}}|\Z)` lookahead) stopped there, silently truncating the value. Depth-aware
+    # splitting must read all the way to the *next field*, not the first "}}" it sees.
+    wikitext = (
+        "{{Infobox military conflict\n"
+        "| strength1 = 72,000{{efn|\n* alt estimate one\n* alt estimate two\n}}\n"
+        "| strength2 = 86,400\n"
+        "}}"
+    )
+    body = find_infobox_body(wikitext)
+    pairs = dict(split_infobox_params(body))
+    assert pairs["strength1"] == "72,000{{efn|\n* alt estimate one\n* alt estimate two\n}}"
+    assert pairs["strength2"] == "86,400"
+
+
+def test_split_infobox_params_ignores_pipe_equals_inside_nested_template():
+    # A {{ubl|...}} breakdown's own lines can start with "|" and even contain "=" — these must
+    # not be mistaken for the infobox's own next "|name=" field boundary.
+    wikitext = (
+        "{{Infobox military conflict\n"
+        "| casualties1 = {{ubl\n|label = 500\n|other item\n}}\n"
+        "| casualties2 = Unknown\n"
+        "}}"
+    )
+    body = find_infobox_body(wikitext)
+    pairs = dict(split_infobox_params(body))
+    assert pairs["casualties1"] == "{{ubl\n|label = 500\n|other item\n}}"
+    assert pairs["casualties2"] == "Unknown"
+
+
+def test_find_infobox_body_stops_at_matching_close_not_rest_of_article():
+    wikitext = (
+        "{{Infobox military conflict\n| conflict = Battle of X\n}}\n"
+        "'''Battle of X''' was fought.\n|unrelated=should not be reachable\n}}"
+    )
+    body = find_infobox_body(wikitext)
+    assert "unrelated" not in body
 
 
 def _query_response(pages):

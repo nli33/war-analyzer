@@ -16,6 +16,8 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
+from war.wikitext import balanced_template_end
+
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = "war-analyzer-research-scraper/0.1 (draft-data only, not for direct citation)"
 
@@ -23,9 +25,10 @@ USER_AGENT = "war-analyzer-research-scraper/0.1 (draft-data only, not for direct
 # apihighlimits). 50 is the safe default for an unauthenticated throttled crawler.
 MAX_TITLES_PER_BATCH = 50
 
-# Matches `|param = value` pairs inside a wikitext template, value running until the next
-# `|param =` line or the template's closing `}}`.
-_PARAM_RE = re.compile(r"\|\s*(\w+)\s*=\s*(.*?)(?=\n\s*\|\s*\w+\s*=|\n}}|\Z)", re.DOTALL)
+# A `|name = value` boundary only counts at template-brace depth 0 (see split_infobox_params) —
+# otherwise a nested template whose own content happens to start a line with "|word=" (a
+# {{ubl|...}} breakdown item that includes an "=", say) could be mistaken for the next field.
+_PARAM_START_RE = re.compile(r"(?:^|\n)\s*\|\s*(\w+)\s*=")
 
 _INFOBOX_FIELDS = (
     "conflict",
@@ -90,23 +93,76 @@ def _strip_wikitext_markup(value: str) -> str:
     return value
 
 
+def find_infobox_body(wikitext: str) -> str | None:
+    """Return the inner content of the first `{{Infobox military conflict ...}}` template.
+
+    Bounded by brace-depth tracking (`balanced_template_end`), not a `}}` lookahead — the old
+    approach matched the *first* `}}` anywhere in the rest of the page, which is wrong whenever
+    a field's value contains a nested template (a `{{efn|...}}` citation, say) whose own closing
+    `}}` comes first. Returns None if no such infobox is found.
+    """
+    match = re.search(r"\{\{\s*Infobox military conflict", wikitext, re.IGNORECASE)
+    if not match:
+        return None
+    end = balanced_template_end(wikitext, match.start())
+    return wikitext[match.end() : end - 2]
+
+
+def split_infobox_params(body: str) -> list[tuple[str, str]]:
+    """Split an infobox template's inner body into (name, raw_value) pairs.
+
+    A `|name = value` boundary only starts a new param when it occurs at template-brace depth
+    0 — i.e. not inside a nested template the previous param's value contains. Real infobox
+    fields nest templates routinely (a multi-line `{{efn|...}}` citation, a `{{ubl|...}}`
+    breakdown whose own lines can themselves start with "|"), and depth-0-gating is what keeps
+    those from being mistaken for the next field's boundary.
+    """
+    depth = 0
+    i, n = 0, len(body)
+    boundaries: list[tuple[int, int, str]] = []  # (boundary_start, value_start, name)
+    while i < n:
+        two = body[i : i + 2]
+        if two == "{{":
+            depth += 1
+            i += 2
+            continue
+        if two == "}}":
+            depth = max(depth - 1, 0)
+            i += 2
+            continue
+        if depth == 0:
+            match = _PARAM_START_RE.match(body, i)
+            if match:
+                boundaries.append((match.start(), match.end(), match.group(1)))
+                i = match.end()
+                continue
+        i += 1
+
+    pairs = []
+    for idx, (_, value_start, name) in enumerate(boundaries):
+        value_end = boundaries[idx + 1][0] if idx + 1 < len(boundaries) else n
+        pairs.append((name, body[value_start:value_end].strip()))
+    return pairs
+
+
 def parse_military_infobox(wikitext: str) -> dict[str, str]:
-    """Extract known infobox fields from a page's raw wikitext.
+    """Extract known infobox fields from a page's raw wikitext, as cleaned text.
 
     Only looks inside the first `{{Infobox military conflict ...}}` template (case-insensitive,
     tolerates the "Infobox military conflict" / "military conflict" naming variants Wikipedia
     uses). Returns {} if no such infobox is found — callers should treat that as "no draft
     available, research this one by hand" rather than an error.
+
+    This generic text cleanup is a reasonable baseline for the text fields (date, place,
+    combatant/commander names), but is not the real numeric parser for strength/casualties —
+    see `war.infobox_numbers.extract_strength_and_casualties` for that.
     """
-    match = re.search(
-        r"\{\{\s*Infobox military conflict(.*)", wikitext, re.IGNORECASE | re.DOTALL
-    )
-    if not match:
+    body = find_infobox_body(wikitext)
+    if body is None:
         return {}
 
-    body = match.group(1)
     fields: dict[str, str] = {}
-    for name, raw_value in _PARAM_RE.findall(body):
+    for name, raw_value in split_infobox_params(body):
         if name not in _INFOBOX_FIELDS:
             continue
         cleaned = _strip_wikitext_markup(raw_value)
