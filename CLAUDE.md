@@ -18,6 +18,7 @@ goal-driven execution). The rules below are additions specific to this repo.
 - One line, no body required. Don't sweat grammar/capitalization perfection.
 - Don't reference internal milestone/phase names (M1, Phase 3, etc.) in the
   message — describe what changed, not where it sits in the plan.
+- No `Co-Authored-By` trailer or any other AI attribution in commit messages.
 - Keep commits small and incremental. No big-bang diffs — commit after each
   meaningful step (a metric implemented, a batch of battles added, a test
   passing), not once at the end of a phase.
