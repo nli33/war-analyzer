@@ -76,3 +76,12 @@ def test_bool_round_trip():
 def test_parse_bool_rejects_other_spellings():
     with pytest.raises(ValueError):
         schema.parse_bool("yes")
+
+
+@pytest.mark.parametrize(
+    "year, date_text",
+    [(1815, "1815"), (-52, "-0052"), (5, "0005"), (-331, "-0331")],
+)
+def test_format_year_round_trips_through_parse_year(year, date_text):
+    assert schema.format_year(year) == date_text
+    assert schema.parse_year(schema.format_year(year)) == year

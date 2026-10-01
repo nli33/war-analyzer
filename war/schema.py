@@ -329,3 +329,17 @@ def parse_bool(text: str) -> bool:
 def format_bool(value: bool) -> str:
     """Inverse of parse_bool, so writers and readers stay consistent."""
     return "true" if value else "false"
+
+
+def format_year(year: int) -> str:
+    """Inverse of parse_year: a signed year as the schema's zero-padded `YYYY` date string.
+
+    >>> format_year(1815)
+    '1815'
+    >>> format_year(-52)
+    '-0052'
+    >>> format_year(5)
+    '0005'
+    """
+    sign = "-" if year < 0 else ""
+    return f"{sign}{abs(year):04d}"

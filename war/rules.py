@@ -238,6 +238,135 @@ _ERA_BREAKPOINTS: tuple[tuple[int, str], ...] = (
 assert {era for _, era in _ERA_BREAKPOINTS} == set(ERAS)
 
 
+# --- outcome_from_result: which side won, from the infobox `result` text (C6) -----------
+#
+# Deriving `outcome` (Win/Loss/Draw) is a gap PROGRESS.md's plan left implicit: B2 built
+# `decisiveness_from_result` *assuming* `outcome` was already known, and C3 only assigned
+# commanders to sides, never results. But `outcome` is a required schema column, so C6's full
+# run needs a rule for it. Added here, in the same "rule that replaces hand judgment" spirit
+# as the other three in this module, and the same way: measured against real cached pages
+# before picking a design, not guessed (see dev log's C6 entry).
+#
+# The `result` field names a *nation/demonym* ("Confederate victory", "Pyrrhic Carthaginian
+# victory"), not "combatant1"/"combatant2" directly, so telling which side it means requires
+# matching that word against `combatant1`/`combatant2`'s own free text. Most of the time the
+# word is already a literal substring of one side's text ("Roman victory" / combatant1 "Roman
+# Republic"); the rest of the time it is a demonym built from a country name by an irregular
+# rule English doesn't apply predictably ("French" from "France", "British" from "Britain") -
+# `_DEMONYM_TO_COUNTRY` is a hand-built lookup for the common irregular cases seen in a sample
+# of this project's own battle universe, not a general solution. Measured on 8,433 real cached
+# pages before committing to this design: a plain substring/suffix-stem match alone resolved
+# ~46% of pages with a "victory"-shaped result and at least one combatant field; adding the
+# demonym table raised that to ~56%, a worthwhile gain for a bounded, one-time addition, but the
+# remainder (results naming a demonym this table doesn't have, or missing both combatant fields
+# outright) is accepted as unresolved - this returns (None, None) for those; the row is not
+# written to data/auto/battles.csv rather than guessing a winner.
+_DEMONYM_TO_COUNTRY: dict[str, str] = {
+    "french": "france", "british": "britain", "english": "england", "american": "america",
+    "spanish": "spain", "portuguese": "portugal", "italian": "italy", "german": "germany",
+    "russian": "russia", "chinese": "china", "japanese": "japan", "turkish": "turkey",
+    "dutch": "netherlands", "swedish": "sweden", "danish": "denmark", "polish": "poland",
+    "austrian": "austria", "hungarian": "hungary", "prussian": "prussia", "egyptian": "egypt",
+    "persian": "persia", "indian": "india", "korean": "korea", "vietnamese": "vietnam",
+    "mexican": "mexico", "canadian": "canada", "australian": "australia", "israeli": "israel",
+    "greek": "greece", "carthaginian": "carthage", "macedonian": "macedon", "gallic": "gaul",
+    "gaulish": "gaul", "norman": "normandy", "castilian": "castile", "aragonese": "aragon",
+    "venetian": "venice", "genoese": "genoa", "florentine": "florence", "neapolitan": "naples",
+    "sicilian": "sicily", "papal": "papacy", "burgundian": "burgundy", "bavarian": "bavaria",
+    "saxon": "saxony", "scottish": "scotland", "irish": "ireland", "welsh": "wales",
+    "norwegian": "norway", "finnish": "finland", "belgian": "belgium", "swiss": "switzerland",
+    "romanian": "romania", "bulgarian": "bulgaria", "serbian": "serbia", "croatian": "croatia",
+    "ethiopian": "ethiopia", "algerian": "algeria", "moroccan": "morocco", "iraqi": "iraq",
+    "iranian": "iran", "syrian": "syria", "pakistani": "pakistan", "bangladeshi": "bangladesh",
+    "thai": "thailand", "burmese": "burma", "filipino": "philippines", "indonesian": "indonesia",
+    "brazilian": "brazil", "argentine": "argentina", "chilean": "chile", "peruvian": "peru",
+    "colombian": "colombia", "cuban": "cuba", "haitian": "haiti",
+}
+
+_DEMONYM_SUFFIXES = ("ese", "ian", "ish", "an", "ic")
+
+# Generic polity-type nouns that don't identify *which* polity, stripped before token matching
+# so e.g. "Confederate States" matches on "confederate" and not also, uselessly, on "states".
+_POLITY_STOPWORDS = frozenset(
+    {
+        "the", "of", "and", "forces", "kingdom", "republic", "empire", "duchy", "colony",
+        "colonial", "dynasty", "confederacy", "government", "company", "states", "united",
+        "army", "state", "clan", "garrison", "rebels", "rebellion", "supported", "supporting",
+    }
+)
+
+_RESULT_VICTORY_RE = re.compile(r"^(.*?)\bvictory\b", re.IGNORECASE)
+_RESULT_DRAW_RE = re.compile(r"inconclusive|indecisive|stalemate|\bdraw\b|status quo", re.IGNORECASE)
+_WORD_RE = re.compile(r"[a-zA-Z]{3,}")
+
+
+def _demonym_stem(word: str) -> str:
+    word = word.lower()
+    if word in _DEMONYM_TO_COUNTRY:
+        return _DEMONYM_TO_COUNTRY[word]
+    for suffix in _DEMONYM_SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 3:
+            return word[: -len(suffix)]
+    return word
+
+
+def _combatant_tokens(text: str | None) -> set[str]:
+    if not text:
+        return set()
+    return {w for w in _WORD_RE.findall(text.lower()) if w not in _POLITY_STOPWORDS}
+
+
+def _side_match_score(adjective_words: list[str], combatant_text: str | None) -> int:
+    tokens = _combatant_tokens(combatant_text)
+    score = 0
+    for word in adjective_words:
+        stem = _demonym_stem(word)
+        for token in tokens:
+            token_stem = _demonym_stem(token)
+            if stem == token_stem or stem.startswith(token_stem) or token_stem.startswith(stem):
+                if min(len(stem), len(token_stem)) >= 3:
+                    score += 1
+                    break
+    return score
+
+
+def outcome_from_result(
+    result_text: str | None, combatant1_text: str | None, combatant2_text: str | None
+) -> tuple[str | None, str | None]:
+    """Derive (outcome_for_side1, outcome_for_side2) from the infobox `result`/`combatant1`/
+    `combatant2` fields. Each element is "Win"/"Loss"/"Draw", or `None` if the text does not let
+    this rule tell who won (see module notes above for exactly when that happens and why).
+
+    >>> outcome_from_result("Roman victory", "Roman Republic", "Gauls")
+    ('Win', 'Loss')
+    >>> outcome_from_result("Confederate victory", "United States", "Confederate States")
+    ('Loss', 'Win')
+    >>> outcome_from_result("Indecisive, stalemate", "France", "Great Britain")
+    ('Draw', 'Draw')
+    >>> outcome_from_result("Ceasefire agreed", "France", "Great Britain")
+    (None, None)
+    """
+    if not result_text:
+        return (None, None)
+    if _RESULT_DRAW_RE.search(result_text):
+        return ("Draw", "Draw")
+
+    match = _RESULT_VICTORY_RE.search(result_text)
+    if not match:
+        return (None, None)
+    adjective_words = [
+        w for w in _WORD_RE.findall(match.group(1).lower()) if w not in _POLITY_STOPWORDS
+    ]
+    if not adjective_words:
+        return (None, None)
+
+    score1 = _side_match_score(adjective_words, combatant1_text)
+    score2 = _side_match_score(adjective_words, combatant2_text)
+    if score1 == score2:
+        return (None, None)
+    return ("Win", "Loss") if score1 > score2 else ("Loss", "Win")
+
+
 def era_for_year(year: int) -> str:
     """Map a year to one of `war.schema.ERAS` via `_ERA_BREAKPOINTS`.
 

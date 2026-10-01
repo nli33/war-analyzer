@@ -388,7 +388,29 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       null (bare equipment counts, disputed multi-estimate prose, citation-year noise — genuinely
       not recoverable personnel numbers, not a shortfall). Full suite 336 passed (up from 315).
       `scripts/eval_ingest.py` doesn't apply (none of the 3 resolved battles are in the gold set).
-- [ ] C6. Full run into `data/auto/`. Validator passes. Row counts and null rates per field logged.
+- [x] C6. Full run into `data/auto/`. Validator passes. Row counts and null rates per field logged.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Found and fixed a real bug in
+      `war/commanders.py` first (same "caught by real pages, not synthetic fixtures" pattern as
+      C2/C4b): a leading flag-icon wikilink in a commander field (e.g. `[[File:Royal flag of
+      France.svg|22px]] [[Name]]`) was parsed as the commander itself, letting 14/277 (5%) of the
+      already-committed `data/auto/generals.csv` be fake "generals" that were actually image
+      titles; fixed and reran `scripts/build_roster_selection.py` (no re-crawl needed) ->
+      277 -> 296 real generals (up, since removing the fake primary commander let the real
+      second-listed one take the slot). Also filled an undocumented gap: nothing in Phase A/B/C
+      derived `outcome` (Win/Loss/Draw), a required column, from anything — added
+      `war.rules.outcome_from_result` (infobox `result` text matched against `combatant1`/
+      `combatant2`, with a hand-built irregular-demonym table), measured at ~56% resolution on
+      "victory"-shaped results against the real corpus; unresolved rows are dropped, not guessed.
+      Built `war/battles_dataset.py` (row assembly, combining C2/C3/C4b/B2's rules) and
+      `scripts/build_auto_battles.py` (CLI driver). Real run: 717 battle rows for 296 roster
+      generals (250 with >=1 row; the other 46 cleared C4b's strength-only bar but every one of
+      their qualifying battles was missing `combatant1`/`combatant2` text for `outcome_from_result`
+      to match against — traced via Philip II of Macedon, accepted rather than chased further).
+      Validator: 0 errors. Coverage: strength 91%/92% (own/enemy), casualties 79%/83%,
+      opponent_general_id 82%, decisiveness 58% (expected lower — Loss/Draw with no rout keyword
+      is `None` by design, not a gap). All comfortably above A3's naive-parser baseline. CDB90's
+      accuracy-override join (A4/A6) deliberately not wired here — deferred to only if C7 fails
+      and needs it. Full suite 360 passed (up from 336).
 - [ ] C7. Quality gate: score the pipeline against the gold set with `scripts/eval_ingest.py`
       using the thresholds from A6. If it fails, write why in Notes and stop (SCOPE.md "stop and
       flag"); do not move on to Phase D with bad data.

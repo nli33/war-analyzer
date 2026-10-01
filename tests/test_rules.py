@@ -4,6 +4,7 @@ from war.rules import (
     CincTable,
     decisiveness_from_result,
     load_cinc_table,
+    outcome_from_result,
     resource_backing_tier,
     tech_era_tier_for_year,
 )
@@ -91,3 +92,36 @@ def test_decisiveness_pyrrhic_and_strategic_only_apply_to_win():
 
 def test_decisiveness_plain_victory_defaults_to_tactical():
     assert decisiveness_from_result("American victory", "Win") == "Tactical"
+
+
+def test_outcome_from_result_no_text_is_unresolved():
+    assert outcome_from_result(None, "France", "Britain") == (None, None)
+
+
+def test_outcome_from_result_draw_keywords():
+    assert outcome_from_result("Inconclusive", "France", "Britain") == ("Draw", "Draw")
+    assert outcome_from_result("Stalemate", "France", "Britain") == ("Draw", "Draw")
+
+
+def test_outcome_from_result_direct_substring_match():
+    assert outcome_from_result("Roman victory", "Roman Republic", "Gauls") == ("Win", "Loss")
+
+
+def test_outcome_from_result_side2_wins_via_substring():
+    assert outcome_from_result("Confederate victory", "United States", "Confederate States") == (
+        "Loss",
+        "Win",
+    )
+
+
+def test_outcome_from_result_irregular_demonym_table():
+    assert outcome_from_result("French victory", "France", "Great Britain") == ("Win", "Loss")
+    assert outcome_from_result("British victory", "France", "Britain") == ("Loss", "Win")
+
+
+def test_outcome_from_result_unmatched_demonym_is_unresolved():
+    assert outcome_from_result("Zanzibari victory", "France", "Great Britain") == (None, None)
+
+
+def test_outcome_from_result_no_victory_word_is_unresolved():
+    assert outcome_from_result("Ceasefire agreed", "France", "Great Britain") == (None, None)
