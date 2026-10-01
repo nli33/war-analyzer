@@ -111,6 +111,26 @@ def test_parse_commander_field_empty_value():
     assert parse_commander_field("") == []
 
 
+def test_parse_commander_field_skips_leading_flag_icon_file_link():
+    # Real bug (C6 dev log): a national flag-icon template directly ahead of the name, with no
+    # separator the segment splitter breaks on, used to make the File: link itself the parsed
+    # "commander" (and a fake roster entry once the field's first-listed name is the icon).
+    refs = parse_commander_field(
+        "[[File:Royal flag of France.svg|22px]] [[Louis d'Armagnac|Duke of Nemours]]"
+    )
+    assert refs == [CommanderRef("Duke of Nemours", "Louis d'Armagnac", "louis-d-armagnac")]
+
+
+def test_parse_commander_field_flag_icon_ahead_of_plain_name():
+    refs = parse_commander_field("[[File:Royal flag of France.svg|22px]] Chandieu")
+    assert refs == [CommanderRef("Chandieu", wikipedia_title=None, general_id=None)]
+
+
+def test_parse_commander_field_pure_flag_icon_segment_is_not_a_commander():
+    refs = parse_commander_field("[[File:Royal flag of France.svg|22px]]")
+    assert refs == []
+
+
 def test_extract_commander_fields_no_infobox_returns_empty_dict():
     assert extract_commander_fields("no infobox here") == {}
 

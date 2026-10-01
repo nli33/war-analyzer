@@ -150,16 +150,22 @@ def _ref_from_segment(segment: str) -> CommanderRef | None:
     segment = segment.strip().lstrip("*").strip()
     if not segment:
         return None
-    match = _WIKILINK_RE.search(segment)
-    if match:
+    # A real example this caught: a national flag-icon template directly ahead of the name,
+    # `[[File:Royal flag of France.svg|22px]] [[Duke of Nemours|...]]`, with no separator this
+    # module's segment splitter (newline/`;`/`,`/" and ") would ever break on — both wikilinks
+    # land in the same segment. `_WIKILINK_RE.search` alone would grab the *first* one, the
+    # image, and misread it as a commander; skip every namespaced link (File:/Image:/Category:/
+    # a language-interwiki prefix — none of those is a person, same exclusion
+    # war.scrape.extract_battle_titles already applies to list-page wikilinks) to find the real
+    # name link, if any, instead of stopping at the first wikilink found.
+    for match in _WIKILINK_RE.finditer(segment):
         title = match.group(1).split("#", 1)[0].strip()
-        if not title:
-            return None
-        display = (match.group(2) or title).strip()
-        return CommanderRef(
-            display_name=display, wikipedia_title=title, general_id=general_id_from_title(title)
-        )
-    plain = segment.strip("[]").strip()
+        if title and ":" not in title:
+            display = (match.group(2) or title).strip()
+            return CommanderRef(
+                display_name=display, wikipedia_title=title, general_id=general_id_from_title(title)
+            )
+    plain = re.sub(r"\[\[[^\]]*\]\]", "", segment).strip("[]").strip()
     if not plain:
         return None
     return CommanderRef(display_name=plain, wikipedia_title=None, general_id=None)
