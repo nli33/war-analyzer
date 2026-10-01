@@ -35,6 +35,18 @@ database can grow to hundreds of generals, then re-run the rankings and visuals 
   points.
 - **Run limits for C5** (change only with a note): at most 3,000 rows and 60 CLI calls in total.
 
+### Archiving datasets between experiments
+
+When you try a different source, floor, parser version, or roster rule and it replaces the
+current dataset, do not overwrite or delete the old one. Move it to
+`data/archive/<YYYY-MM-DD>-<short-label>/` (for example `2026-10-02-wikipedia-api-floor75`).
+Each archive directory gets a `README.md` saying what it is: the source and method, the floor and
+settings used, row and general counts, its `eval_ingest.py` scores against the gold set, and why it
+was replaced. Add one line per archive to `data/archive/INDEX.md` (path, date, one-sentence
+purpose), and record the reasoning in the dev log notes. Keep the gold set in `data/` untouched.
+Large raw caches stay in `data/raw/` (gitignored) and are not archived; archive only the
+generated CSVs.
+
 ### How much to ingest
 
 The agents decide the methods, then ingest as much as the pipeline can do within these
