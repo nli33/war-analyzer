@@ -182,9 +182,24 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       (`data/battles.csv`, 177 rows) migrated mechanically: 3 columns dropped, 8 empty columns added,
       no values re-researched. `validate_all()` returns `[]`; full suite (178 tests across all of
       `tests/` and `war/`, including every file that constructs a `Battle` by hand) green.
-- [ ] B2. Rules in place of hand judgment: `tech_era_tier` from a date lookup table,
+- [x] B2. Rules in place of hand judgment: `tech_era_tier` from a date lookup table,
       `resource_backing_tier` from COW CINC after 1816 and a coarse per-era default before that
       (only if A4 shows CINC is cheap to load), `decisiveness` from the infobox result text.
+      Added `war/rules.py` (standalone, not yet wired into any pipeline — C2/C6 are what call
+      these once they exist) with three functions plus tests in `tests/test_rules.py`:
+      `tech_era_tier_for_year` (plain 5-step year lookup, boundaries at 1400/1700/1860/1914);
+      `resource_backing_tier` (COW CINC quintile-rank-within-year when year>=1816 and a
+      country/table are given, else a per-era default); `decisiveness_from_result` (regex over
+      the infobox `result` string, keyed off the already-known `outcome` — see module docstring
+      for the keyword table). Re-downloaded COW CINC v7 (A4's source) since the A4 clone wasn't
+      persisted; added `scripts/fetch_cow_cinc.py` to make `data/raw/cow_cinc/` reproducible
+      since `data/raw/` is gitignored. Gold set (`data/battles.csv`) untouched, per A6's decision
+      that it's the benchmark, not a target to regenerate. Full suite + doctests green (192
+      passed); validator still passes (schema unchanged, no new columns). Decisions recorded in
+      `~/notes/war-analyzer/ingestion.md`: the tech-era year breakpoints, the per-era
+      resource-backing defaults, and the decisiveness keyword mapping are all judgment calls with
+      no single authoritative source — written down there with the reasoning so they can be
+      revisited.
 - [ ] B3. Metrics handle missing values (define the policy: drop the row, impute, or fall back per
       metric) and Monte Carlo uses source ranges instead of confidence tags. Tests green. Log the
       gold-set ranking before versus after the schema change.
