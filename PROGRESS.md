@@ -82,8 +82,15 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
 
 ## Phase A: Decide the method (measure, then write down the choice)
 
-- [ ] A1. Study `ethanarsht/military_rankings`: how it builds the battle list, extracts infobox
+- [x] A1. Study `ethanarsht/military_rankings`: how it builds the battle list, extracts infobox
       fields, and codes results. Record what to reuse and what to avoid, plus its license.
+      Findings in `~/notes/war-analyzer/ingestion.md`: no root LICENSE (code is all-rights-
+      reserved, don't copy verbatim, techniques aren't copyrightable so reuse ideas only); reuse
+      its battle-list-page structure (7 era pages, bullets vs wikitables) and infobox field
+      names/positions; do NOT reuse its result coding or strength/casualty parsing — both were
+      hand-labeled/manual there, not automated, so ours has to be real code (C2/C3); avoid its
+      per-commander-page HTTP fetch for canonicalization, use the anchor's own `title` attribute
+      instead.
 - [ ] A2. Pick the Wikipedia access method by measuring: throttled API versus enwiki dump versus
       DBpedia. Compare time for 1,000 pages, completeness of infobox fields, and setup effort.
       Reuse or extend `war/scrape.py` where it fits.
