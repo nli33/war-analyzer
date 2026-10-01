@@ -58,6 +58,118 @@ LIST_OF_BATTLES_PAGES = (
     "List of battles in the 21st century",
 )
 
+# C4a seed roster: Wikipedia category pages whose members are (mostly) general biography
+# pages. Hand-probed from the category hierarchy rather than guessed — see
+# ~/notes/war-analyzer/ingestion.md's C4a entry for the probe transcript. Three groups:
+#
+# - "Category:Generals by century" leaf categories (1st-4th c. BC through 21st century): the
+#   literal "by era" source PROGRESS.md's C4a line asks for. Turned out sparse on its own
+#   (~200 members total across all 25 — most Wikipedia general bios aren't century-tagged),
+#   kept anyway since it catches names the war/nationality categories below miss (a polity
+#   with no modern-nation-state category, e.g. a Khwarezmian or early-medieval commander).
+# - "Category:Generals by war" and "Category:Military leaders by war" leaf categories: the
+#   two hubs overlap in era but not membership (a "Generals of X" tag and a "Military leaders
+#   of X" tag on the same war aren't applied to the same pages 1:1), so both are kept rather
+#   than picking one. Napoleonic Wars commanders live one hub-level deeper, by nationality.
+# - "Category:Generals by nationality" leaf categories: only a curated subset of major
+#   historical military powers, not all ~190 countries in the hub — the hub itself is mostly
+#   small modern countries with few or no pre-20th-century battles in this project's scope,
+#   and crawling all of them would dominate the seed list with names C4b's battle-match filter
+#   would just drop anyway.
+GENERAL_SEED_CATEGORIES = (
+    # By century (ancient/medieval eras with no modern-nationality equivalent)
+    "Category:4th-century BC generals",
+    "Category:3rd-century BC generals",
+    "Category:2nd-century BC generals",
+    "Category:1st-century BC generals",
+    "Category:1st-century generals",
+    "Category:2nd-century generals",
+    "Category:3rd-century generals",
+    "Category:4th-century generals",
+    "Category:5th-century generals",
+    "Category:6th-century generals",
+    "Category:7th-century generals",
+    "Category:8th-century generals",
+    "Category:9th-century generals",
+    "Category:10th-century generals",
+    "Category:11th-century generals",
+    "Category:12th-century generals",
+    "Category:13th-century generals",
+    "Category:14th-century generals",
+    "Category:15th-century generals",
+    "Category:16th-century generals",
+    "Category:17th-century generals",
+    "Category:18th-century generals",
+    "Category:19th-century generals",
+    "Category:20th-century generals",
+    "Category:21st-century generals",
+    # Flat ancient/medieval categories (denser than their by-century counterparts)
+    "Category:Ancient Roman generals",
+    "Category:Ancient Greek generals",
+    "Category:Byzantine generals",
+    # By war ("Category:Generals by war" leaves)
+    "Category:Generals of the American Civil War",
+    "Category:Generals in the American Revolution",
+    "Category:Generals of the Bangladesh Liberation War",
+    "Category:Generals in the Mexican War of Independence",
+    "Category:Generals of the Colombian War of Independence",
+    "Category:Generals of the India–Pakistan war of 1965",
+    "Category:Generals of the India–Pakistan war of 1971",
+    "Category:Generals of the January Uprising",
+    "Category:Generals of the Kościuszko Uprising",
+    "Category:Generals of the November Uprising",
+    "Category:Generals of World War I",
+    "Category:Generals of World War II",
+    "Category:Confederate States Army generals",
+    # By war ("Category:Military leaders by war" leaves, not duplicating the above)
+    "Category:First Punic War commanders",
+    "Category:Second Punic War commanders",
+    "Category:Military leaders of the French Revolutionary Wars",
+    "Category:Military leaders of the Gulf War",
+    "Category:Military leaders of the India–Pakistan war of 1965",
+    "Category:Military leaders of the India–Pakistan war of 1971",
+    "Category:Military leaders of the Iraq War",
+    "Category:Military leaders of the Italian Wars",
+    "Category:Military leaders of the New Zealand Wars",
+    "Category:Military leaders of the War of the Spanish Succession",
+    "Category:Military leaders of World War I",
+    "Category:Military leaders of World War II",
+    # Napoleonic Wars commanders, by nationality (one hub-level below "by war")
+    "Category:Austrian Empire commanders of the Napoleonic Wars",
+    "Category:British commanders of the Napoleonic Wars",
+    "Category:Danish military commanders of the Napoleonic Wars",
+    "Category:Dutch military commanders of the Napoleonic Wars",
+    "Category:French commanders of the Napoleonic Wars",
+    "Category:German commanders of the Napoleonic Wars",
+    "Category:Haitian commanders of the Napoleonic Wars",
+    "Category:Italian commanders of the Napoleonic Wars",
+    "Category:Polish commanders of the Napoleonic Wars",
+    "Category:Portuguese military commanders of the Napoleonic Wars",
+    "Category:Russian commanders of the Napoleonic Wars",
+    "Category:Spanish commanders of the Napoleonic Wars",
+    "Category:Swedish military commanders of the Napoleonic Wars",
+    # By nationality (curated: major historical military powers only, see docstring above)
+    "Category:American generals",
+    "Category:British generals",
+    "Category:French generals",
+    "Category:German generals",
+    "Category:Russian generals",
+    "Category:Spanish generals",
+    "Category:Turkish generals",
+    "Category:Polish generals",
+    "Category:Swedish generals",
+    "Category:Iranian generals",
+    "Category:Japanese generals",
+    "Category:Israeli generals",
+    "Category:Indian generals",
+    "Category:North Korean generals",
+    "Category:South Korean generals",
+    "Category:Egyptian generals",
+    "Category:Italian generals",
+    "Category:Chinese generals",
+    "Category:Austrian generals",
+)
+
 # Keyword filter from A1's study of ethanarsht/military_rankings: a wikilink target containing
 # one of these words is treated as a candidate battle page. This is recall-oriented, not
 # precision — it also catches non-battle links (e.g. a "see also" link to "List of sieges",
@@ -282,6 +394,67 @@ def _fetch_wikitext_batch_once(titles: list[str], max_retries: int) -> dict[str,
             continue
         out[page["title"]] = content
     return out
+
+
+def fetch_category_members(
+    category_title: str,
+    page_limit: int = 500,
+    delay_seconds: float = 1.5,
+    max_retries: int = 5,
+) -> list[str]:
+    """Return the article (namespace-0) page titles directly in a Wikipedia category.
+
+    Network calls, one `list=categorymembers` request per up-to-500-member page (MediaWiki's
+    anonymous page size cap), following `cmcontinue` until exhausted. Same HTTP-429
+    exponential-backoff pattern as `_fetch_wikitext_batch_once` — this project's probing found
+    categorymembers hits the same anonymous rate limit `action=query&prop=revisions` does.
+    Subcategories (namespace 14) and other non-article members are excluded via `cmnamespace=0`
+    rather than filtered after the fact, since the API does that server-side for free.
+    `page_limit` caps the number of *paginated requests*, not members — left high (effectively
+    unbounded for any category this project crawls) rather than silently truncating a category's
+    recall; lower it only for a bounded test.
+    """
+    titles: list[str] = []
+    cmcontinue: str | None = None
+    for _ in range(page_limit):
+        params = {
+            "action": "query",
+            "list": "categorymembers",
+            "cmtitle": category_title,
+            "cmlimit": "500",
+            "cmnamespace": "0",
+            "format": "json",
+            "formatversion": "2",
+        }
+        if cmcontinue:
+            params["cmcontinue"] = cmcontinue
+        query = "&".join(f"{k}={urllib.parse.quote(v)}" for k, v in params.items())
+        request = urllib.request.Request(
+            f"{WIKIPEDIA_API}?{query}", headers={"User-Agent": USER_AGENT}
+        )
+
+        backoff = 10.0
+        for attempt in range(max_retries):
+            try:
+                with urllib.request.urlopen(request, timeout=15) as response:
+                    payload = json.loads(response.read())
+                break
+            except urllib.error.HTTPError as exc:
+                if exc.code == 429 and attempt < max_retries - 1:
+                    time.sleep(backoff)
+                    backoff *= 2
+                    continue
+                raise
+
+        titles.extend(
+            member["title"] for member in payload.get("query", {}).get("categorymembers", [])
+        )
+        next_continue = payload.get("continue", {}).get("cmcontinue")
+        if not next_continue:
+            break
+        cmcontinue = next_continue
+        time.sleep(delay_seconds)
+    return titles
 
 
 def draft_for_battle(title: str) -> InfoboxDraft:

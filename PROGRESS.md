@@ -318,11 +318,25 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       suite 289 passed (259 + 30). `scripts/validate_data.py` still passes (schema untouched).
       `scripts/eval_ingest.py` doesn't apply — C3 doesn't touch strength/casualty extraction or
       the schema, only commander/side parsing.
-- [ ] C4a. Seed roster: build a candidate list of a few hundred generals from online "top X
+- [x] C4a. Seed roster: build a candidate list of a few hundred generals from online "top X
       generals in history" lists and similar published rankings, plus Wikipedia's lists of
       commanders and generals by era. Cache the source pages, record which list each name came
       from, and merge duplicates to Wikipedia page titles. This is a one-time scrape and a merge
       script, not research per general.
+      Dropped the "online top X generals" published-rankings half: the only fetch tool available
+      for arbitrary external pages (WebFetch) runs an LLM over the content, which the ingestion
+      rules reserve for C5 alone, and bespoke per-site HTML scraping isn't a cheap deterministic
+      join. Built the Wikipedia-categories half instead: `war.scrape.fetch_category_members` +
+      `GENERAL_SEED_CATEGORIES` (85 hand-probed category pages — by century, by war, by
+      nationality, see dev log) and `scripts/build_general_seed_roster.py`, cached/resumable
+      like C1. Real run: 85/85 categories, 3,730 raw candidates, 23 "List of ..." navigational
+      pages filtered (same shape as C1's "List of sieges"), 3,707 final candidates ->
+      `data/raw/general_seed_roster.csv`. Read C4a's "a few hundred" as the eventual C4b-filtered
+      roster size, not this raw seed pool — seeded wide on purpose so C4b's battle-match filter
+      has enough candidates to reach PROGRESS.md's 200-400-general target without undershooting.
+      4 new mocked tests (`tests/test_scrape.py`); full suite 293 passed (289 + 4).
+      `scripts/validate_data.py` still passes (schema/`data/generals.csv` untouched — this task's
+      output is a gitignored raw candidate list only). `scripts/eval_ingest.py` doesn't apply.
 - [ ] C4b. Roster selection: for each seed, count battles from C3 that have usable strength
       figures, and keep generals with at least N such battles (pick N, record why). Opponents who
       appear in kept battles but are not on the seed list may join if they clear the same bar.

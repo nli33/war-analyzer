@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from war.scrape import (
     extract_battle_titles,
+    fetch_category_members,
     fetch_wikitext_batch,
     find_infobox_body,
     parse_military_infobox,
@@ -195,3 +196,56 @@ def test_fetch_wikitext_batch_retries_on_429_then_succeeds():
     assert result == {"A": "x"}
     assert mock_urlopen.call_count == 2
     mock_sleep.assert_called_once()  # backoff before the retry, not the politeness delay
+
+
+def _categorymembers_response(titles, cmcontinue=None):
+    payload = {"query": {"categorymembers": [{"title": t} for t in titles]}}
+    if cmcontinue:
+        payload["continue"] = {"cmcontinue": cmcontinue}
+    return BytesIO(json.dumps(payload).encode())
+
+
+def test_fetch_category_members_single_page():
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.__enter__.return_value = _categorymembers_response(
+            ["Julius Caesar", "Pompey"]
+        )
+        result = fetch_category_members("Category:Ancient Roman generals")
+
+    assert result == ["Julius Caesar", "Pompey"]
+    assert mock_urlopen.call_count == 1
+
+
+def test_fetch_category_members_follows_cmcontinue():
+    with patch("urllib.request.urlopen") as mock_urlopen, patch("time.sleep") as mock_sleep:
+        mock_urlopen.return_value.__enter__.side_effect = [
+            _categorymembers_response(["A"], cmcontinue="page2|0"),
+            _categorymembers_response(["B"]),
+        ]
+        result = fetch_category_members("Category:X", delay_seconds=2.0)
+
+    assert result == ["A", "B"]
+    assert mock_urlopen.call_count == 2
+    mock_sleep.assert_called_once_with(2.0)
+
+
+def test_fetch_category_members_retries_on_429_then_succeeds():
+    error = urllib.error.HTTPError("url", 429, "Too Many Requests", {}, None)
+    with patch("urllib.request.urlopen") as mock_urlopen, patch("time.sleep") as mock_sleep:
+        mock_urlopen.return_value.__enter__.side_effect = [
+            error,
+            _categorymembers_response(["A"]),
+        ]
+        result = fetch_category_members("Category:X", max_retries=3)
+
+    assert result == ["A"]
+    assert mock_urlopen.call_count == 2
+    mock_sleep.assert_called_once()
+
+
+def test_fetch_category_members_empty_category():
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.__enter__.return_value = _categorymembers_response([])
+        result = fetch_category_members("Category:Does not exist")
+
+    assert result == []
