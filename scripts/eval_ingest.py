@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
-"""A3: score a Wikipedia-infobox extractor against the 177-row gold set in data/battles.csv.
+"""C7: score the real pipeline extractor against the 177-row gold set in data/battles.csv.
 
     python scripts/eval_ingest.py
 
-For each gold battle, fetches the Wikipedia page named by `battle_name`, pulls the military
-infobox (`war.scrape.parse_military_infobox`), and runs a NAIVE numeric parser (defined in this
-file, not war/scrape.py) over strength1/strength2/casualties1/casualties2. The naive parser is a
-throwaway baseline, not the production extractor: it takes the first number in each field and
-does not handle ranges, per-nation breakdowns, or unit words beyond k/m. Its whole job is to find
-where it breaks so C2 knows what the real parser has to handle (PROGRESS.md: "Add a test for each
-failure mode that A3 shows").
-
-Side matching (own vs. enemy <-> strength1/strength2) is not solved yet either — that is C3's
-job (commander names -> sides). This script picks whichever of the two possible orientations
-minimizes total log-error per battle, so the accuracy numbers below are an optimistic upper
-bound, not a claim about the real pipeline's eventual accuracy.
+For each gold battle, fetches the Wikipedia page named by `battle_name` and runs the actual
+production modules: `war.commanders.extract_commander_fields`/`primary_commander` (C3) to find
+which infobox side (1 or 2) the gold row's `general_id` personally commanded, and
+`war.infobox_numbers.extract_strength_and_casualties` (C2) to parse that side's numbers. A gold
+row with no commander-side match (slug mismatch, missing/unlinked commander field, etc.) is
+"not covered" for every field, the same way a missing Wikipedia page is — both are real pipeline
+misses, not scoring artifacts. This replaces A3's naive "first number, oracle-picked
+orientation" baseline (see `notes/dev-log.md`'s A3 entry for that baseline's numbers) now that
+C2/C3 are real code instead of a stand-in.
 
 Reports, per field, coverage (share of the 177 gold rows where a number was extracted) and the
 share within 1.5x/2x/3x of the gold value, using log error: a field counts as "within Nx" iff
@@ -27,56 +24,47 @@ don't re-hit the network. Delete that file (or pass --no-cache) to force a fresh
 import argparse
 import json
 import math
-import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from war.commanders import extract_commander_fields, primary_commander  # noqa: E402
+from war.infobox_numbers import extract_strength_and_casualties  # noqa: E402
 from war.records import load_battles  # noqa: E402
-from war.scrape import fetch_wikitext_batch, parse_military_infobox  # noqa: E402
+from war.scrape import fetch_wikitext_batch  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CACHE_PATH = REPO_ROOT / "data" / "raw" / "eval_ingest_cache.json"
 
 FACTORS = (1.5, 2.0, 3.0)
 
-# Fields this script scores, and which raw infobox field feeds each orientation (1 = combatant1
-# side, 2 = combatant2 side).
 STRENGTH_FIELDS = ("own_troop_strength", "enemy_troop_strength")
 CASUALTY_FIELDS = ("own_casualties", "enemy_casualties")
 ALL_FIELDS = STRENGTH_FIELDS + CASUALTY_FIELDS
 
-_BRACKET_RE = re.compile(r"\[[^\]]*\]")
-_NUMBER_RE = re.compile(
-    r"(?:c\.|ca\.|~|about\s+)?\s*([\d,]*\d(?:\.\d+)?)\s*(million|mil\b|m\b|thousand|k\b)?",
-    re.IGNORECASE,
-)
-_UNIT_MULTIPLIER = {
-    "k": 1_000,
-    "thousand": 1_000,
-    "m": 1_000_000,
-    "mil": 1_000_000,
-    "million": 1_000_000,
+# The gold set's `general_id` predates this pipeline and was hand-chosen per general (B1/A6),
+# not derived from a Wikipedia title the way the auto pipeline's roster ids always are (C4b's
+# `general_id_from_title`). For these 5 gold generals, infobox commander wikilinks resolve to a
+# different (but same-person) slug than the gold id — e.g. Hannibal's own Wikipedia page is
+# titled "Hannibal", not "Hannibal Barca". Without this map, the eval would score a real same-
+# person match as a miss purely because of a naming convention gap that doesn't exist in the
+# auto pipeline (where the roster id and the infobox-derived id always come from the same
+# title). Confirmed by hand against every mismatch this produced (see dev log's C7 entry) that
+# every id listed here is the *same individual*, not a co-commander or opponent.
+GOLD_ID_ALIASES: dict[str, set[str]] = {
+    "napoleon-bonaparte": {"napoleon", "napoleon-i"},
+    "frederick-the-great": {"frederick-ii-of-prussia"},
+    "genghis-khan": {"temujin"},
+    "hannibal-barca": {"hannibal"},
+    "wellington": {"arthur-wellesley-1st-duke-of-wellington"},
 }
 
 
-def naive_extract_number(text: str) -> int | None:
-    """Best-effort "first number" baseline. See module docstring: not the real extractor.
-
-    Returns None for qualitative-only text ("Heavy", "Unknown", "") with no digits at all.
-    """
-    if not text:
-        return None
-    cleaned = _BRACKET_RE.sub("", text)
-    match = _NUMBER_RE.search(cleaned)
-    if not match:
-        return None
-    digits, unit = match.group(1), match.group(2)
-    value = float(digits.replace(",", ""))
-    if unit:
-        value *= _UNIT_MULTIPLIER[unit.lower()]
-    return round(value)
+def _matches_gold_id(extracted_id: str, gold_general_id: str) -> bool:
+    return extracted_id == gold_general_id or extracted_id in GOLD_ID_ALIASES.get(
+        gold_general_id, set()
+    )
 
 
 def _load_cache() -> dict[str, str]:
@@ -91,52 +79,56 @@ def _save_cache(cache: dict[str, str]) -> None:
 
 
 def fetch_all_wikitext(titles: list[str], use_cache: bool = True) -> dict[str, str]:
-    """Fetch wikitext for every title, filling in from cache first. Network calls for misses."""
+    """Fetch wikitext for every title, filling in from cache first. Network calls for misses.
+
+    `use_cache=False` ("--no-cache") means start from an empty cache (force a fresh fetch for
+    every title), not "never touch disk" — any newly-fetched wikitext is still written back, as
+    the CLI help text ("ignore/overwrite the wikitext cache") promises. Skipping the save here
+    silently discarded a fresh fetch's results once already caught this exact way (C7): the
+    on-disk cache kept serving pre-bugfix wikitext indefinitely, even right after a `--no-cache`
+    run that fetched the corrected content.
+    """
     cache = _load_cache() if use_cache else {}
     missing = [title for title in titles if title not in cache]
     if missing:
         fetched = fetch_wikitext_batch(missing)
         cache.update(fetched)
-        if use_cache:
-            _save_cache(cache)
+        _save_cache(cache)
     return cache
 
 
-def _orientation_error(
-    gold_own: int, gold_enemy: int, side1: int | None, side2: int | None
-) -> float:
-    """Total abs log-error for assigning side1->own, side2->enemy. inf if nothing comparable."""
-    total = 0.0
-    comparable = False
-    for gold_value, extracted in ((gold_own, side1), (gold_enemy, side2)):
-        if extracted is None or extracted <= 0 or gold_value <= 0:
-            continue
-        total += abs(math.log(extracted / gold_value))
-        comparable = True
-    return total if comparable else math.inf
+def find_own_side(wikitext: str, gold_general_id: str) -> str | None:
+    """Which infobox side ("1" or "2") this gold general personally commanded (C3's rule),
+    or None if neither side's primary commander's `general_id` matches (via `GOLD_ID_ALIASES`)
+    — a real pipeline miss (unlinked/missing commander field, a command-attribution granularity
+    the first-listed-commander rule can't see), not fetched/skipped here."""
+    commander_fields = extract_commander_fields(wikitext)
+    for side in ("1", "2"):
+        primary = primary_commander(commander_fields.get(f"commander{side}", []))
+        if primary is not None and _matches_gold_id(primary.general_id, gold_general_id):
+            return side
+    return None
 
 
-def extract_for_battle(fields: dict[str, str], gold_own_strength: int, gold_enemy_strength: int):
-    """Return {field_name: extracted_value_or_None} for one battle's four scored fields.
+def extract_for_battle(wikitext: str, gold_general_id: str) -> dict[str, int | None]:
+    """Return {field_name: extracted_value_or_None} for one battle's four scored fields, using
+    the real C2/C3 extractor (no gold-value peeking to pick an orientation)."""
+    own_side = find_own_side(wikitext, gold_general_id)
+    if own_side is None:
+        return {field: None for field in ALL_FIELDS}
+    enemy_side = "2" if own_side == "1" else "1"
 
-    Orientation (which raw side is "own") is chosen once per battle from the strength fields
-    (the only pair both sides of the gold set always have), then reused for casualties.
-    """
-    s1 = naive_extract_number(fields.get("strength1", ""))
-    s2 = naive_extract_number(fields.get("strength2", ""))
-    c1 = naive_extract_number(fields.get("casualties1", ""))
-    c2 = naive_extract_number(fields.get("casualties2", ""))
-
-    forward_error = _orientation_error(gold_own_strength, gold_enemy_strength, s1, s2)
-    reverse_error = _orientation_error(gold_own_strength, gold_enemy_strength, s2, s1)
-    own_strength, enemy_strength = (s1, s2) if forward_error <= reverse_error else (s2, s1)
-    own_casualties, enemy_casualties = (c1, c2) if forward_error <= reverse_error else (c2, c1)
+    numbers = extract_strength_and_casualties(wikitext)
+    own_strength = numbers.get(f"strength{own_side}")
+    enemy_strength = numbers.get(f"strength{enemy_side}")
+    own_casualties = numbers.get(f"casualties{own_side}")
+    enemy_casualties = numbers.get(f"casualties{enemy_side}")
 
     return {
-        "own_troop_strength": own_strength,
-        "enemy_troop_strength": enemy_strength,
-        "own_casualties": own_casualties,
-        "enemy_casualties": enemy_casualties,
+        "own_troop_strength": own_strength.point if own_strength else None,
+        "enemy_troop_strength": enemy_strength.point if enemy_strength else None,
+        "own_casualties": own_casualties.point if own_casualties else None,
+        "enemy_casualties": enemy_casualties.point if enemy_casualties else None,
     }
 
 
@@ -177,10 +169,7 @@ def run_eval(limit: int | None = None, use_cache: bool = True) -> dict:
                 per_field_pairs[field].append((getattr(battle, field), None))
             continue
         pages_found += 1
-        fields = parse_military_infobox(wikitext)
-        extracted = extract_for_battle(
-            fields, battle.own_troop_strength, battle.enemy_troop_strength
-        )
+        extracted = extract_for_battle(wikitext, battle.general_id)
         for field in ALL_FIELDS:
             per_field_pairs[field].append((getattr(battle, field), extracted[field]))
 

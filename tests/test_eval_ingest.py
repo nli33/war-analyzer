@@ -1,68 +1,66 @@
-"""Tests for scripts/eval_ingest.py's naive numeric parser and scoring logic (A3)."""
+"""Tests for scripts/eval_ingest.py's real-pipeline scoring logic (C7)."""
 
 import math
 
-from scripts.eval_ingest import (
-    extract_for_battle,
-    naive_extract_number,
-    score_field,
-)
+from scripts.eval_ingest import extract_for_battle, find_own_side, score_field
 
 
-def test_plain_number_with_commas():
-    assert naive_extract_number("50,000") == 50000
+def _wikitext(commander1, commander2, strength1="", strength2="", casualties1="", casualties2=""):
+    return (
+        "{{Infobox military conflict\n"
+        f"| commander1 = {commander1}\n"
+        f"| commander2 = {commander2}\n"
+        f"| strength1 = {strength1}\n"
+        f"| strength2 = {strength2}\n"
+        f"| casualties1 = {casualties1}\n"
+        f"| casualties2 = {casualties2}\n"
+        "}}"
+    )
 
 
-def test_strips_bracketed_citation():
-    assert naive_extract_number("35,000[1]") == 35000
+def test_find_own_side_matches_commander1():
+    wikitext = _wikitext("[[Hannibal]]", "[[Scipio Africanus]]")
+    assert find_own_side(wikitext, "hannibal") == "1"
 
 
-def test_k_suffix():
-    assert naive_extract_number("3.5k") == 3500
+def test_find_own_side_matches_commander2():
+    wikitext = _wikitext("[[Hannibal]]", "[[Scipio Africanus]]")
+    assert find_own_side(wikitext, "scipio-africanus") == "2"
 
 
-def test_million_suffix():
-    assert naive_extract_number("1.2 million") == 1_200_000
+def test_find_own_side_none_when_general_id_not_present():
+    wikitext = _wikitext("[[Hannibal]]", "[[Scipio Africanus]]")
+    assert find_own_side(wikitext, "julius-caesar") is None
 
 
-def test_approx_marker():
-    assert naive_extract_number("c. 20,000") == 20000
+def test_find_own_side_resolves_gold_id_alias():
+    # Gold's hand-chosen id ("hannibal-barca") differs from Wikipedia's own page title
+    # ("Hannibal") for the same person; GOLD_ID_ALIASES bridges that naming gap.
+    wikitext = _wikitext("[[Hannibal]]", "[[Scipio Africanus]]")
+    assert find_own_side(wikitext, "hannibal-barca") == "1"
 
 
-def test_range_takes_first_number_only():
-    # Documented limitation: the naive baseline is not expected to average ranges.
-    assert naive_extract_number("5,700-8,000") == 5700
-
-
-def test_qualitative_text_returns_none():
-    assert naive_extract_number("Heavy") is None
-    assert naive_extract_number("Unknown") is None
-    assert naive_extract_number("") is None
-
-
-def test_extra_segment_after_number_is_ignored():
-    assert naive_extract_number("40,000\n40+ cannon") == 40000
-
-
-def test_extract_for_battle_picks_lower_error_orientation():
-    # Gold says own=30000, enemy=80000. Infobox lists them combatant1=80000,
-    # combatant2=30000 (reversed order) -> should flip to match gold, not take strength1 as own.
-    fields = {
-        "strength1": "80,000",
-        "strength2": "30,000",
-        "casualties1": "9,000",
-        "casualties2": "2,000",
+def test_extract_for_battle_reads_own_side_numbers():
+    wikitext = _wikitext(
+        "[[Hannibal]]",
+        "[[Scipio Africanus]]",
+        strength1="40,000",
+        strength2="34,000",
+        casualties1="5,500",
+        casualties2="1,500",
+    )
+    result = extract_for_battle(wikitext, "scipio-africanus")
+    assert result == {
+        "own_troop_strength": 34000,
+        "enemy_troop_strength": 40000,
+        "own_casualties": 1500,
+        "enemy_casualties": 5500,
     }
-    result = extract_for_battle(fields, gold_own_strength=30000, gold_enemy_strength=80000)
-    assert result["own_troop_strength"] == 30000
-    assert result["enemy_troop_strength"] == 80000
-    assert result["own_casualties"] == 2000
-    assert result["enemy_casualties"] == 9000
 
 
-def test_extract_for_battle_defaults_forward_when_nothing_comparable():
-    fields = {"strength1": "", "strength2": "", "casualties1": "", "casualties2": ""}
-    result = extract_for_battle(fields, gold_own_strength=30000, gold_enemy_strength=80000)
+def test_extract_for_battle_no_side_match_returns_all_none():
+    wikitext = _wikitext("[[Hannibal]]", "[[Scipio Africanus]]", strength1="40,000")
+    result = extract_for_battle(wikitext, "julius-caesar")
     assert result == {
         "own_troop_strength": None,
         "enemy_troop_strength": None,
