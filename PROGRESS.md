@@ -528,3 +528,19 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
   D2. `data/auto/`'s new viz output lives in `output/viz_auto/`, a sibling directory, not merged
   into `output/viz/` — keeps the original Phase 1-7 gold-set deliverable and the new
   hundreds-of-generals one both inspectable without one overwriting the other.
+- D3 (2026-10-01): two real, unfixed bugs found in the automated roster, both flagged per this
+  task's "do not hand-tune weights" instruction rather than fixed, since both require reopening
+  C3/C4a/C4b decisions already checked off: (1) no cross-title identity merge, so a person with
+  two Wikipedia pages (Napoleon/Napoleon Bonaparte, Wellington/Arthur Wellesley, Hannibal/Hannibal
+  Barca) becomes two roster entries with a split battle record; (2) C4a's category-based seeding
+  misses ruler-generals (kings/khans/shoguns/presidents/field marshals), and C4b's opponent-join
+  fallback doesn't rescue them when both sides of a battle share that blind spot — root-caused for
+  Julius Caesar (his battles parse and clear C4b's bar cleanly, he's just never seeded or reachable
+  via opponent-join), with only 6 of 19 gold-set generals sharing an id with the auto roster as a
+  result. Full writeup, including the Caesar root-cause trace, in `~/notes/war-analyzer/
+  ingestion.md`; summarized in README.md's "What the pipeline can and can't do" (D4).
+
+All phases complete. See `~/notes/war-analyzer/ingestion.md` for the full Phase A-D narrative and
+README.md for how to rerun the pipeline and what it can/can't do.
+
+DONE
