@@ -363,6 +363,7 @@ def _fetch_wikitext_batch_once(titles: list[str], max_retries: int) -> dict[str,
         "rvprop": "content",
         "rvslots": "main",
         "titles": "|".join(titles),
+        "redirects": "1",
         "format": "json",
         "formatversion": "2",
     }
@@ -393,6 +394,16 @@ def _fetch_wikitext_batch_once(titles: list[str], max_retries: int) -> dict[str,
         except (KeyError, IndexError):
             continue
         out[page["title"]] = content
+    # With redirects=1, a requested title that is itself a #REDIRECT page is resolved
+    # server-side and `pages` carries the *target*'s content keyed under the target's own
+    # title — the originally requested title (e.g. "Siege of Alesia" -> "Battle of Alesia")
+    # would otherwise be missing from `out` entirely, silently losing every redirect title's
+    # infobox. `query.redirects` lists each `from`/`to` pair so callers can still look the
+    # content up by the title they asked for.
+    for redirect in payload.get("query", {}).get("redirects", []):
+        target_content = out.get(redirect["to"])
+        if target_content is not None:
+            out[redirect["from"]] = target_content
     return out
 
 

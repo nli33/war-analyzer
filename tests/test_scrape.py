@@ -106,8 +106,11 @@ def test_find_infobox_body_stops_at_matching_close_not_rest_of_article():
     assert "unrelated" not in body
 
 
-def _query_response(pages):
-    body = json.dumps({"query": {"pages": pages}}).encode()
+def _query_response(pages, redirects=None):
+    query = {"pages": pages}
+    if redirects is not None:
+        query["redirects"] = redirects
+    body = json.dumps({"query": query}).encode()
     return BytesIO(body)
 
 
@@ -123,6 +126,21 @@ def test_fetch_wikitext_batch_parses_multi_page_response():
 
     assert result == {"Battle of Cannae": "AAA", "Battle of Zama": "BBB"}
     assert mock_urlopen.call_count == 1
+
+
+def test_fetch_wikitext_batch_follows_redirects_keyed_by_requested_title():
+    # Regression test (C7): a requested title that is itself a #REDIRECT page (e.g.
+    # "Siege of Alesia" -> "Battle of Alesia") used to come back with the redirect stub's own
+    # one-line wikitext (no infobox at all), since fetch_wikitext_batch keyed results purely by
+    # the API response's `page["title"]`. With `redirects=1`, the API resolves the redirect
+    # server-side and reports the mapping separately in `query.redirects`.
+    pages = [{"title": "Battle of Alesia", "revisions": [{"slots": {"main": {"content": "AAA"}}}]}]
+    redirects = [{"from": "Siege of Alesia", "to": "Battle of Alesia"}]
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.__enter__.return_value = _query_response(pages, redirects)
+        result = fetch_wikitext_batch(["Siege of Alesia"])
+
+    assert result == {"Siege of Alesia": "AAA", "Battle of Alesia": "AAA"}
 
 
 def test_fetch_wikitext_batch_chunks_by_batch_size():

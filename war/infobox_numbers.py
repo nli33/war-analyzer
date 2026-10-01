@@ -50,8 +50,10 @@ _FOOTNOTE_TEMPLATE_NAMES = frozenset(
 _LIST_TEMPLATE_NAMES = frozenset(
     {
         "ubl",
+        "ubli",
         "plainlist",
         "plain list",
+        "indented plainlist",
         "unbulleted list",
         "flatlist",
         "bulletedlist",

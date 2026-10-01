@@ -50,11 +50,15 @@ def balanced_template_end(text: str, open_pos: int) -> int:
     return n
 
 
-def split_top_level(text: str, sep: str) -> list[str]:
-    """Split `text` on `sep`, ignoring occurrences nested inside `{{...}}` or `[[...]]`.
+def split_top_level(text: str, seps: str) -> list[str]:
+    """Split `text` on any character in `seps`, ignoring occurrences nested inside `{{...}}` or
+    `[[...]]`.
 
     Needed because a `{{ubl|a|[[X|b]]|c}}` template's items are pipe-separated, but a wikilink
-    display alias (`[[X|b]]`) also uses `|` internally and must not be split on.
+    display alias (`[[X|b]]`) also uses `|` internally and must not be split on. Also needed for
+    a wikilink *target* containing one of the separator characters itself (e.g.
+    `[[Arthur Wellesley, 1st Duke of Wellington|Arthur Wellesley]]` has a comma before the `|`) —
+    a plain `re.split` on `,` would break the link in two.
 
     >>> split_top_level("a|[[X|b]]|c", "|")
     ['a', '[[X|b]]', 'c']
@@ -75,7 +79,7 @@ def split_top_level(text: str, sep: str) -> list[str]:
             current.append(two)
             i += 2
             continue
-        if depth == 0 and text[i] == sep:
+        if depth == 0 and text[i] in seps:
             parts.append("".join(current))
             current = []
             i += 1

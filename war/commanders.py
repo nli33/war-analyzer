@@ -35,8 +35,10 @@ _COMMANDER_FIELD_NAMES = ("commander1", "commander2")
 _LIST_TEMPLATE_NAMES = frozenset(
     {
         "ubl",
+        "ubli",
         "plainlist",
         "plain list",
+        "indented plainlist",
         "unbulleted list",
         "flatlist",
         "bulletedlist",
@@ -51,7 +53,7 @@ _BR_RE = re.compile(r"<br\s*/?>", re.IGNORECASE)
 _HR_RE = re.compile(r"<hr\s*/?>", re.IGNORECASE)
 _BOLD_ITALIC_RE = re.compile(r"'''?")
 _WIKILINK_RE = re.compile(r"\[\[([^|\]]+)(?:\|([^\]]*))?\]\]")
-_SEGMENT_SPLIT_RE = re.compile(r"\n|;|,")
+_SEGMENT_SPLIT_CHARS = "\n;,"
 _AND_SPLIT_RE = re.compile(r"\s+and\s+", re.IGNORECASE)
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 
@@ -178,16 +180,21 @@ def parse_commander_field(raw_value: str) -> list[CommanderRef]:
     Known limitations, inherent to parsing free text rather than structured data: a plain
     (non-wikilinked) name containing a literal comma or the word "and" could be mis-split into
     two entries; this doesn't come up in any real example checked while building this, but
-    isn't structurally ruled out.
+    isn't structurally ruled out. The word "and" split (unlike the comma/semicolon/newline split
+    just below) also isn't bracket-aware, so a wikilink target containing the word "and" (none
+    found in a real example yet) could still be mis-split the same way a comma target used to be.
 
     >>> [ref.display_name for ref in parse_commander_field("[[Hannibal]]")]
     ['Hannibal']
     >>> [ref.display_name for ref in parse_commander_field("[[Napoleon]]<br>[[Michel Ney|Ney]]")]
     ['Napoleon', 'Ney']
+    >>> [ref.general_id for ref in parse_commander_field(
+    ...     "[[Arthur Wellesley, 1st Duke of Wellington|Arthur Wellesley]]")]
+    ['arthur-wellesley-1st-duke-of-wellington']
     """
     text = _clean_for_parsing(raw_value)
     segments = []
-    for piece in _SEGMENT_SPLIT_RE.split(text):
+    for piece in split_top_level(text, _SEGMENT_SPLIT_CHARS):
         segments.extend(_AND_SPLIT_RE.split(piece))
 
     refs = []
