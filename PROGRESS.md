@@ -146,8 +146,17 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       noise. Decision: keep A6's quality gate at PROGRESS.md's existing default floor rather than
       loosening it — this test shows the ranking doesn't need tighter accuracy, not that the
       ingested data can be less honest/usable for other purposes.
-- [ ] A6. Write the decision: chosen source(s), measured numbers from A2-A5, and the pass/fail
+- [x] A6. Write the decision: chosen source(s), measured numbers from A2-A5, and the pass/fail
       thresholds for the ingest quality gate (task C7). Put it in the dev log.
+      Decision recorded in `~/notes/war-analyzer/ingestion.md`: Wikipedia batched API (A2) as
+      primary source, `military_rankings` page-structure ideas only (A1, no code reuse), CDB90
+      (A4) as an optional accuracy override for 1600-1973 battles that join, COW CINC (A4)
+      confirmed for B2's resource-backing tier. C7's gate is PROGRESS.md's existing default floor
+      unchanged (A5 showed the ranking tolerates far worse, but that's not grounds to loosen it —
+      the floor protects data honesty beyond this one ranking formula): strength within 3x on
+      >=75% of rows where both sides exist, strength present both sides on >=60% of battles,
+      casualties kept only if >=40% coverage. A3's naive-parser baseline already clears all three
+      (89%/89% within 3x, 58-62% coverage) so C2's real extractor has a concrete bar to beat.
 
 ## Phase B: Simplify the schema
 
