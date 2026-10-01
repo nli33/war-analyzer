@@ -498,7 +498,16 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       be checked. Also closed D2's open "335 of 417 ranked, not investigated" question: the gap is
       82 generals with zero rows in `data/auto/battles.csv`, the same outcome-unresolvable dropout
       C6 already documented, not a new bug. No code or data changed; 367 tests still pass.
-- [ ] D4. Update README.md with how to rerun ingestion and what the pipeline can and cannot do.
+- [x] D4. Update README.md with how to rerun ingestion and what the pipeline can and cannot do.
+      Added three sections: the two-dataset split (`data/` gold set vs `data/auto/`), how to
+      rerun the metrics/viz scripts against either CSV pair via their existing `--battles`/
+      `--generals`/`--output` flags, and the C1-C7 ingestion run order with the C5 LLM-call
+      caveat spelled out. "Can/can't do" lists D3's two confirmed bugs (identity dedup, seed-
+      category coverage gap for ruler-generals) plus the no-sample-size-weighting and sparse-
+      casualties limitations, pointing to `~/notes/war-analyzer/ingestion.md` for detail rather
+      than duplicating it. Verified every documented command actually runs (`validate_data.py`
+      passes; `render_ranking_tables.py --help` matches the documented flags). No code changed;
+      367 tests still pass.
 
 ## Notes / deviations
 
