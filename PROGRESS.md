@@ -453,9 +453,30 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       runs over hundreds of generals doesn't clear the bar for "too slow, needs a fix" the task
       names, and a heavier vectorization rewrite would be scope creep past what D1 asks for. No
       schema change; `scripts/validate_data.py` not re-run (unaffected).
-- [ ] D2. Ranking tables and the three scatter plots at hundreds of generals: tables show top N with
+- [x] D2. Ranking tables and the three scatter plots at hundreds of generals: tables show top N with
       full CSV alongside, scatter plots label only the extremes. Verify without a display, as in
       SCOPE.md Phase 6 (assert on output files and data).
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Before touching `data/auto/`, re-ran the
+      gold-set renderers as a reproduces-committed-output check and found the committed
+      `output/viz/ranking_tables_composite.csv`/`_categories.csv`/`tactical_vs_strategic.csv` were
+      stale — last regenerated before B1's `decisive_win_rate` redefinition, which shifted the
+      committed composite ranking (e.g. Grant #2 -> #4, Alexander/Frederick into the top tier).
+      Not caused by this task; regenerated `output/viz/*` with current code before adding anything
+      new. Added `war/viz/labeling.py` (`extreme_labels`, the one shared-not-duplicated viz helper)
+      and wired it into all three scatter modules in place of "label every point." Added `top_n`
+      (default 25) to `save_ranking_tables`/`render_ranking_tables_html`: each HTML table caps at
+      its best 25 rows with a "(top N of total)" caption when truncated; the CSV outputs are never
+      truncated. All four `scripts/render_*.py` gained `--battles`/`--generals`/`--output` (plus
+      `--top-n`), defaulting to the unchanged gold-set paths so the bare CLI invocation still
+      reproduces the Phase 1-7 deliverable. Ran a second time against `data/auto/` (417 generals,
+      920 rows) into a new `output/viz_auto/` directory (kept separate from the gold set's
+      `output/viz/`, not overwritten). Monte Carlo took 2m23s, matching D1's measurement. Verified
+      without a display (SCOPE.md Phase 6): all 7 output files non-empty; OAR/Volume-Efficiency
+      scatter CSVs list 342 rows (matches D1's "342 generals with >=1 row"); Tactical/Strategic
+      lists 235 (generals with >=1 win); composite CSV has 335 rows; the HTML's composite table
+      caption reads "top 25 of 335" with a matching 26-row `<tr>` count. 8 new tests (5 for
+      `extreme_labels`, 3 for `top_n` truncation/CSV-untruncated); full suite 367 passed (up from
+      359). `scripts/validate_data.py` still passes (schema untouched).
 - [ ] D3. Sanity pass on the new ranking against historian consensus. Flag likely bugs and roster
       artifacts; do not hand-tune weights. Compare against the gold-set ranking.
 - [ ] D4. Update README.md with how to rerun ingestion and what the pipeline can and cannot do.
@@ -472,3 +493,10 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
   condition this doc actually treats as a stop-and-flag trigger. If Phase D's output looks too
   large to sanity-check by hand, revisiting `--min-battles` (e.g. 3) is the lever to pull, with its
   own fresh before/after roster-size measurement.
+- D2 (2026-10-01): the committed gold-set `output/viz/ranking_tables_composite.csv`/
+  `_categories.csv`/`tactical_vs_strategic.csv` were stale (regenerated before B1's
+  `decisive_win_rate` redefinition), materially changing the committed composite ranking once
+  fixed. Found and fixed as part of D2's own re-run of these scripts, not a new bug introduced by
+  D2. `data/auto/`'s new viz output lives in `output/viz_auto/`, a sibling directory, not merged
+  into `output/viz/` — keeps the original Phase 1-7 gold-set deliverable and the new
+  hundreds-of-generals one both inspectable without one overwriting the other.
