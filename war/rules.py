@@ -1,4 +1,5 @@
-"""Deterministic rules that replace hand judgment on three schema fields.
+"""Deterministic rules that replace hand judgment on three schema fields, plus (C4b) the
+year -> era cohort rule used to auto-generate `data/auto/generals.csv`.
 
 PROGRESS.md Phase B task B2: `tech_era_tier`, `resource_backing_tier`, and `decisiveness`
 were all hand-judged per row in the original 19-general gold set. The pipeline being built
@@ -205,3 +206,58 @@ def decisiveness_from_result(result_text: str | None, outcome: str) -> str | Non
     if "strategic" in text:
         return "Strategic"
     return "Tactical"
+
+
+# --- era_for_year: a plain year lookup table (C4b) --------------------------------------
+#
+# `data/battles.csv`'s `era` column was hand-assigned per general by the gold set's curators,
+# not computed from a year cutoff — e.g. its "Medieval" rows run from 1175 to 1615 while its
+# "Early Modern" rows start at 1741, a gap with no battle in it, so the gold set itself doesn't
+# pin down where the boundary actually falls. C4b's auto-generated `data/auto/generals.csv`
+# has no curator to make that call per general, so this table picks one boundary year per era
+# transition from the conventional historical turning point nearest the gold set's gap, each
+# chosen independently (not derived from `_TECH_ERA_BREAKPOINTS` above, whose 5 tiers don't
+# line up 1:1 with `ERAS`'s 6 — though two breakpoints do end up numerically identical, noted
+# below, since both rules picked the same real-world turning point for different reasons):
+#   Ancient / Medieval     - 500  (conventional fall of the Western Roman Empire, 476 CE)
+#   Medieval / Early Modern - 1500 (Renaissance / Age of Discovery)
+#   Early Modern / Napoleonic - 1792 (French Revolutionary Wars begin)
+#   Napoleonic / Industrial - 1816 (the year after Waterloo; also where COW CINC data starts,
+#       a coincidence of two independent choices, not a dependency between them)
+#   Industrial / WWII      - 1914 (matches `_TECH_ERA_BREAKPOINTS`'s tier-5 threshold: WWI has
+#       no era of its own in `ERAS`, so 1914-1918 battles land in the "WWII" bucket — a known,
+#       accepted gap in the 6-value enum, not a claim that WWI battles are WWII battles)
+_ERA_BREAKPOINTS: tuple[tuple[int, str], ...] = (
+    (-999999, "Ancient"),
+    (500, "Medieval"),
+    (1500, "Early Modern"),
+    (1792, "Napoleonic"),
+    (1816, "Industrial"),
+    (1914, "WWII"),
+)
+assert {era for _, era in _ERA_BREAKPOINTS} == set(ERAS)
+
+
+def era_for_year(year: int) -> str:
+    """Map a year to one of `war.schema.ERAS` via `_ERA_BREAKPOINTS`.
+
+    >>> era_for_year(-334)
+    'Ancient'
+    >>> era_for_year(1200)
+    'Medieval'
+    >>> era_for_year(1600)
+    'Early Modern'
+    >>> era_for_year(1800)
+    'Napoleonic'
+    >>> era_for_year(1863)
+    'Industrial'
+    >>> era_for_year(1916)
+    'WWII'
+    >>> era_for_year(1944)
+    'WWII'
+    """
+    era = _ERA_BREAKPOINTS[0][1]
+    for threshold, candidate_era in _ERA_BREAKPOINTS:
+        if year >= threshold:
+            era = candidate_era
+    return era

@@ -337,12 +337,37 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       4 new mocked tests (`tests/test_scrape.py`); full suite 293 passed (289 + 4).
       `scripts/validate_data.py` still passes (schema/`data/generals.csv` untouched — this task's
       output is a gitignored raw candidate list only). `scripts/eval_ingest.py` doesn't apply.
-- [ ] C4b. Roster selection: for each seed, count battles from C3 that have usable strength
+- [x] C4b. Roster selection: for each seed, count battles from C3 that have usable strength
       figures, and keep generals with at least N such battles (pick N, record why). Opponents who
       appear in kept battles but are not on the seed list may join if they clear the same bar.
       Generate `generals.csv` automatically: era and career years from battle dates. The famous-names
       seeding favors generals people already rank highly. Record this bias in Notes, and keep
       lower-profile generals in when the data clears the bar.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Added `war/roster.py`
+      (`extract_year`, `battle_appearances`, `select_roster`, `generals_csv_rows`) and
+      `scripts/build_roster_selection.py`. Crawled wikitext for all 8,824 C1 candidate battle
+      titles (8,430 found; cached at `data/raw/battle_wikitext_cache.json`), parsed 10,690
+      general-perspective battle appearances, then compared `--min-battles` 1-5 locally (no
+      re-crawl needed): N=1 -> 976 generals (overshoots the 200-400 target by 2x+, one battle is
+      too thin a bar), N=2 -> 277, N=3 -> 130 (undershoots). Picked **N=2** (both sides have a
+      parsed, positive strength number on at least 2 of the general's battles) since it lands in
+      PROGRESS.md's target range. Wrote `data/auto/generals.csv` (277 rows); validates clean
+      against `GENERAL_COLUMNS` (0 errors, unique ids, era in `ERAS`). Of the 277, 111 came from
+      the C4a seed list directly and 183 (66%) joined only via the opponent-of-a-kept-general
+      rule — this catches both expected lower-profile names (Civil War corps/cavalry commanders)
+      and, unexpectedly, famous figures the seed crawl structurally missed (Napoleon himself
+      isn't in the C4a seed set — his Wikipedia page is categorized as a monarch, not under any
+      `Category:Generals by ...` tree — and only entered via opponent-join). Era distribution
+      skews Napoleonic/Industrial/Western, inherited from C1/C4a's Wikipedia-structure coverage,
+      left as-is per the "don't pad/don't hand-rebalance" instruction. Found and fixed two real
+      parser bugs while running this against real pages (not caught by earlier synthetic tests):
+      `war/commanders.py` and `war/infobox_numbers.py` only recognized the no-space `plainlist`
+      template name, not the real variant `{{Plain list|...}}` (Battle of Gaugamela), silently
+      dropping the whole field; fixed in both modules with regression tests. Also added
+      `war/rules.py`'s `era_for_year` (year -> `ERAS` lookup, independent breakpoints from B2's
+      `tech_era_tier` table) since the auto roster has no curator to hand-assign era. Full suite
+      315 passed (up from 293). `scripts/eval_ingest.py` doesn't apply (C4b doesn't touch
+      strength/casualty extraction accuracy).
 - [ ] C5. Uncertain-row queue: collect every field regex could not parse into one file. Process the
       whole queue in a single bounded pass: `claude -p` on the lowest model and effort, chunked
       rows per call, a hard cap on total rows and calls, outputs checked against sanity bounds
