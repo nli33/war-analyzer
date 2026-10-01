@@ -8,7 +8,12 @@ from pathlib import Path
 
 import pytest
 
-from war.infobox_numbers import ExtractedNumber, extract_numeric_field, extract_strength_and_casualties
+from war.infobox_numbers import (
+    ExtractedNumber,
+    extract_numeric_field,
+    extract_strength_and_casualties,
+    raw_numeric_fields,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EVAL_CACHE = REPO_ROOT / "data" / "raw" / "eval_ingest_cache.json"
@@ -86,6 +91,21 @@ def test_multi_segment_headline_wins_over_citation_bracket():
 def test_equipment_only_field_returns_null():
     # Nothing but an equipment count — not a troop/casualty number at all.
     assert extract_numeric_field("20 ships").point is None
+
+
+def test_same_line_trailing_equipment_count_does_not_blank_the_personnel_number():
+    # Real infobox shape: "<personnel>, <equipment> guns" on one line, no newline between them.
+    # A blanket "any equipment word anywhere -> whole segment is junk" check used to throw away
+    # the personnel figure along with the equipment count (see war/infobox_numbers.py's
+    # _EQUIPMENT_COUNT_RE comment).
+    assert extract_numeric_field("2,000, 3 guns") == ExtractedNumber(point=2000)
+
+
+def test_same_line_trailing_equipment_count_on_a_range():
+    low, high = 15_000, 16_500
+    result = extract_numeric_field("15,000-16,500, 30 guns")
+    assert (result.low, result.high) == (low, high)
+    assert result.point == round((low + high) / 2)
 
 
 # --- plainlist/ubl templates ----------------------------------------------------------------------
@@ -203,6 +223,27 @@ def test_extract_strength_and_casualties_reads_all_four_fields():
     assert result["strength2"] == ExtractedNumber(point=86400)
     assert result["casualties1"] == ExtractedNumber(point=6850, low=5700, high=8000)
     assert result["casualties2"].point == 55000
+
+
+# --- raw_numeric_fields (C5 queue input) -----------------------------------------------------
+
+
+def test_raw_numeric_fields_no_infobox_returns_empty():
+    assert raw_numeric_fields("no infobox on this page at all") == {}
+
+
+def test_raw_numeric_fields_omits_empty_fields_and_strips_whitespace():
+    wikitext = (
+        "{{Infobox military conflict\n"
+        "| strength1 = Kamensky's division\n"
+        "| strength2 = \n"
+        "| casualties1 =   Unknown  \n"
+        "}}"
+    )
+    assert raw_numeric_fields(wikitext) == {
+        "strength1": "Kamensky's division",
+        "casualties1": "Unknown",
+    }
 
 
 @pytest.mark.skipif(not EVAL_CACHE.exists(), reason="requires data/raw/eval_ingest_cache.json")

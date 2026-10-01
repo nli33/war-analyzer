@@ -92,6 +92,14 @@ _EQUIPMENT_RE = re.compile(
     re.IGNORECASE,
 )
 
+# A bare "<number>, N guns" shape is extremely common in real infobox strength/casualty fields
+# (e.g. "2,000, 3 guns", "15,000-16,500, 30 guns") — a personnel figure with an equipment count
+# trailing on the same line, no newline between them. `_parse_number_segment` used to reject the
+# *whole* segment whenever any equipment word appeared in it, which threw away the real personnel
+# number along with the equipment count it was never meant to protect against. Stripped out below,
+# before segment splitting, so the personnel number survives; only a segment that is *purely* an
+# equipment count (e.g. "40+ cannon" alone) still parses to nothing, same as before.
+
 _UNIT_GROUP = r"(million|mil\b|thousand|k\b|m\b)?"
 _NUM_GROUP = r"([\d,]*\d(?:\.\d+)?)"
 _APPROX_PREFIX = r"(?:c\.|ca\.|~|about\s+)?\s*"
@@ -101,6 +109,15 @@ _RANGE_RE = re.compile(
 )
 _NUMBER_RE = re.compile(rf"{_APPROX_PREFIX}{_NUM_GROUP}\s*{_UNIT_GROUP}", re.IGNORECASE)
 _UNIT_MULTIPLIER = {"k": 1_000, "thousand": 1_000, "m": 1_000_000, "mil": 1_000_000, "million": 1_000_000}
+
+# A number (range or single) directly naming an equipment count, e.g. "3 guns" in "2,000, 3
+# guns" or "30 guns" in "15,000-16,500, 30 guns" — stripped out so only the number's *equipment*
+# instance is removed, not the whole segment (see _EQUIPMENT_RE comment above).
+_EQUIPMENT_COUNT_RE = re.compile(
+    rf"(?:and\s+|&\s*)?(?:{_RANGE_RE.pattern}|{_NUMBER_RE.pattern})\+?\s*(?:and\s+|&\s*)?"
+    rf"(?={_EQUIPMENT_RE.pattern})",
+    re.IGNORECASE,
+)
 
 
 # A segment is a bare "headline" value — trusted alone, with every other segment in the field
@@ -194,13 +211,20 @@ def _clean_for_parsing(raw_value: str) -> str:
     text = _WIKILINK_RE.sub(r"\1", text)
     text = _BOLD_ITALIC_RE.sub("", text)
     text = _CITATION_BRACKET_RE.sub("", text)
+    text = _EQUIPMENT_COUNT_RE.sub("", text)
     return text
 
 
 def _parse_number_segment(segment: str) -> ExtractedNumber | None:
     """A single segment's number, or None for qualitative text ("Heavy", "Unknown") and
-    equipment counts ("40+ cannon") — neither contributes to a troop/casualty total."""
-    if not segment or _EQUIPMENT_RE.search(segment):
+    equipment counts ("40+ cannon") — neither contributes to a troop/casualty total.
+
+    Equipment counts attached to a number are already stripped out by `_EQUIPMENT_COUNT_RE`
+    before segments are split (see that constant's comment), so a bare equipment word that
+    survives here (e.g. the unconsumed "ships" left behind by stripping "100+ ships") has no
+    number of its own left to match — no separate check is needed to reject it.
+    """
+    if not segment:
         return None
     range_match = _RANGE_RE.search(segment)
     if range_match:
@@ -271,3 +295,20 @@ def extract_strength_and_casualties(wikitext: str) -> dict[str, ExtractedNumber]
         if name in _NUMERIC_FIELD_NAMES:
             result[name] = extract_numeric_field(raw_value)
     return result
+
+
+def raw_numeric_fields(wikitext: str) -> dict[str, str]:
+    """Raw (unparsed) text of strength1/strength2/casualties1/casualties2, keyed by field name.
+
+    Used by C5 to find fields that carry real (non-empty) infobox text but that
+    `extract_numeric_field` couldn't turn into a number — the candidates for the bounded LLM
+    pass, as opposed to fields the infobox never set at all.
+    """
+    body = find_infobox_body(wikitext)
+    if body is None:
+        return {}
+    return {
+        name: raw_value.strip()
+        for name, raw_value in split_infobox_params(body)
+        if name in _NUMERIC_FIELD_NAMES and raw_value.strip()
+    }
