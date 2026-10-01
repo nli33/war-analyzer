@@ -83,6 +83,16 @@ def test_parse_commander_field_plainlist_template_with_bold_first_entry():
     assert [r.display_name for r in refs] == ["Alexander the Great", "Parmenion"]
 
 
+def test_parse_commander_field_plain_list_with_space_template_name():
+    # "Plain list" (two words) is a real Wikipedia template-name variant for Plainlist, seen on
+    # Battle of Gaugamela's commander1 field — regression test for C4b's roster crawl, which
+    # found it silently dropping every name because only the no-space "plainlist" name was
+    # recognized.
+    raw = "{{Plain list| * '''[[Alexander the Great]]''' \n* [[Parmenion]]}}"
+    refs = parse_commander_field(raw)
+    assert [r.display_name for r in refs] == ["Alexander the Great", "Parmenion"]
+
+
 def test_parse_commander_field_tree_list_hierarchy_keeps_top_commander_first():
     raw = "{{tree list}}\n*[[Julius Caesar]]\n**[[Mark Antony]]\n{{tree list/end}}"
     refs = parse_commander_field(raw)

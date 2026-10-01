@@ -48,7 +48,15 @@ _FOOTNOTE_TEMPLATE_NAMES = frozenset(
 # Templates whose items are the actual breakdown of a field's value, unwrapped into one line
 # per item rather than deleted.
 _LIST_TEMPLATE_NAMES = frozenset(
-    {"ubl", "plainlist", "unbulleted list", "flatlist", "bulletedlist", "bulleted list"}
+    {
+        "ubl",
+        "plainlist",
+        "plain list",
+        "unbulleted list",
+        "flatlist",
+        "bulletedlist",
+        "bulleted list",
+    }
 )
 
 

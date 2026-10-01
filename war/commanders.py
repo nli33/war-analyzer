@@ -33,7 +33,15 @@ _COMMANDER_FIELD_NAMES = ("commander1", "commander2")
 # catch-all template strip below removes the two marker tags and leaves the lines untouched,
 # with no special-casing needed.
 _LIST_TEMPLATE_NAMES = frozenset(
-    {"ubl", "plainlist", "unbulleted list", "flatlist", "bulletedlist", "bulleted list"}
+    {
+        "ubl",
+        "plainlist",
+        "plain list",
+        "unbulleted list",
+        "flatlist",
+        "bulletedlist",
+        "bulleted list",
+    }
 )
 
 _REF_TAG_RE = re.compile(r"<ref[^>]*>.*?</ref>", re.DOTALL)

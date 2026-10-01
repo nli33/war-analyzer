@@ -96,6 +96,13 @@ def test_plainlist_template_with_no_stated_total_sums_items():
     assert extract_numeric_field(raw) == ExtractedNumber(point=10000)
 
 
+def test_plain_list_with_space_template_name_sums_items():
+    # "Plain list" (two words) is a real Wikipedia template-name variant for Plainlist — see
+    # test_commanders.py's matching regression test, found on Battle of Gaugamela's strength1.
+    raw = "{{Plain list|\n* 7,000 infantry\n* 3,000 cavalry\n}}"
+    assert extract_numeric_field(raw) == ExtractedNumber(point=10000)
+
+
 def test_ubl_template_pipe_separated():
     raw = "{{ubl|212 killed|1,252 wounded|250 missing}}"
     assert extract_numeric_field(raw) == ExtractedNumber(point=1714)
