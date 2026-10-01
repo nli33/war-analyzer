@@ -77,7 +77,7 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
   with poor precision; use the infobox `commander` field instead. Wikipedia rate-limits at 429, so
   throttle and cache raw pages under `data/raw/` (gitignored).
 - Candidate extra sources to test cheaply, not to depend on: CDB90 (github.com/jrnold/CDB90, 600+
-  battles 1600-1973, strength/losses/victor, no commanders), Correlates of War National Material
+  battles 1600-1973, strength/losses/victor, commanders with Wikipedia uris per A4), Correlates of War National Material
   Capabilities (CINC score per state-year from 1816, a proxy for resource backing).
 
 ## Phase A: Decide the method (measure, then write down the choice)
@@ -117,9 +117,22 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       own/enemy casualties 58%/62% coverage, 71%/78% within 3x. Clears the default quality floor
       comfortably on strength and is at-or-above it on casualties coverage, with the real C2
       extractor and C3 side-matching still to come.
-- [ ] A4. CDB90 join test: download it, join to the gold set by name and date, report agreement and
+- [x] A4. CDB90 join test: download it, join to the gold set by name and date, report agreement and
       coverage. Check whether it has commanders and what its license is. Check COW CINC
       availability. Keep a source only if joining it is cheap.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Cloned CDB90 (small, ~5MB, no sparse
+      checkout needed); joined by deriving a Wikipedia title from its `dbpedia` URI column and
+      exact-matching gold `battle_name`: 50/177 gold rows matched (CDB90 only covers 1600-1973, a
+      fixed list of 660 battles). On the matched rows, agreement with gold is far above the A3
+      Wikipedia-regex baseline: strength 100% within 3x (94% within 1.5x), casualties 95% within
+      3x. CDB90 does have commanders (1,358 rows, 74% with a ready-made Wikipedia `uri`) —
+      corrects PROGRESS.md's earlier note that it doesn't. License: data odc-by, original source
+      public domain, code BSD-3, no blocker. COW CINC (`NMC-70-abridged.csv`) downloads directly,
+      has `ccode/year/cinc` from 1816, confirms B2 is buildable. Decision: the join is cheap, but
+      CDB90's fixed 660-battle list can't replace Wikipedia as the primary source (fails
+      exhaustiveness at the scale this run targets) — recommend it as an optional accuracy
+      override in C2/C6 for battles that match, not a dependency. Wiring left to C2/C6; A4 is
+      measurement only.
 - [ ] A5. Sensitivity test: perturb the gold set's numbers by random log-normal factors (about 1.5x,
       2x, 3x) over many trials and measure how much the composite ranking moves (rank correlation,
       top-5 stability). Write down the error level the ranking tolerates. This sets the quality
