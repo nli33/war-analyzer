@@ -411,9 +411,23 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       is `None` by design, not a gap). All comfortably above A3's naive-parser baseline. CDB90's
       accuracy-override join (A4/A6) deliberately not wired here — deferred to only if C7 fails
       and needs it. Full suite 360 passed (up from 336).
-- [ ] C7. Quality gate: score the pipeline against the gold set with `scripts/eval_ingest.py`
+- [x] C7. Quality gate: score the pipeline against the gold set with `scripts/eval_ingest.py`
       using the thresholds from A6. If it fails, write why in Notes and stop (SCOPE.md "stop and
       flag"); do not move on to Phase D with bad data.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Rewrote `eval_ingest.py` to score the
+      real C2/C3 extractor (it was still A3's naive baseline) and found/fixed 3 real bugs along
+      the way: a non-bracket-aware commander-field split that broke on a comma inside a
+      wikilink's target title (e.g. Wellington's full style), two missing list-template name
+      variants (`ubli`, `Indented plainlist`), and `fetch_wikitext_batch` not following Wikipedia
+      redirects. Final score clears A6's floor: strength present both sides 65% of battles
+      (>=60%), 92.6% of those within 3x of gold (>=75%), casualties 58%/61% coverage (>=40%).
+      **C7 passes.** Regenerated `data/auto/` with the fixed parser (old version archived to
+      `data/archive/2026-10-01-pre-c7-parser-fixes/`) rather than move to Phase D on stale output;
+      roster grew to 417 generals/920 rows (up from 296/717) as a side effect, overshooting the
+      200-400 target band — not re-tuned (that's C4b's already-decided call, out of C7's scope),
+      flagged here for whoever reviews Phase D's output size. 357 tests pass;
+      `scripts/validate_data.py` and a direct validator run against `data/auto/` both report 0
+      errors.
 
 ## Phase D: Rankings and visuals at scale
 
@@ -427,4 +441,14 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
 - [ ] D4. Update README.md with how to rerun ingestion and what the pipeline can and cannot do.
 
 ## Notes / deviations
-(none yet)
+
+- C7 (2026-10-01): the auto roster at `--min-battles 2` is now 417 generals / 920 battle rows
+  (342 generals with >=1 row), up from C6's original 296/717, purely from fixing 3 real C2/C3
+  parser bugs the gold-set eval surfaced (comma-in-wikilink segment splitting, two missing list-
+  template name variants, redirect-following) — not a roster-rule change. This overshoots
+  PROGRESS.md's 200-400 target band from "How much to ingest." Left as-is rather than re-tuning
+  `--min-battles` back into the band: that would reopen C4b's already-checked-off decision, which
+  is out of C7's scope (the quality gate), and 417 is a modest overshoot, not the "fewer than 100"
+  condition this doc actually treats as a stop-and-flag trigger. If Phase D's output looks too
+  large to sanity-check by hand, revisiting `--min-battles` (e.g. 3) is the lever to pull, with its
+  own fresh before/after roster-size measurement.
