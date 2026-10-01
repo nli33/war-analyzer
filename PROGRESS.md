@@ -368,11 +368,26 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       `tech_era_tier` table) since the auto roster has no curator to hand-assign era. Full suite
       315 passed (up from 293). `scripts/eval_ingest.py` doesn't apply (C4b doesn't touch
       strength/casualty extraction accuracy).
-- [ ] C5. Uncertain-row queue: collect every field regex could not parse into one file. Process the
+- [x] C5. Uncertain-row queue: collect every field regex could not parse into one file. Process the
       whole queue in a single bounded pass: `claude -p` on the lowest model and effort, chunked
       rows per call, a hard cap on total rows and calls, outputs checked against sanity bounds
       (no negative numbers, casualties not far above strength). Never one call per battle. Record the
       row count, call count, and rough cost.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Found and fixed a real bug in
+      `war/infobox_numbers.py` while building the queue: a same-line trailing equipment count
+      (`"2,000, 3 guns"`) was blanking the whole segment, including the real personnel number;
+      fixed with a targeted strip (`_EQUIPMENT_COUNT_RE`) instead of a whole-segment reject, 2
+      regression tests added. Added `raw_numeric_fields()` (queue input) and `war/uncertain_fields.py`
+      / `scripts/resolve_uncertain_fields.py` (queue build + bounded pass, resumable via
+      `data/raw/c5_llm_cache.json`). Real run against the 277-general roster: 302 fields queued,
+      265 (88%) had no digit and resolved to null for free, the remaining 37 fit in **one**
+      `claude -p` call (haiku, low effort) costing **$0.0437** — both call count and cost are far
+      inside the 3,000-row/60-call cap, no scaling concern for C6. 3/37 resolved to real numbers
+      (spot-checked correct: picked the battle-specific sub-figure over a campaign-wide rollup
+      and ignored trailing equipment counts), 0 rejected by the sanity check, 34/37 correctly
+      null (bare equipment counts, disputed multi-estimate prose, citation-year noise — genuinely
+      not recoverable personnel numbers, not a shortfall). Full suite 336 passed (up from 315).
+      `scripts/eval_ingest.py` doesn't apply (none of the 3 resolved battles are in the gold set).
 - [ ] C6. Full run into `data/auto/`. Validator passes. Row counts and null rates per field logged.
 - [ ] C7. Quality gate: score the pipeline against the gold set with `scripts/eval_ingest.py`
       using the thresholds from A6. If it fails, write why in Notes and stop (SCOPE.md "stop and
