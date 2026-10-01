@@ -133,10 +133,19 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       exhaustiveness at the scale this run targets) — recommend it as an optional accuracy
       override in C2/C6 for battles that match, not a dependency. Wiring left to C2/C6; A4 is
       measurement only.
-- [ ] A5. Sensitivity test: perturb the gold set's numbers by random log-normal factors (about 1.5x,
+- [x] A5. Sensitivity test: perturb the gold set's numbers by random log-normal factors (about 1.5x,
       2x, 3x) over many trials and measure how much the composite ranking moves (rank correlation,
       top-5 stability). Write down the error level the ranking tolerates. This sets the quality
       bar for everything below.
+      Built `scripts/sensitivity_test.py` (300 trials/level on the 177-row gold set). Finding in
+      `~/notes/war-analyzer/ingestion.md`: the ranking tolerates strength/casualty error up to at
+      least 3x log-error with almost no movement (mean Spearman >=0.998, top-5 unchanged in
+      97-99.7% of trials) — because 3 of 4 composite inputs (OAR, decisiveness, longevity) are
+      outcome-only and mathematically can't move from this kind of noise, and the 4th
+      (war_residual) is a pooled-OLS, per-general-averaged residual that partly cancels per-battle
+      noise. Decision: keep A6's quality gate at PROGRESS.md's existing default floor rather than
+      loosening it — this test shows the ranking doesn't need tighter accuracy, not that the
+      ingested data can be less honest/usable for other purposes.
 - [ ] A6. Write the decision: chosen source(s), measured numbers from A2-A5, and the pass/fail
       thresholds for the ingest quality gate (task C7). Put it in the dev log.
 
