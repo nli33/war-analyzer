@@ -284,9 +284,40 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       score this module — it's wired in by C6/C7, not C2 — but was re-run anyway as a sanity check
       per the note above. Not yet wired into any pipeline (same "built standalone, C3/C6 call it
       later" pattern as `war/rules.py` from B2).
-- [ ] C3. Commanders and sides: parse infobox commander links per side, set `opponent_general_id`,
+- [x] C3. Commanders and sides: parse infobox commander links per side, set `opponent_general_id`,
       and invert into general to battles. A general counts as personally commanding a battle if
       they are listed first on their side (document this rule and its known misses).
+      Added `war/commanders.py` (standalone, not yet wired into a pipeline — same pattern as
+      `war/rules.py`/`war/infobox_numbers.py`; C6 is what will call it). Re-parses
+      `commander1`/`commander2` from raw (unstripped) wikitext, bypassing
+      `parse_military_infobox`'s generic cleanup since that throws away a wikilink's target
+      title (keeps only display text) — exactly the piece needed to build a `general_id` slug.
+      `parse_commander_field` returns an ordered `list[CommanderRef]` (handles `<br>`/comma/"and"
+      -separated names, `{{ubl}}`/`{{plainlist}}`/`{{tree list}}...{{tree list/end}}` templates,
+      and strips decoration templates like `{{KIA}}` stuck directly on a name); a name with no
+      wikilink gets a `CommanderRef` with `general_id=None` rather than being dropped, since
+      it's a real name but has no Wikipedia page for C4 to source era/career years from.
+      `primary_commander` is the "first listed and wikilinked" rule, with known misses
+      documented on the function (infobox order isn't a verified seniority ranking; a titular
+      figure can be listed ahead of the real field commander; a non-wikilinked first name means
+      nobody is attributed command of that side at all). `invert_to_general_battles` turns a
+      battle's two parsed sides into 0/1/2 `GeneralBattleLink`s (one per side with an
+      identifiable primary commander, each carrying the other side's id as
+      `opponent_general_id`) — this is the "invert into general to battles" step; it stops at a
+      single battle; C6 accumulates these into `generals.csv`/`battles.csv` rows.
+      Verified against real cached pages (`data/raw/eval_ingest_cache.json`, not just synthetic
+      fixtures): Pharsalus, Thapsus, Munda, Issus all resolve to the historically correct
+      primary commander on both sides (Caesar vs. Pompey/Metellus Scipio/Pompeius Magnus,
+      Alexander vs. Darius III) despite messy real markup — Pharsalus's `{{tree list}}`
+      subordinate hierarchy and Issus's bolded-and-first `{{plainlist}}` entry both still pick
+      the right name because the rule only needs list order, not hierarchy depth or bold
+      markup (bold was checked and is consistent with first-position on every example found,
+      but not relied on, since it isn't universal across articles). 30 new tests
+      (`tests/test_commanders.py`, incl. a cache-gated real-page block skipped if
+      `data/raw/eval_ingest_cache.json` is absent, same pattern C2 used) + 2 doctests; full
+      suite 289 passed (259 + 30). `scripts/validate_data.py` still passes (schema untouched).
+      `scripts/eval_ingest.py` doesn't apply — C3 doesn't touch strength/casualty extraction or
+      the schema, only commander/side parsing.
 - [ ] C4a. Seed roster: build a candidate list of a few hundred generals from online "top X
       generals in history" lists and similar published rankings, plus Wikipedia's lists of
       commanders and generals by era. Cache the source pages, record which list each name came
