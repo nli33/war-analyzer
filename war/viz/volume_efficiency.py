@@ -18,15 +18,21 @@ so the choice is a judgment call, documented here:
   lopsided battles. `win_rate` is already bounded to [0, 1], always defined,
   and is literally PLAN.md's own first-listed Efficiency option.
 
-With only 8 points (this run's locked roster, SCOPE.md), every point is
-directly labeled by the general's name rather than color-coded by era or
-given a legend — a single-series chart needs no legend box (the dataviz
-skill's own rule: "a single series needs no legend box, the title names
-it"), and coloring 8 individually-identified points by era would just
-reproduce identity information the label already carries, at the cost of an
-8-hue categorical palette this chart form (`--pairs all`, no fixed adjacency)
-cannot validate past 3 slots per the skill's own palette notes. All markers
-use the palette's single default sequential/slot-1 hue instead.
+At the original 8-general locked roster (SCOPE.md), every point was labeled
+by the general's name rather than color-coded by era or given a legend — a
+single-series chart needs no legend box (the dataviz skill's own rule: "a
+single series needs no legend box, the title names it"), and coloring 8
+individually-identified points by era would just reproduce identity
+information the label already carries, at the cost of an 8-hue categorical
+palette this chart form (`--pairs all`, no fixed adjacency) cannot validate
+past 3 slots per the skill's own palette notes. All markers use the
+palette's single default sequential/slot-1 hue instead.
+
+At the auto-ingested, hundreds-of-generals scale (PROGRESS.md's D2), naming
+every point the same way is unreadable, so labeling now uses
+`war/viz/labeling.py`'s shared "extremes only" rule instead — see that
+module's docstring. Point styling (single hue, no legend, no era color
+coding) is unchanged.
 """
 
 import csv
@@ -42,6 +48,7 @@ import matplotlib.pyplot as plt
 from war.metrics.raw import raw_stats_by_general
 from war.metrics.rate import rate_stats_by_general
 from war.records import Battle, General
+from war.viz.labeling import extreme_labels
 
 _MARKER_COLOR = "#2a78d6"  # dataviz skill palette.md categorical slot 1 (light mode)
 _SURFACE_COLOR = "#fcfcfb"  # dataviz skill palette.md light chart surface
@@ -99,7 +106,7 @@ def render_volume_efficiency_figure(
     xs = [p.battles_commanded for p in points]
     ys = [p.win_rate for p in points]
     ax.scatter(xs, ys, s=64, color=_MARKER_COLOR, zorder=3)
-    for p in points:
+    for p in extreme_labels(points, lambda p: p.battles_commanded, lambda p: p.win_rate):
         ax.annotate(
             p.display_name,
             (p.battles_commanded, p.win_rate),

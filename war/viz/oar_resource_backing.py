@@ -36,8 +36,10 @@ is, so the y-axis (not the x-axis) gets a fixed `[0.5, 5.5]` limit for
 readability, the same "pad a known bounded range" treatment
 `tactical_strategic.py` gives its own `[0, 1]`-bounded axes.
 
-Point styling/labeling follows `volume_efficiency.py`'s reasoning: 8 points,
-each directly labeled by name, single palette hue, no legend.
+Point styling follows `volume_efficiency.py`'s reasoning: single palette hue,
+no legend. Labeling uses `war/viz/labeling.py`'s shared "extremes only" rule
+(PROGRESS.md's D2) rather than naming every point — see that module's
+docstring.
 """
 
 import csv
@@ -52,6 +54,7 @@ import matplotlib.pyplot as plt
 
 from war.metrics.oar import oar_ratings
 from war.records import Battle, General
+from war.viz.labeling import extreme_labels
 
 _MARKER_COLOR = "#2a78d6"  # dataviz skill palette.md categorical slot 1 (light mode)
 _SURFACE_COLOR = "#fcfcfb"  # dataviz skill palette.md light chart surface
@@ -112,7 +115,7 @@ def render_oar_resource_backing_figure(
     xs = [p.oar_rating for p in points]
     ys = [p.avg_resource_backing_tier for p in points]
     ax.scatter(xs, ys, s=64, color=_MARKER_COLOR, zorder=3)
-    for p in points:
+    for p in extreme_labels(points, lambda p: p.oar_rating, lambda p: p.avg_resource_backing_tier):
         ax.annotate(
             p.display_name,
             (p.oar_rating, p.avg_resource_backing_tier),
