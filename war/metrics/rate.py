@@ -21,7 +21,11 @@ formulas:
   optional in the schema. `casualty_exchange_ratio` sums whichever rows have
   each side's casualty field recorded (same per-field skip as `raw.py`'s
   totals) before taking the ratio, so a battle missing one side's casualties
-  doesn't block the other side's total from counting. `avg_force_ratio_faced`
+  doesn't block the other side's total from counting. `None` when either
+  side's total has no present rows to sum at all (not just when a present
+  total happens to be zero) -- a general can have every row missing one
+  side's casualties while the other side's total is a real, nonzero number,
+  which isn't "zero casualties taken," it's "never recorded." `avg_force_ratio_faced`
   needs *both* strengths on the same row to form that row's ratio, so a row
   missing either is dropped from the average entirely (there is no partial
   force ratio); `None` when every row is missing one side or the other,
@@ -96,7 +100,7 @@ def rate_stats_by_general(battles: list[Battle]) -> dict[str, RateStats]:
             win_rate=len(wins) / len(rows),
             casualty_exchange_ratio=(
                 total_enemy_casualties / total_own_casualties
-                if total_own_casualties
+                if total_own_casualties and total_enemy_casualties is not None
                 else None
             ),
             avg_force_ratio_faced=(

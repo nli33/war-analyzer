@@ -431,8 +431,28 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
 
 ## Phase D: Rankings and visuals at scale
 
-- [ ] D1. Run the metrics on `data/auto/`. Check runtime (Monte Carlo over hundreds of generals);
+- [x] D1. Run the metrics on `data/auto/`. Check runtime (Monte Carlo over hundreds of generals);
       fix it if it is too slow.
+      Running every Phase 3/4 metric function against `data/auto/` (920 rows, 342 generals with
+      >=1 row) surfaced one real crash, same "caught by real data, not synthetic tests" pattern as
+      every C-phase task: `rate.py`'s `casualty_exchange_ratio` only guarded against
+      `total_own_casualties` being falsy before dividing, not against `total_enemy_casualties`
+      being `None` — the gold set never has a general whose own-casualties total is real but whose
+      enemy-casualties total is entirely unrecorded, but `data/auto/`'s sparser per-field coverage
+      does, and `None / int` raised `TypeError`. Fixed in `war/metrics/rate.py` (guard both totals),
+      1 regression test added in `tests/test_metrics_rate.py` (358 passed, up from 357).
+      Runtime: `raw`/`rate`/`war_residual`/`clutch`/`squander` each <0.1s; `oar_ratings` 1.4s;
+      `composite_ranking`/`category_rankings` ~1.5s each. `monte_carlo_uncertainty` (the one that
+      scales with generals, not just rows) took 2m23s at the default 1000 runs — exceeds the
+      interactive 120s command timeout (same thing already noted happened at the smaller
+      19-general/178-row gold set) so it needs to run in the background or with an extended
+      timeout, but it is not pathologically slow for a one-shot overnight batch script. Applied one
+      free optimization while profiling (`war/metrics/uncertainty.py`'s finalization loop called
+      `np.percentile` twice per general/metric instead of once with `[5, 95]`, doubling the sort
+      cost for no benefit) but did not rewrite the resampling loop itself — 2.5 minutes for 1000
+      runs over hundreds of generals doesn't clear the bar for "too slow, needs a fix" the task
+      names, and a heavier vectorization rewrite would be scope creep past what D1 asks for. No
+      schema change; `scripts/validate_data.py` not re-run (unaffected).
 - [ ] D2. Ranking tables and the three scatter plots at hundreds of generals: tables show top N with
       full CSV alongside, scatter plots label only the extremes. Verify without a display, as in
       SCOPE.md Phase 6 (assert on output files and data).

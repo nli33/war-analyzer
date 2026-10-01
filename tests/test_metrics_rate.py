@@ -146,6 +146,19 @@ def test_casualty_exchange_ratio_sums_only_rows_with_that_sides_casualties():
     assert stats.casualty_exchange_ratio == 4_000 / 1_000
 
 
+def test_casualty_exchange_ratio_none_when_one_side_never_recorded():
+    # own_casualties present and nonzero on both rows, enemy_casualties missing
+    # on every row -- not "zero enemy casualties," genuinely never recorded.
+    battles = [
+        make_battle("kate", "Win", 1, 1, 500, None, decisiveness="Strategic"),
+        make_battle("kate", "Loss", 1, 1, 1_000, None),
+    ]
+
+    stats = rate_stats_by_general(battles)["kate"]
+
+    assert stats.casualty_exchange_ratio is None
+
+
 def test_generals_kept_separate():
     battles = [
         make_battle("alice", "Win", 1, 1, 0, 1, decisiveness="Strategic"),

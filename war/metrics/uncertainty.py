@@ -170,12 +170,13 @@ def monte_carlo_uncertainty(
             values = samples.get((general_id, metric_name), [])
             if values:
                 arr = np.array(values)
+                ci_low, ci_high = np.percentile(arr, [5, 95])
                 result[general_id][metric_name] = MetricDistribution(
                     general_id=general_id,
                     metric=metric_name,
                     mean=float(np.mean(arr)),
-                    ci_low=float(np.percentile(arr, 5)),
-                    ci_high=float(np.percentile(arr, 95)),
+                    ci_low=float(ci_low),
+                    ci_high=float(ci_high),
                     runs_used=len(values),
                 )
             else:
