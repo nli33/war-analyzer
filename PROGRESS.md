@@ -218,8 +218,22 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
 
 ## Phase C: Build the pipeline
 
-- [ ] C1. Battle universe: crawl Wikipedia "List of battles" pages into a battle URL list. Cached,
+- [x] C1. Battle universe: crawl Wikipedia "List of battles" pages into a battle URL list. Cached,
       throttled, resumable.
+      Added `war.scrape.extract_battle_titles` (keyword filter over every `[[wikilink]]` on a
+      list page, reusing A1's keyword set; works unchanged on both the bullet-list and
+      wikitable markup these pages mix) and `scripts/build_battle_universe.py`, which fetches
+      the 7 list pages (`LIST_OF_BATTLES_PAGES`), caches their wikitext at
+      `data/raw/battle_universe_cache.json`, and writes the deduped candidate titles to
+      `data/raw/battle_universe.csv`. Real run: 7/7 pages fetched, 8,824 candidate titles;
+      rerun hit the cache (2s, no network) confirming resumability. This is a recall-oriented
+      candidate list, not a verified one — known misses are non-keyword battle names (e.g.
+      ancient sites like "Jebel Sahaba") and false positives like nav links ("List of sieges",
+      explicitly excluded) or campaign pages with no military-conflict infobox; C2's extractor
+      is the precision filter on this list, not this script. 8 new tests in
+      `tests/test_scrape.py` cover keyword filtering, dedup, fragment-stripping, namespace
+      exclusion, and both markup shapes. Full suite green (210 passed). No schema/extractor
+      change, so `validate_data.py`/`eval_ingest.py` don't apply to this task.
 - [ ] C2. Deterministic infobox extractor with unit tests. Cover at least: ranges, "c."/"~", k/m
       suffixes, multi-segment fields, plainlist/ubl templates, killed/wounded/captured sums,
       per-nation breakdowns, qualitative words ("heavy", "light") become null. Add a test for each

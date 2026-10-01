@@ -42,6 +42,29 @@ _INFOBOX_FIELDS = (
     "casualties2",
 )
 
+# The 7 pages Wikipedia splits its battle index across (same split A1's study of
+# ethanarsht/military_rankings uses). "since 2001" currently redirects to "...in the 21st
+# century" — using the live redirect target directly avoids relying on redirect resolution.
+LIST_OF_BATTLES_PAGES = (
+    "List of battles before 301",
+    "List of battles 301–1300",
+    "List of battles 1301–1600",
+    "List of battles 1601–1800",
+    "List of battles 1801–1900",
+    "List of battles 1901–2000",
+    "List of battles in the 21st century",
+)
+
+# Keyword filter from A1's study of ethanarsht/military_rankings: a wikilink target containing
+# one of these words is treated as a candidate battle page. This is recall-oriented, not
+# precision — it also catches non-battle links (e.g. a "see also" link to "List of sieges",
+# excluded separately below) and it misses battle pages that don't use any of these words (e.g.
+# ancient conflict sites named only for their location, like "Jebel Sahaba"). C2's infobox
+# extractor is the precision filter on this list, not this function.
+_BATTLE_LINK_KEYWORDS = ("fall", "battle", "siege", "capture", "operation", "action", "recapture")
+
+_WIKILINK_RE = re.compile(r"\[\[([^|\]]+)(?:\|[^\]]*)?\]\]")
+
 
 @dataclass
 class InfoboxDraft:
@@ -90,6 +113,35 @@ def parse_military_infobox(wikitext: str) -> dict[str, str]:
         if cleaned:
             fields[name] = cleaned
     return fields
+
+
+def extract_battle_titles(wikitext: str) -> list[str]:
+    """Pull candidate battle-page titles out of a "List of battles" page's wikitext.
+
+    Scans every `[[wikilink]]` on the page — this works unchanged whether the page's markup
+    for a given era is a bullet list or a wikitable, since a wikilink looks the same in raw
+    wikitext either way — and keeps targets containing a battle-like keyword (see
+    `_BATTLE_LINK_KEYWORDS`), after stripping any `#section` fragment and excluding namespaced
+    links (`File:`, `Category:`, interwiki language prefixes like `:es:`) and "List of ..."
+    links. Order of first appearance is preserved; duplicate targets are dropped.
+
+    >>> extract_battle_titles("[[Battle of Cannae]] and [[List of sieges]] and [[Rome]]")
+    ['Battle of Cannae']
+    """
+    titles: list[str] = []
+    seen: set[str] = set()
+    for raw_target in _WIKILINK_RE.findall(wikitext):
+        target = raw_target.split("#", 1)[0].strip()
+        if not target or ":" in target:
+            continue
+        if target.lower().startswith("list of") or target.lower().startswith("lists of"):
+            continue
+        if not any(keyword in target.lower() for keyword in _BATTLE_LINK_KEYWORDS):
+            continue
+        if target not in seen:
+            seen.add(target)
+            titles.append(target)
+    return titles
 
 
 def fetch_wikitext(title: str) -> str:

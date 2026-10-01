@@ -6,7 +6,7 @@ import urllib.error
 from io import BytesIO
 from unittest.mock import patch
 
-from war.scrape import fetch_wikitext_batch, parse_military_infobox
+from war.scrape import extract_battle_titles, fetch_wikitext_batch, parse_military_infobox
 
 # Trimmed from enwiki's actual "Battle of Cannae" infobox as of research time, with
 # refs/templates left in deliberately to exercise the cleanup regexes.
@@ -88,6 +88,54 @@ def test_fetch_wikitext_batch_chunks_by_batch_size():
 
     assert mock_urlopen.call_count == 2  # chunks of 2 -> ["A", "B"], ["C"]
     mock_sleep.assert_called_once_with(1.0)
+
+
+def test_extract_battle_titles_keeps_keyword_matches_only():
+    text = "[[Battle of Cannae]], [[Rome]], and [[Siege of Ostend]]."
+    assert extract_battle_titles(text) == ["Battle of Cannae", "Siege of Ostend"]
+
+
+def test_extract_battle_titles_excludes_list_of_links():
+    # A "see also" link containing the keyword "siege" shouldn't be mistaken for a battle page.
+    text = "[[Battle of Kokenhausen]] ... see also [[List of sieges]]"
+    assert extract_battle_titles(text) == ["Battle of Kokenhausen"]
+
+
+def test_extract_battle_titles_excludes_namespaced_and_interwiki_links():
+    text = "[[:es:Masacre de la cueva de Els Trocs|Battle Massacre]] [[Category:Battles]]"
+    assert extract_battle_titles(text) == []
+
+
+def test_extract_battle_titles_strips_section_fragments():
+    # The keyword only appears in the fragment, not the page title itself — not a battle page.
+    text = "[[Scorpion I#Battle depiction|Unification Battle of Egypt]]"
+    assert extract_battle_titles(text) == []
+
+
+def test_extract_battle_titles_dedupes_preserving_first_order():
+    text = "[[Battle of Zama]] ... [[Battle of Cannae]] ... [[Battle of Zama|Zama]]"
+    assert extract_battle_titles(text) == ["Battle of Zama", "Battle of Cannae"]
+
+
+def test_extract_battle_titles_works_on_wikitable_markup():
+    # Real markup shape: table row cells separated by `||`, link piped to a display alias.
+    text = (
+        "{|class=\"wikitable\"\n"
+        "|-\n"
+        "| [[Eighty Years' War]] || [[Siege of Rheinberg (1601)|Siege of Rheinberg]] "
+        "|| {{flagicon|Germany}} || 12 June\n"
+        "|-\n"
+        "| [[Jebel Sahaba]] || {{flagicon|Sudan}} || Neolithic conflict site\n"
+        "|}"
+    )
+    # "Eighty Years' War" has no keyword (correctly excluded as a war, not a battle); "Jebel
+    # Sahaba" is the documented miss (no battle-like keyword in its title).
+    assert extract_battle_titles(text) == ["Siege of Rheinberg (1601)"]
+
+
+def test_extract_battle_titles_works_on_bullet_markup():
+    text = "* [[Battle of Hastings]]\n* [[Fall of Constantinople]]\n* [[Byzantine Empire]]"
+    assert extract_battle_titles(text) == ["Battle of Hastings", "Fall of Constantinople"]
 
 
 def test_fetch_wikitext_batch_retries_on_429_then_succeeds():
