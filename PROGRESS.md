@@ -477,8 +477,27 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       caption reads "top 25 of 335" with a matching 26-row `<tr>` count. 8 new tests (5 for
       `extreme_labels`, 3 for `top_n` truncation/CSV-untruncated); full suite 367 passed (up from
       359). `scripts/validate_data.py` still passes (schema untouched).
-- [ ] D3. Sanity pass on the new ranking against historian consensus. Flag likely bugs and roster
+- [x] D3. Sanity pass on the new ranking against historian consensus. Flag likely bugs and roster
       artifacts; do not hand-tune weights. Compare against the gold-set ranking.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Bottom of the auto ranking is sane (no
+      consensus-great general at the bottom). Top end has two real, verified bugs, flagged but not
+      fixed (both are C3/C4a-level pipeline work, out of a sanity-pass task's scope): (1) identity
+      canonicalization is missing — 10 people (Napoleon, Wellington, Hannibal, etc.) are split
+      across 2-3 `general_id`s each because C3 never merges alternate Wikipedia titles for the
+      same person, so e.g. Napoleon occupies both auto-ranking #4 and #6 with his real record
+      arbitrarily halved between them; (2) C4a's category-based seed roster structurally misses
+      ruler-generals (kings/khans/shoguns/presidents/field-marshals aren't under its 85 "generals"
+      categories) and C4b's opponent-join doesn't rescue them when both sides of a battle are
+      unseeded rulers — root-caused end to end for Julius Caesar (his battles parse correctly and
+      clear C4b's bar several times over, he's simply never in the seed list or reachable via
+      opponent-join), with the same pattern explaining 12 of the 19 gold-set generals' total
+      absence from the 417-general roster. Net effect: the auto top-30 is real but minor figures
+      (3-11 battle records) rather than any consensus top-tier commander, not because the ranking
+      formula is wrong (A5 already showed it's robust to per-battle noise) but because roster
+      membership feeding it is incomplete/double-counted for exactly the generals most likely to
+      be checked. Also closed D2's open "335 of 417 ranked, not investigated" question: the gap is
+      82 generals with zero rows in `data/auto/battles.csv`, the same outcome-unresolvable dropout
+      C6 already documented, not a new bug. No code or data changed; 367 tests still pass.
 - [ ] D4. Update README.md with how to rerun ingestion and what the pipeline can and cannot do.
 
 ## Notes / deviations
