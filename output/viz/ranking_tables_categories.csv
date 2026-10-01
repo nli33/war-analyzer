@@ -1,14 +1,14 @@
 category,rank,general_id,display_name,value,ci_low,ci_high
-win_rate,1,genghis-khan,Genghis Khan,1.0,,
+win_rate,1,scipio-africanus,Scipio Africanus,1.0,,
 win_rate,2,subutai,Subutai,1.0,,
 win_rate,3,dwight-d-eisenhower,Dwight D. Eisenhower,1.0,,
-win_rate,4,alexander-the-great,Alexander the Great,1.0,,
-win_rate,5,scipio-africanus,Scipio Africanus,1.0,,
+win_rate,4,genghis-khan,Genghis Khan,1.0,,
+win_rate,5,alexander-the-great,Alexander the Great,1.0,,
 win_rate,6,wellington,Duke of Wellington,0.9473684210526315,,
 win_rate,7,hannibal-barca,Hannibal Barca,0.8571428571428571,,
 win_rate,8,georgy-zhukov,Georgy Zhukov,0.8333333333333334,,
-win_rate,9,douglas-macarthur,Douglas MacArthur,0.8333333333333334,,
-win_rate,10,tokugawa-ieyasu,Tokugawa Ieyasu,0.8333333333333334,,
+win_rate,9,tokugawa-ieyasu,Tokugawa Ieyasu,0.8333333333333334,,
+win_rate,10,douglas-macarthur,Douglas MacArthur,0.8333333333333334,,
 win_rate,11,napoleon-bonaparte,Napoleon Bonaparte,0.7857142857142857,,
 win_rate,12,frederick-the-great,Frederick the Great,0.75,,
 win_rate,13,julius-caesar,Julius Caesar,0.7272727272727273,,
@@ -56,33 +56,33 @@ opponent_adjusted_rating,16,george-washington,George Washington,1564.98209346030
 opponent_adjusted_rating,17,erich-von-manstein,Erich von Manstein,1557.9786989384882,,
 opponent_adjusted_rating,18,erwin-rommel,Erwin Rommel,1499.1653943499703,,
 opponent_adjusted_rating,19,saladin,Saladin,1429.8257396289432,,
-clutch_rating,1,genghis-khan,Genghis Khan,1.0,1.0,1.0
-clutch_rating,2,hannibal-barca,Hannibal Barca,1.0,0.8571428571428571,1.0
-clutch_rating,3,subutai,Subutai,1.0,1.0,1.0
+clutch_rating,1,scipio-africanus,Scipio Africanus,1.0,1.0,1.0
+clutch_rating,2,subutai,Subutai,1.0,1.0,1.0
+clutch_rating,3,georgy-zhukov,Georgy Zhukov,1.0,1.0,1.0
 clutch_rating,4,dwight-d-eisenhower,Dwight D. Eisenhower,1.0,1.0,1.0
-clutch_rating,5,alexander-the-great,Alexander the Great,1.0,1.0,1.0
-clutch_rating,6,scipio-africanus,Scipio Africanus,1.0,1.0,1.0
-clutch_rating,7,georgy-zhukov,Georgy Zhukov,1.0,1.0,1.0
-clutch_rating,8,wellington,Duke of Wellington,0.8888888888888888,0.8888888888888888,0.9090909090909091
-clutch_rating,9,frederick-the-great,Frederick the Great,0.75,0.7222222222222222,0.7727272727272727
-clutch_rating,10,napoleon-bonaparte,Napoleon Bonaparte,0.75,0.7222222222222222,0.8
-clutch_rating,11,julius-caesar,Julius Caesar,0.75,0.625,0.7777777777777778
-clutch_rating,12,douglas-macarthur,Douglas MacArthur,0.6666666666666666,0.6666666666666666,0.6666666666666666
-clutch_rating,13,tokugawa-ieyasu,Tokugawa Ieyasu,0.6666666666666666,0.6666666666666666,0.75
+clutch_rating,5,genghis-khan,Genghis Khan,1.0,1.0,1.0
+clutch_rating,6,alexander-the-great,Alexander the Great,1.0,1.0,1.0
+clutch_rating,7,hannibal-barca,Hannibal Barca,1.0,1.0,1.0
+clutch_rating,8,wellington,Duke of Wellington,0.8888888888888888,0.8888888888888888,0.8888888888888888
+clutch_rating,9,julius-caesar,Julius Caesar,0.75,0.75,0.75
+clutch_rating,10,frederick-the-great,Frederick the Great,0.75,0.75,0.75
+clutch_rating,11,napoleon-bonaparte,Napoleon Bonaparte,0.75,0.75,0.75
+clutch_rating,12,tokugawa-ieyasu,Tokugawa Ieyasu,0.6666666666666666,0.6666666666666666,0.6666666666666666
+clutch_rating,13,douglas-macarthur,Douglas MacArthur,0.6666666666666666,0.6666666666666666,0.6666666666666666
 clutch_rating,14,george-washington,George Washington,0.55,0.55,0.55
 clutch_rating,15,erwin-rommel,Erwin Rommel,0.5,0.5,0.5
-clutch_rating,16,erich-von-manstein,Erich von Manstein,0.5,0.3333333333333333,0.5
-clutch_rating,17,robert-e-lee,Robert E. Lee,0.5,0.5,0.5454545454545454
+clutch_rating,16,robert-e-lee,Robert E. Lee,0.5,0.5,0.5
+clutch_rating,17,erich-von-manstein,Erich von Manstein,0.5,0.5,0.5
 clutch_rating,18,ulysses-s-grant,Ulysses S. Grant,0.5,0.5,0.5
-clutch_rating,19,saladin,Saladin,0.0,0.0,0.6666666666666666
-squander_index,1,genghis-khan,Genghis Khan,0.0,,
-squander_index,2,erich-von-manstein,Erich von Manstein,0.0,,
+clutch_rating,19,saladin,Saladin,0.0,0.0,0.0
+squander_index,1,george-washington,George Washington,0.0,,
+squander_index,2,saladin,Saladin,0.0,,
 squander_index,3,subutai,Subutai,0.0,,
-squander_index,4,dwight-d-eisenhower,Dwight D. Eisenhower,0.0,,
-squander_index,5,saladin,Saladin,0.0,,
-squander_index,6,georgy-zhukov,Georgy Zhukov,0.0,,
-squander_index,7,george-washington,George Washington,0.0,,
-squander_index,8,julius-caesar,Julius Caesar,0.0,,
+squander_index,4,georgy-zhukov,Georgy Zhukov,0.0,,
+squander_index,5,dwight-d-eisenhower,Dwight D. Eisenhower,0.0,,
+squander_index,6,genghis-khan,Genghis Khan,0.0,,
+squander_index,7,julius-caesar,Julius Caesar,0.0,,
+squander_index,8,erich-von-manstein,Erich von Manstein,0.0,,
 squander_index,9,ulysses-s-grant,Ulysses S. Grant,0.0,,
 squander_index,10,robert-e-lee,Robert E. Lee,0.16666666666666666,,
 squander_index,11,scipio-africanus,Scipio Africanus,0.2,,
@@ -109,7 +109,7 @@ longevity_adjusted_value,12,julius-caesar,Julius Caesar,0.5714285714285714,,
 longevity_adjusted_value,13,frederick-the-great,Frederick the Great,0.475,,
 longevity_adjusted_value,14,hannibal-barca,Hannibal Barca,0.35294117647058826,,
 longevity_adjusted_value,15,genghis-khan,Genghis Khan,0.34782608695652173,,
-longevity_adjusted_value,16,subutai,Subutai,0.25,,
-longevity_adjusted_value,17,george-washington,George Washington,0.25,,
+longevity_adjusted_value,16,george-washington,George Washington,0.25,,
+longevity_adjusted_value,17,subutai,Subutai,0.25,,
 longevity_adjusted_value,18,saladin,Saladin,0.15,,
 longevity_adjusted_value,19,tokugawa-ieyasu,Tokugawa Ieyasu,0.10869565217391304,,
