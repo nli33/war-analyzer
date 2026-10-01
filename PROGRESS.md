@@ -104,9 +104,19 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       with sub-counts like artillery pieces; not a cheap join, would need as much parsing work as
       the wikitext infobox with worse structure, plus IPv6-only endpoint unreachable in this
       sandbox without forcing IPv4).
-- [ ] A3. Build `scripts/eval_ingest.py`: runs the extractor on the 177 gold battles and reports, per
+- [x] A3. Build `scripts/eval_ingest.py`: runs the extractor on the 177 gold battles and reports, per
       field, coverage and the share within 1.5x, 2x, and 3x of the gold value (use log error, not
       percent). Everything later is scored with this.
+      Full findings in `~/notes/war-analyzer/ingestion.md`. Since C1-C2's real extractor don't
+      exist yet, scored a naive "first number in the field" regex parser defined in the script
+      itself as a baseline/floor, not the production extractor. Side assignment (own/enemy vs.
+      combatant1/2) also doesn't exist yet (C3), so the script tries both orientations per battle
+      and keeps the lower-error one — makes these numbers an optimistic upper bound, not a
+      prediction of C7's eventual score. Results (177 rows, battle_name as-is as the Wikipedia
+      title): page found 155/177 (88%); own/enemy troop strength 66%/65% coverage, 89% within 3x;
+      own/enemy casualties 58%/62% coverage, 71%/78% within 3x. Clears the default quality floor
+      comfortably on strength and is at-or-above it on casualties coverage, with the real C2
+      extractor and C3 side-matching still to come.
 - [ ] A4. CDB90 join test: download it, join to the gold set by name and date, report agreement and
       coverage. Check whether it has commanders and what its license is. Check COW CINC
       availability. Keep a source only if joining it is cheap.
