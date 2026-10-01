@@ -15,6 +15,13 @@ the condition but not the exact thresholds or how performance rolls up:
   side, never the opponent's; there is nothing to compare it against
   per-battle. On the real 83-row dataset, tier <=2 selects 24 rows and
   outnumbered selects 36, so neither condition is vacuous or near-universal.
+* **Missing-value policy (PROGRESS.md Phase B3):** both troop-strength
+  fields are optional in the schema, but `resource_backing_tier` is not, so
+  "outnumbered" is simply untestable on a row missing either strength field.
+  The fallback is to decide that row's "playing from behind" status on the
+  tier condition alone, rather than dropping the row (it may still
+  genuinely qualify via low resource backing) or crashing on a `None`
+  comparison.
 * Performance is the **mean outcome score** (Win/Draw/Loss -> 1.0/0.5/0.0,
   the same mapping `oar.py`/`war_residual.py` already use) across only the
   qualifying "behind" battles — not a residual against expectation. PLAN.md
@@ -37,10 +44,12 @@ _RESOURCE_DISADVANTAGED_TIER = 2
 
 
 def _playing_from_behind(battle: Battle) -> bool:
-    return (
-        battle.enemy_troop_strength > battle.own_troop_strength
-        or battle.resource_backing_tier <= _RESOURCE_DISADVANTAGED_TIER
+    outnumbered = (
+        battle.own_troop_strength is not None
+        and battle.enemy_troop_strength is not None
+        and battle.enemy_troop_strength > battle.own_troop_strength
     )
+    return outnumbered or battle.resource_backing_tier <= _RESOURCE_DISADVANTAGED_TIER
 
 
 @dataclass(frozen=True)

@@ -105,3 +105,27 @@ def test_generals_kept_separate():
 
 def test_general_with_no_battles_is_absent():
     assert clutch_rating_by_general([]) == {}
+
+
+def test_missing_strength_falls_back_to_tier_condition_only():
+    battles = [
+        make_battle("hank", "Win", own_troops=None, enemy_troops=10_000, resource_backing_tier=1),
+    ]
+
+    stats = clutch_rating_by_general(battles)["hank"]
+
+    # "outnumbered" is untestable with own_troops missing, but tier 1 alone
+    # still qualifies the row as playing from behind
+    assert stats.battles_used == 1
+    assert stats.clutch_rating == 1.0
+
+
+def test_missing_strength_and_adequate_tier_does_not_qualify():
+    battles = [
+        make_battle("ivy", "Win", own_troops=None, enemy_troops=10_000, resource_backing_tier=3),
+    ]
+
+    stats = clutch_rating_by_general(battles)["ivy"]
+
+    assert stats.battles_used == 0
+    assert stats.clutch_rating is None

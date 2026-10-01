@@ -20,7 +20,9 @@ from war.metrics.war_residual import war_residual_by_general
 from war.records import Battle
 
 
-def make_battle(general_id, outcome, force_ratio=1.0, resource=3, tech=3, battle_id=None):
+def make_battle(
+    general_id, outcome, force_ratio=1.0, resource=3, tech=3, battle_id=None, missing_strength=False
+):
     """A Battle with only the fields war_residual_by_general reads set meaningfully."""
     own = 1000
     return Battle(
@@ -29,8 +31,8 @@ def make_battle(general_id, outcome, force_ratio=1.0, resource=3, tech=3, battle
         battle_name="Test Battle",
         date="1900",
         era="Industrial",
-        own_troop_strength=own,
-        enemy_troop_strength=round(own * force_ratio),
+        own_troop_strength=None if missing_strength else own,
+        enemy_troop_strength=None if missing_strength else round(own * force_ratio),
         own_casualties=1,
         enemy_casualties=1,
         outcome=outcome,
@@ -127,3 +129,35 @@ def test_battles_used_matches_row_count_per_general():
     result = war_residual_by_general(battles)
 
     assert result["alice"].battles_used == 3
+
+
+def test_rows_missing_a_strength_field_are_dropped_from_the_fit():
+    battles = [
+        make_battle("alice", "Win", force_ratio=1.5, battle_id="a1"),
+        make_battle("alice", "Loss", battle_id="a2", missing_strength=True),
+        make_battle("bob", "Loss", force_ratio=1.5, battle_id="b1"),
+    ]
+
+    result = war_residual_by_general(battles)
+
+    # alice's missing-strength row contributes no design-matrix row, so only
+    # her one usable battle is fit/counted
+    assert result["alice"].battles_used == 1
+
+
+def test_general_with_every_row_missing_strength_is_absent():
+    battles = [
+        make_battle("alice", "Win", battle_id="a1", missing_strength=True),
+        make_battle("bob", "Loss", force_ratio=1.5, battle_id="b1"),
+    ]
+
+    result = war_residual_by_general(battles)
+
+    assert "alice" not in result
+    assert "bob" in result
+
+
+def test_all_rows_missing_strength_returns_empty_dict():
+    battles = [make_battle("alice", "Win", battle_id="a1", missing_strength=True)]
+
+    assert war_residual_by_general(battles) == {}

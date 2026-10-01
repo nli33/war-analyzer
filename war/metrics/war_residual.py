@@ -24,6 +24,15 @@ regression target or how per-battle residuals roll up to a per-general stat:
   field `rate.py`'s `avg_force_ratio_faced` uses, with the same
   no-zero-guard precedent (own_troop_strength is never recorded as 0 in this
   dataset).
+* **Missing-value policy (PROGRESS.md Phase B3):** both troop-strength
+  fields are optional in the schema, but `resource_backing_tier`/
+  `tech_era_tier` are not, so a row can only fail to produce a `force_ratio`
+  by missing one of its two strength fields. Such rows cannot contribute a
+  design-matrix row at all (there is no partial regression input) and are
+  dropped from the pooled fit entirely, the "drop the row" policy — a
+  general whose every battle is missing a strength figure ends up with zero
+  usable rows and is absent from the result, same no-data convention as
+  `raw_stats_by_general`.
 * The per-general stat is the **mean** residual across that general's
   battles, not the sum — a rate stat, like `avg_force_ratio_faced`, so a
   general with more rows isn't rewarded or punished purely by battle count.
@@ -59,11 +68,18 @@ def war_residual_by_general(battles: list[Battle]) -> dict[str, WARResidual]:
 
     Generals with no rows in `battles` are absent from the result, same
     convention as `raw_stats_by_general`/`rate_stats_by_general`. The OLS fit
-    is pooled across every row of `battles`, so the result depends on the
-    whole input, not just one general's rows — passing a subset of the
-    dataset refits against that subset only.
+    is pooled across every row that has both strength fields recorded (see
+    this module's docstring), so the result depends on the whole usable
+    input, not just one general's rows — passing a subset of the dataset
+    refits against that subset only.
     """
-    if not battles:
+    usable = [
+        battle
+        for battle in battles
+        if battle.own_troop_strength is not None
+        and battle.enemy_troop_strength is not None
+    ]
+    if not usable:
         return {}
 
     design = np.array(
@@ -74,17 +90,17 @@ def war_residual_by_general(battles: list[Battle]) -> dict[str, WARResidual]:
                 battle.resource_backing_tier,
                 battle.tech_era_tier,
             ]
-            for battle in battles
+            for battle in usable
         ]
     )
-    actual = np.array([_ACTUAL_SCORE[battle.outcome] for battle in battles])
+    actual = np.array([_ACTUAL_SCORE[battle.outcome] for battle in usable])
 
     coefficients, *_ = np.linalg.lstsq(design, actual, rcond=None)
     predicted = design @ coefficients
     residuals = actual - predicted
 
     by_general: dict[str, list[float]] = defaultdict(list)
-    for battle, residual in zip(battles, residuals):
+    for battle, residual in zip(usable, residuals):
         by_general[battle.general_id].append(residual)
 
     return {

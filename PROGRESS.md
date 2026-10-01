@@ -200,9 +200,21 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       resource-backing defaults, and the decisiveness keyword mapping are all judgment calls with
       no single authoritative source — written down there with the reasoning so they can be
       revisited.
-- [ ] B3. Metrics handle missing values (define the policy: drop the row, impute, or fall back per
+- [x] B3. Metrics handle missing values (define the policy: drop the row, impute, or fall back per
       metric) and Monte Carlo uses source ranges instead of confidence tags. Tests green. Log the
       gold-set ranking before versus after the schema change.
+      Monte Carlo/ranges half was already done in B1 out of necessity. This pass covered the
+      other half: `raw.py` totals and `rate.py`'s `casualty_exchange_ratio` now sum only the rows
+      that carry each field (impute by omission, `None` when zero rows do); `rate.py`'s
+      `avg_force_ratio_faced` and `war_residual.py`'s OLS fit drop rows missing a strength field
+      (no partial force ratio/regression row exists); `clutch.py` falls back to the
+      resource-tier condition alone when strength is missing. Full reasoning and the
+      per-metric table in `~/notes/war-analyzer/ingestion.md`. 10 new tests across
+      `test_metrics_raw.py`/`rate.py`/`war_residual.py`/`clutch.py` (202 total, all green);
+      `scripts/validate_data.py` and `scripts/eval_ingest.py` unaffected (schema/extractor
+      untouched); `composite_ranking` on the gold set is byte-identical before/after
+      (Eisenhower 1st, Rommel last) since the gold set has no missing values yet — confirms this
+      is a true no-op until real nulls exist.
 
 ## Phase C: Build the pipeline
 

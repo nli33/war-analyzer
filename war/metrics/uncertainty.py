@@ -52,7 +52,14 @@ the exact noise model or which of Phase 3's metrics to re-run:
   single repeated point when noise is 0.
 * A field with a recorded point estimate but a missing low or high bound
   (or vice versa) is left unresampled -- a partial range isn't a usable
-  sampling interval, so this is treated the same as no range at all.
+  sampling interval, so this is treated the same as no range at all. A field
+  that is genuinely missing (`None`, no point estimate and no range) has
+  nothing to resample from either, so it stays `None` across every run; the
+  Phase B3 missing-value policy in `raw.py`/`rate.py`/`war_residual.py`/
+  `clutch.py` is what then decides how each metric treats that still-`None`
+  value run to run (skip the row, fall back to another condition, etc.) --
+  this module just needs those downstream functions to tolerate `None`
+  without crashing, which they now do.
 * `war_residual` is the one metric here that is *not* purely general-local:
   `war_residual_by_general` fits its regression pooled across every battle
   passed in, so resampling another general's Low-confidence rows shifts the

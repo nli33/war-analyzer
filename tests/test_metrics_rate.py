@@ -112,6 +112,40 @@ def test_decisive_win_rate_none_with_no_wins():
     assert stats.decisive_win_rate is None
 
 
+def test_avg_force_ratio_faced_skips_rows_missing_either_strength_field():
+    battles = [
+        make_battle("hank", "Win", 5_000, 10_000, 1, 1, decisiveness="Strategic"),
+        make_battle("hank", "Loss", None, 10_000, 1, 1),  # own strength missing
+        make_battle("hank", "Loss", 10_000, None, 1, 1),  # enemy strength missing
+    ]
+
+    stats = rate_stats_by_general(battles)["hank"]
+
+    # only the first row has both sides recorded, so the average is just its ratio
+    assert stats.avg_force_ratio_faced == 2.0
+
+
+def test_avg_force_ratio_faced_none_when_no_row_has_both_strengths():
+    battles = [make_battle("ivy", "Win", None, 10_000, 1, 1, decisiveness="Strategic")]
+
+    stats = rate_stats_by_general(battles)["ivy"]
+
+    assert stats.avg_force_ratio_faced is None
+
+
+def test_casualty_exchange_ratio_sums_only_rows_with_that_sides_casualties():
+    battles = [
+        make_battle("jill", "Win", 1, 1, 1_000, None, decisiveness="Strategic"),
+        make_battle("jill", "Loss", 1, 1, None, 4_000),
+    ]
+
+    stats = rate_stats_by_general(battles)["jill"]
+
+    # own total: 1000 (second row's own_casualties missing, skipped)
+    # enemy total: 4000 (first row's enemy_casualties missing, skipped)
+    assert stats.casualty_exchange_ratio == 4_000 / 1_000
+
+
 def test_generals_kept_separate():
     battles = [
         make_battle("alice", "Win", 1, 1, 0, 1, decisiveness="Strategic"),

@@ -64,6 +64,34 @@ def test_general_with_no_battles_is_absent():
     assert stats == {}
 
 
+def test_total_is_none_when_every_row_is_missing_the_field():
+    battles = [
+        make_battle("hank", "Win", own_troops=None, own_casualties=None, enemy_casualties=None),
+        make_battle("hank", "Loss", own_troops=None, own_casualties=None, enemy_casualties=None),
+    ]
+
+    stats = raw_stats_by_general(battles)["hank"]
+
+    assert stats.total_own_troops is None
+    assert stats.total_enemy_casualties_inflicted is None
+    assert stats.total_own_casualties_taken is None
+
+
+def test_total_sums_only_rows_with_the_field_present():
+    battles = [
+        make_battle("ivy", "Win", own_troops=10_000, own_casualties=500, enemy_casualties=None),
+        make_battle("ivy", "Loss", own_troops=None, own_casualties=None, enemy_casualties=1_000),
+    ]
+
+    stats = raw_stats_by_general(battles)["ivy"]
+
+    # each total is summed independently from whichever rows carry it, not
+    # all-or-nothing per row
+    assert stats.total_own_troops == 10_000
+    assert stats.total_own_casualties_taken == 500
+    assert stats.total_enemy_casualties_inflicted == 1_000
+
+
 def test_all_outcome_kinds_counted_independently():
     battles = [
         make_battle("carol", "Win", 1, 0, 0),
