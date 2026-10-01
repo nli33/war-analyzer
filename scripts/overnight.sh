@@ -18,19 +18,18 @@ Read PROGRESS.md and CLAUDE.md. Check ~/notes/war-analyzer/ via the project-note
 existing entries before writing new ones - maintain the dev log there, not in this repo'"'"'s
 notes/dev-log.md, which predates the skill being available and is superseded. Pick up the next
 unchecked task. Do the work for
-that ONE task only - do not jump ahead. Follow SCOPE.md'"'"'s verification method for that phase
-before marking it done. Update PROGRESS.md (check the task, add a one-line note on what
+that ONE task only - do not jump ahead. Verify it before marking it done: run the test suite and,
+where the task calls for it, scripts/eval_ingest.py and the validator. Update PROGRESS.md (check the task, add a one-line note on what
 happened or any deviation) and commit your work with a message per CLAUDE.md'"'"'s commit rules.
 If a phase'"'"'s exit criteria can'"'"'t be verified, stop and write why in PROGRESS.md instead of
 guessing. If everything in PROGRESS.md is checked off, write DONE as the last line of
 PROGRESS.md and stop.
 
-For battle-curation tasks specifically: for each battle, first run
-`python scripts/scrape_wikipedia_infobox.py "<battle name>"` to get a draft strength/casualties
-scaffold - it is unverified and only saves you a first-pass lookup. Cross-check every number
-against an academic source (Clodfelter, Osprey, or another named source) before writing the
-battles.csv row, and set source_citation to the academic source you actually checked it against,
-not "Wikipedia". If the scraper finds no infobox, research the battle by hand as before.'
+Data ingestion rules: do not research individual battles with web searches or sub-agents. Data
+comes from deterministic code (scraping, parsing, joins). The only LLM call allowed is the single
+bounded batch pass described in PROGRESS.md task C5. Priorities when choosing a method: cost and
+latency first, then exhaustiveness and consensus, then historical accuracy (rough numbers are
+fine). Measure with scripts/eval_ingest.py against the gold set in data/ rather than guessing.'
 
 for i in $(seq 1 "$MAX_ITERATIONS"); do
   echo "=== iteration $i ==="
