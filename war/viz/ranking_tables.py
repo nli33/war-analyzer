@@ -51,6 +51,17 @@ Design choices not fully specified by PLAN.md/SCOPE.md:
   numbers otherwise) since each category's underlying metric has a different
   natural unit; this is presentation only; the CSV output keeps raw
   unformatted floats so the numbers stay machine-checkable.
+* **`top_n` (PROGRESS.md's D2, default 25)**: at the original 8-general
+  roster every table just showed everyone, but the auto-ingested roster runs
+  to the hundreds, and a scrollable wall of rows defeats the point of an
+  HTML summary table. Each table (composite and every category) renders only
+  its best `top_n` rows, with a caption noting the full count when truncated
+  (e.g. "top 25 of 342"); the two CSV files are never truncated, since they
+  are the "full data alongside" half of D2's ask and the place to look up
+  anyone past the cutoff. 25 was picked as enough rows to sanity-check the
+  top of a ranking (D3) without the page turning back into a full roster
+  dump; `top_n=None` disables truncation for callers that want everything
+  (e.g. a small gold-set run where truncation would never trigger anyway).
 """
 
 import csv
@@ -219,7 +230,13 @@ def category_ranking_rows(
     }
 
 
-def _composite_table_html(rows: list[CompositeRankingRow]) -> str:
+def _table_caption(label: str, shown: int, total: int) -> str:
+    if shown < total:
+        return f"{label} (top {shown} of {total})"
+    return label
+
+
+def _composite_table_html(rows: list[CompositeRankingRow], total: int) -> str:
     header = (
         "<tr><th>Rank</th><th>General</th><th>Era</th><th>Composite Score</th>"
         "<th>OAR</th><th>WAR-Residual (90% CI)</th><th>Decisive Win Rate</th>"
@@ -249,13 +266,14 @@ def _composite_table_html(rows: list[CompositeRankingRow]) -> str:
             f"<td>{row.longevity_adjusted_value:.3f}</td>"
             "</tr>"
         )
+    caption = html.escape(_table_caption("Composite Power Ranking", len(rows), total))
     return (
-        '<table class="ranking-table"><caption>Composite Power Ranking</caption>'
+        f'<table class="ranking-table"><caption>{caption}</caption>'
         f"<thead>{header}</thead><tbody>{''.join(body_rows)}</tbody></table>"
     )
 
 
-def _category_table_html(category: str, rows: list[CategoryTableRow]) -> str:
+def _category_table_html(category: str, rows: list[CategoryTableRow], total: int) -> str:
     value_label, formatter = _CATEGORY_VALUE_FORMAT[category]
     header = f"<tr><th>Rank</th><th>General</th><th>{html.escape(value_label)}</th></tr>"
     body_rows = []
@@ -271,8 +289,9 @@ def _category_table_html(category: str, rows: list[CategoryTableRow]) -> str:
             f"<td>{value_cell}</td>"
             "</tr>"
         )
+    caption = html.escape(_table_caption(CATEGORY_LABELS[category], len(rows), total))
     return (
-        f'<table class="ranking-table"><caption>{html.escape(CATEGORY_LABELS[category])}</caption>'
+        f'<table class="ranking-table"><caption>{caption}</caption>'
         f"<thead>{header}</thead><tbody>{''.join(body_rows)}</tbody></table>"
     )
 
@@ -297,21 +316,33 @@ table.ranking-table thead th {{ border-bottom: 2px solid {_ACCENT_COLOR}; color:
 def render_ranking_tables_html(
     composite_rows: list[CompositeRankingRow],
     category_rows: dict[str, list[CategoryTableRow]],
+    top_n: int | None = 25,
 ) -> str:
     """Render the Composite Power Ranking and the six category rankings as one
     static HTML page (no JS, no server) — plain string in, plain string out,
     so tests can assert on its contents directly rather than parsing a file.
+
+    `top_n` (see module docstring) caps every table at its best `top_n` rows;
+    `None` renders every row.
     """
+    full_categories = {
+        category: category_rows.get(category, []) for category in CATEGORY_LABELS
+    }
     category_tables = "".join(
-        _category_table_html(category, category_rows.get(category, []))
-        for category in CATEGORY_LABELS
+        _category_table_html(
+            category,
+            rows[:top_n] if top_n is not None else rows,
+            total=len(rows),
+        )
+        for category, rows in full_categories.items()
     )
+    composite_display = composite_rows[:top_n] if top_n is not None else composite_rows
     return (
         "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"
         "<title>War Analyzer — Ranking Tables</title>"
         f"<style>{_STYLE}</style></head><body>"
         "<h1>War Analyzer — Ranking Tables</h1>"
-        f"{_composite_table_html(composite_rows)}"
+        f"{_composite_table_html(composite_display, total=len(composite_rows))}"
         "<h2>Category Rankings</h2>"
         f'<div class="category-grid">{category_tables}</div>'
         "</body></html>"
@@ -371,11 +402,12 @@ def save_ranking_tables(
     output_path: Path | str,
     weights: CompositeWeights = DEFAULT_COMPOSITE_WEIGHTS,
     mc: dict[str, dict[str, MetricDistribution]] | None = None,
+    top_n: int | None = 25,
 ) -> Path:
     """Compute both rankings, render the HTML page, and save it plus two CSVs
     (`<stem>_composite.csv`, `<stem>_categories.csv`) next to it — the CSV
-    pair keeps every number in the page independently machine-checkable,
-    same "picture plus numbers" convention the three scatter modules use.
+    pair keeps every number independently machine-checkable and, per `top_n`
+    (module docstring), is never truncated even when the HTML page is.
 
     Returns the resolved HTML output path.
     """
@@ -385,7 +417,7 @@ def save_ranking_tables(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        render_ranking_tables_html(composite_rows, category_rows), encoding="utf-8"
+        render_ranking_tables_html(composite_rows, category_rows, top_n=top_n), encoding="utf-8"
     )
 
     _write_composite_csv(composite_rows, output_path.with_name(output_path.stem + "_composite.csv"))

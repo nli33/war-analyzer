@@ -205,6 +205,61 @@ def test_render_html_handles_empty_input_without_error():
     assert "Composite Power Ranking" in output
 
 
+def _three_general_fixture():
+    battles = [
+        make_battle("alice", "Win", opponent_general_id="carol", decisiveness="Strategic", battle_id="a1"),
+        make_battle("bob", "Win", opponent_general_id="carol", decisiveness="Tactical", battle_id="b1"),
+        make_battle("carol", "Loss", opponent_general_id="alice", battle_id="c1"),
+        make_battle("carol", "Loss", opponent_general_id="bob", battle_id="c2"),
+    ]
+    generals = [make_general("alice"), make_general("bob"), make_general("carol")]
+    return battles, generals
+
+
+def test_render_html_top_n_truncates_composite_and_categories():
+    battles, generals = _three_general_fixture()
+    composite_rows = composite_ranking_rows(battles, generals)
+    category_rows = category_ranking_rows(battles, generals)
+
+    output = render_ranking_tables_html(composite_rows, category_rows, top_n=1)
+
+    # only the #1-ranked general's name should appear in the composite table...
+    assert "(top 1 of 3)" in output
+    top_general = next(r.display_name for r in composite_rows if r.rank == 1)
+    other_generals = [r.display_name for r in composite_rows if r.rank != 1]
+    assert top_general in output
+    # ...and at least one lower-ranked general's composite row is gone from
+    # the page (category tables may still mention them on their own merits).
+    composite_section, _, _ = output.partition("<h2>Category Rankings</h2>")
+    assert all(name not in composite_section for name in other_generals)
+
+
+def test_render_html_top_n_none_shows_everyone():
+    battles, generals = _three_general_fixture()
+    composite_rows = composite_ranking_rows(battles, generals)
+    category_rows = category_ranking_rows(battles, generals)
+
+    output = render_ranking_tables_html(composite_rows, category_rows, top_n=None)
+
+    assert "(top" not in output
+    for row in composite_rows:
+        assert row.display_name in output
+
+
+def test_save_does_not_truncate_csv_even_with_small_top_n(tmp_path):
+    battles, generals = _three_general_fixture()
+    output_path = tmp_path / "ranking_tables.html"
+
+    save_ranking_tables(battles, generals, output_path, top_n=1)
+
+    html_text = output_path.read_text(encoding="utf-8")
+    assert "(top 1 of 3)" in html_text
+
+    composite_csv = tmp_path / "ranking_tables_composite.csv"
+    composite_lines = composite_csv.read_text(encoding="utf-8").strip().splitlines()
+    assert len(composite_lines) == 1 + 3  # header + all three generals, uncapped
+
+
 def test_save_writes_html_and_two_matching_csvs(tmp_path):
     battles, generals = _two_general_fixture()
     output_path = tmp_path / "ranking_tables.html"
