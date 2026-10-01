@@ -17,6 +17,31 @@ database can grow to hundreds of generals, then re-run the rankings and visuals 
    ranking; task A5 measures how true that is instead of assuming it. Do not spend effort
    reconciling historians' disagreements.
 
+### How to apply the priorities
+
+- **Floor first, then the order.** A method must clear the quality floor below before the
+  priorities rank it. Among methods that clear the floor, choose the cheapest and fastest. If
+  costs are within the same order of magnitude, call it a tie and pick the one with broader
+  coverage (priority 2). Accuracy only breaks a remaining tie.
+- **Default floor** (measured against the gold set with `scripts/eval_ingest.py`): troop strength
+  within 3x of the gold value on at least 75% of rows where both exist, and strength present for
+  both sides on at least 60% of the battles that go into the dataset. Casualties may be sparse:
+  report the null rate and keep the field only if at least 40% of rows have it. Task A5 may
+  move these numbers, but only with the measured reason written in Notes. Do not lower the
+  floor to make a method pass; pick a different method or flag it.
+- **Time-box.** One iteration per method comparison. If a source is blocked, rate-limited, or
+  unclear after a reasonable try, note it and move on to the next best option. Do not gold-plate:
+  stop improving the extractor once another fix moves the gold-set numbers by less than about 2
+  points.
+- **Run limits for C5** (change only with a note): at most 3,000 rows and 60 CLI calls in total.
+
+### How much to ingest
+
+The agents decide the methods, then ingest as much as the pipeline can do within these
+constraints. Aim for the low hundreds of generals (about 200-400). Do not pad the roster with
+generals whose battles have thin or missing numbers just to hit a count. If fewer than 100
+generals clear the floor, stop and flag it in Notes instead of lowering the floor.
+
 ## Decisions already made (do not re-ask)
 
 - The 19 hand-curated generals in `data/` stay untouched as a gold set. New pipeline output goes
@@ -86,9 +111,17 @@ database can grow to hundreds of generals, then re-run the rankings and visuals 
 - [ ] C3. Commanders and sides: parse infobox commander links per side, set `opponent_general_id`,
       and invert into general to battles. A general counts as personally commanding a battle if
       they are listed first on their side (document this rule and its known misses).
-- [ ] C4. Roster selection: keep generals with at least N battles that have usable strength figures
-      (pick N, record why, aim for hundreds of generals). Generate `generals.csv` automatically:
-      era and career years from battle dates.
+- [ ] C4a. Seed roster: build a candidate list of a few hundred generals from online "top X
+      generals in history" lists and similar published rankings, plus Wikipedia's lists of
+      commanders and generals by era. Cache the source pages, record which list each name came
+      from, and merge duplicates to Wikipedia page titles. This is a one-time scrape and a merge
+      script, not research per general.
+- [ ] C4b. Roster selection: for each seed, count battles from C3 that have usable strength
+      figures, and keep generals with at least N such battles (pick N, record why). Opponents who
+      appear in kept battles but are not on the seed list may join if they clear the same bar.
+      Generate `generals.csv` automatically: era and career years from battle dates. The famous-names
+      seeding favors generals people already rank highly. Record this bias in Notes, and keep
+      lower-profile generals in when the data clears the bar.
 - [ ] C5. Uncertain-row queue: collect every field regex could not parse into one file. Process the
       whole queue in a single bounded pass: `claude -p` on the lowest model and effort, chunked
       rows per call, a hard cap on total rows and calls, outputs checked against sanity bounds

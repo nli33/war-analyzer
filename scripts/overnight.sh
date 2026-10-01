@@ -27,9 +27,9 @@ PROGRESS.md and stop.
 
 Data ingestion rules: do not research individual battles with web searches or sub-agents. Data
 comes from deterministic code (scraping, parsing, joins). The only LLM call allowed is the single
-bounded batch pass described in PROGRESS.md task C5. Priorities when choosing a method: cost and
-latency first, then exhaustiveness and consensus, then historical accuracy (rough numbers are
-fine). Measure with scripts/eval_ingest.py against the gold set in data/ rather than guessing.'
+bounded batch pass described in PROGRESS.md task C5. Choosing a method: follow the decision rules in
+PROGRESS.md (clear the quality floor, then cheapest and fastest, then broadest coverage; rough
+numbers are fine). Time-box each comparison. Measure with scripts/eval_ingest.py against the gold set in data/ rather than guessing.'
 
 for i in $(seq 1 "$MAX_ITERATIONS"); do
   echo "=== iteration $i ==="
