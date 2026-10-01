@@ -1,6 +1,12 @@
-"""Tests for the infobox wikitext parser (war/scrape.py). No network calls — fixtures only."""
+"""Tests for war/scrape.py. Parser tests use fixtures only; batch-fetch tests mock urlopen —
+no real network calls."""
 
-from war.scrape import parse_military_infobox
+import json
+import urllib.error
+from io import BytesIO
+from unittest.mock import patch
+
+from war.scrape import fetch_wikitext_batch, parse_military_infobox
 
 # Trimmed from enwiki's actual "Battle of Cannae" infobox as of research time, with
 # refs/templates left in deliberately to exercise the cleanup regexes.
@@ -50,3 +56,47 @@ def test_resolves_wikilinks_to_display_text():
 
 def test_no_infobox_returns_empty():
     assert parse_military_infobox("Just some plain article text, no template here.") == {}
+
+
+def _query_response(pages):
+    body = json.dumps({"query": {"pages": pages}}).encode()
+    return BytesIO(body)
+
+
+def test_fetch_wikitext_batch_parses_multi_page_response():
+    pages = [
+        {"title": "Battle of Cannae", "revisions": [{"slots": {"main": {"content": "AAA"}}}]},
+        {"title": "Battle of Zama", "revisions": [{"slots": {"main": {"content": "BBB"}}}]},
+        {"title": "Nonexistent Battle", "missing": True},
+    ]
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.__enter__.return_value = _query_response(pages)
+        result = fetch_wikitext_batch(["Battle of Cannae", "Battle of Zama", "Nonexistent Battle"])
+
+    assert result == {"Battle of Cannae": "AAA", "Battle of Zama": "BBB"}
+    assert mock_urlopen.call_count == 1
+
+
+def test_fetch_wikitext_batch_chunks_by_batch_size():
+    pages = [{"title": "A", "revisions": [{"slots": {"main": {"content": "x"}}}]}]
+    with patch("urllib.request.urlopen") as mock_urlopen, patch("time.sleep") as mock_sleep:
+        mock_urlopen.return_value.__enter__.side_effect = [
+            _query_response(pages),
+            _query_response(pages),
+        ]
+        fetch_wikitext_batch(["A", "B", "C"], batch_size=2, delay_seconds=1.0)
+
+    assert mock_urlopen.call_count == 2  # chunks of 2 -> ["A", "B"], ["C"]
+    mock_sleep.assert_called_once_with(1.0)
+
+
+def test_fetch_wikitext_batch_retries_on_429_then_succeeds():
+    pages = [{"title": "A", "revisions": [{"slots": {"main": {"content": "x"}}}]}]
+    error = urllib.error.HTTPError("url", 429, "Too Many Requests", {}, None)
+    with patch("urllib.request.urlopen") as mock_urlopen, patch("time.sleep") as mock_sleep:
+        mock_urlopen.return_value.__enter__.side_effect = [error, _query_response(pages)]
+        result = fetch_wikitext_batch(["A"], max_retries=3)
+
+    assert result == {"A": "x"}
+    assert mock_urlopen.call_count == 2
+    mock_sleep.assert_called_once()  # backoff before the retry, not the politeness delay

@@ -10,12 +10,18 @@ with, or are more credulous than, academic estimates. Every value returned here 
 
 import json
 import re
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = "war-analyzer-research-scraper/0.1 (draft-data only, not for direct citation)"
+
+# MediaWiki allows up to 50 titles per query for anonymous callers (500 for bots/users with
+# apihighlimits). 50 is the safe default for an unauthenticated throttled crawler.
+MAX_TITLES_PER_BATCH = 50
 
 # Matches `|param = value` pairs inside a wikitext template, value running until the next
 # `|param =` line or the template's closing `}}`.
@@ -104,6 +110,70 @@ def fetch_wikitext(title: str) -> str:
     if "error" in payload:
         raise ValueError(f"Wikipedia API error for {title!r}: {payload['error']}")
     return payload["parse"]["wikitext"]
+
+
+def fetch_wikitext_batch(
+    titles: list[str],
+    batch_size: int = MAX_TITLES_PER_BATCH,
+    delay_seconds: float = 1.0,
+    max_retries: int = 5,
+) -> dict[str, str]:
+    """Fetch wikitext for many pages in as few HTTP requests as possible.
+
+    Chosen over one-call-per-page (A2 measurement, see dev log): action=query with
+    pipe-separated titles returns up to `batch_size` pages per request, cutting round trips
+    by that same factor versus `fetch_wikitext` called in a loop, for byte-identical wikitext.
+    Network calls. Retries on HTTP 429 with exponential backoff — Wikipedia's anonymous rate
+    limit was hit in practice even at modest request rates during that measurement. Titles with
+    no matching page (redirect-less 404s) are silently omitted from the result, not raised.
+    """
+    results: dict[str, str] = {}
+    for start in range(0, len(titles), batch_size):
+        chunk = titles[start : start + batch_size]
+        results.update(_fetch_wikitext_batch_once(chunk, max_retries))
+        if start + batch_size < len(titles):
+            time.sleep(delay_seconds)
+    return results
+
+
+def _fetch_wikitext_batch_once(titles: list[str], max_retries: int) -> dict[str, str]:
+    params = {
+        "action": "query",
+        "prop": "revisions",
+        "rvprop": "content",
+        "rvslots": "main",
+        "titles": "|".join(titles),
+        "format": "json",
+        "formatversion": "2",
+    }
+    query = "&".join(f"{k}={urllib.parse.quote(v)}" for k, v in params.items())
+    request = urllib.request.Request(
+        f"{WIKIPEDIA_API}?{query}", headers={"User-Agent": USER_AGENT}
+    )
+
+    backoff = 10.0
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(request, timeout=15) as response:
+                payload = json.loads(response.read())
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code == 429 and attempt < max_retries - 1:
+                time.sleep(backoff)
+                backoff *= 2
+                continue
+            raise
+
+    out: dict[str, str] = {}
+    for page in payload.get("query", {}).get("pages", []):
+        if "missing" in page:
+            continue
+        try:
+            content = page["revisions"][0]["slots"]["main"]["content"]
+        except (KeyError, IndexError):
+            continue
+        out[page["title"]] = content
+    return out
 
 
 def draft_for_battle(title: str) -> InfoboxDraft:

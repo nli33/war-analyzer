@@ -91,9 +91,19 @@ generals clear the floor, stop and flag it in Notes instead of lowering the floo
       hand-labeled/manual there, not automated, so ours has to be real code (C2/C3); avoid its
       per-commander-page HTTP fetch for canonicalization, use the anchor's own `title` attribute
       instead.
-- [ ] A2. Pick the Wikipedia access method by measuring: throttled API versus enwiki dump versus
+- [x] A2. Pick the Wikipedia access method by measuring: throttled API versus enwiki dump versus
       DBpedia. Compare time for 1,000 pages, completeness of infobox fields, and setup effort.
       Reuse or extend `war/scrape.py` where it fits.
+      Decision in `~/notes/war-analyzer/ingestion.md`: batched `action=query` (up to 50
+      titles/call) over one-page-per-call — same wikitext/field completeness, ~50x fewer HTTP
+      round trips (~1,000 calls -> ~20 for 1,000 pages). Added `war.scrape.fetch_wikitext_batch`
+      with exponential backoff on HTTP 429 (both methods hit 429 unpredictably in this sandbox,
+      even on the first batched call) and unit tests (mocked `urlopen`, no network). Rejected
+      enwiki dump (26.8GB compressed for ~7M pages to get ~1-3k battles — fails cost/latency) and
+      DBpedia (has strength/casualty predicates but values are unlabeled per-side and fragmented
+      with sub-counts like artillery pieces; not a cheap join, would need as much parsing work as
+      the wikitext infobox with worse structure, plus IPv6-only endpoint unreachable in this
+      sandbox without forcing IPv4).
 - [ ] A3. Build `scripts/eval_ingest.py`: runs the extractor on the 177 gold battles and reports, per
       field, coverage and the share within 1.5x, 2x, and 3x of the gold value (use log error, not
       percent). Everything later is scored with this.
