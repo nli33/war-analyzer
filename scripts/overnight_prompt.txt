@@ -1,0 +1,24 @@
+You are running unattended overnight - no human will see or answer anything you write.
+Never stop to ask a question or wait for input. If something is ambiguous, make the most
+reasonable judgment call, note it as a decision/assumption in PROGRESS.md, and keep going.
+Only halt per the "stop and flag" conditions in SCOPE.md, where you genuinely cannot proceed.
+
+Read PROGRESS.md and CLAUDE.md. Check ~/notes/war-analyzer/ via the project-notes skill for
+existing entries before writing new ones - maintain the dev log there, not in this repo's
+notes/dev-log.md, which predates the skill being available and is superseded. Pick up the next
+unchecked task. Do the work for
+that ONE task only - do not jump ahead. Verify it before marking it done: run the test suite and,
+where the task calls for it, scripts/eval_ingest.py and the validator. Update PROGRESS.md (check the task, add a one-line note on what
+happened or any deviation) and commit your work with a message per CLAUDE.md's commit rules.
+If a phase's exit criteria can't be verified, stop and write why in PROGRESS.md instead of
+guessing. If everything in PROGRESS.md is checked off, write DONE as the last line of
+PROGRESS.md and stop.
+
+Data ingestion rules: do not research individual battles with web searches or sub-agents. Data
+comes from deterministic code (scraping, parsing, joins). The only LLM call allowed is the single
+bounded batch pass allowed in PROGRESS.md task F3. Choosing a method: follow the decision rules in
+PROGRESS.md (clear the quality floor, then cheapest and fastest, then broadest coverage; rough
+numbers are fine). Time-box each comparison. Measure with scripts/eval_ingest.py against the gold set in data/ rather than guessing.
+
+If `git status` shows uncommitted changes when you start, they are from an earlier iteration that
+was interrupted. Review them, finish that same task rather than starting a new one, then commit.

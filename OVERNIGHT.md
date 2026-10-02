@@ -12,64 +12,43 @@ actual visual review to the user afterward.
 ## Architecture: fresh process per iteration, not one long session
 
 Don't try to keep a single Claude Code session alive all night and manage its context via
-compaction. Instead, run a **"Ralph loop"**: an outer bash script repeatedly starts a brand-new,
+compaction. Instead, run a **"Ralph loop"**: an outer script repeatedly starts a brand-new,
 stateless `claude -p` invocation. Each invocation reads state from disk (PROGRESS.md, git log,
 the repo itself), does one unit of work, writes state back to disk, commits, and exits. No
 conversation history carries between iterations — the filesystem is the memory, not the context
 window. This sidesteps context-rot entirely instead of fighting it.
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-cd /Users/n/code/war
-
-MAX_ITERATIONS=40
-STALL_LIMIT=3          # consecutive no-progress iterations before abort
-stall_count=0
-prev_commit=""
-
-for i in $(seq 1 "$MAX_ITERATIONS"); do
-  echo "=== iteration $i ==="
-
-  claude -p "You are running unattended overnight — no human will see or answer anything you
-  write. Never stop to ask a question or wait for input. If something is ambiguous, make the
-  most reasonable judgment call, note it as a decision/assumption in PROGRESS.md, and keep
-  going. Only halt per the 'stop and flag' conditions in SCOPE.md, where you genuinely cannot
-  proceed.
-
-  Read PROGRESS.md and CLAUDE.md. Pick up the next unchecked task. Do the work for
-  that ONE task only — don't jump ahead. Follow SCOPE.md's verification method for that phase
-  before marking it done. Update PROGRESS.md (check the task, add a one-line note on what
-  happened/any deviation) and commit your work with a message per CLAUDE.md's commit rules.
-  If a phase's exit criteria can't be verified, stop and write why in PROGRESS.md instead of
-  guessing. If everything in PROGRESS.md is checked off, write DONE as the last line of
-  PROGRESS.md and stop." \
-    --dangerously-skip-permissions \
-    --output-format stream-json \
-    --verbose
-
-  new_commit="$(git rev-parse HEAD)"
-  if [ "$new_commit" = "$prev_commit" ]; then
-    stall_count=$((stall_count + 1))
-  else
-    stall_count=0
-  fi
-  prev_commit="$new_commit"
-
-  if grep -qx "DONE" PROGRESS.md; then
-    echo "PROGRESS.md marked DONE, stopping."
-    break
-  fi
-  if [ "$stall_count" -ge "$STALL_LIMIT" ]; then
-    echo "No commits in $STALL_LIMIT iterations, stopping (stuck)."
-    break
-  fi
-done
+python3 scripts/overnight.py --min-remaining-pct 10 --wait-for-reset
+# ./scripts/overnight.sh passes its arguments through to the same script
 ```
 
-Run this in a locked-down sandbox (container/VM, network egress limited to what the run actually
-needs — web research + git push) — never against your primary machine unattended with
-`--dangerously-skip-permissions`. This is the same guidance Anthropic gives for "auto mode."
+`scripts/overnight.py` starts a fresh `claude -p` with the prompt in `scripts/overnight_prompt.txt`,
+streams a short line per tool call to the terminal, and writes the full event stream for each
+iteration to `logs/overnight/` (gitignored). Options:
+
+- `--max-iterations` (default 40, or `MAX_ITERATIONS`) and `--stall-limit` (default 3, or
+  `STALL_LIMIT`): hard caps on iterations and on consecutive iterations without a new commit.
+- `--model` and `--effort`: passed to `claude`. Unset means whatever the machine defaults to.
+- `--min-remaining-pct N`: each run reports how much of the five-hour and weekly usage windows is
+  used and when they reset. After a task finishes, if either window has less than N% left, the
+  loop stops instead of starting a task it may not be able to finish.
+- `--wait-for-reset`: instead of stopping, sleep until the window resets and carry on. It only
+  waits when the reset is within `--max-wait-hours` (default 6), so a nearly used-up weekly window
+  still stops the run. `--reset-margin-sec` (default 120) is added to the reset time.
+- If the limit is hit in the middle of a task, that iteration does not count as a stall. The loop
+  waits for the reset (with `--wait-for-reset`) or stops, then retries, and the prompt tells the
+  next iteration to finish the interrupted task first. Three limit hits in a row stop the run.
+
+Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck, 2 = iteration cap, 3 = stopped for usage.
+Look at `git status` before restarting after a usage stop in case a task was cut off.
+
+The usage-limit failure path (what `claude -p` prints when it is actually cut off) has not been
+seen on a real run; the loop treats a non-allowed `rate_limit_event` status, or an error result
+that mentions a usage or rate limit, as a limit hit.
+
+Run it inside a sandboxed container/VM, not against your primary machine. It passes
+`--dangerously-skip-permissions`, the same guidance Anthropic gives for "auto mode."
 
 ## PROGRESS.md — the living task file
 

@@ -6,3 +6,4 @@ __pycache__/
 
 # raw ingestion cache (large, regenerable)
 data/raw/
+logs/
