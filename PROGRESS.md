@@ -34,6 +34,12 @@ What went wrong, from the previous run's sanity pass:
   in Notes. Do not pad with thin-data generals.
 - Decisions already made for this run: the roster no longer requires a seed list (task E4), and
   the headline ranking uses a minimum-battle cutoff, not shrinkage (task G1).
+- Must-include generals: all 19 gold-set generals plus Han Xin must be in the final
+  `data/auto/` roster. They go in `data/must_include.csv` (canonical Wikipedia title and reason).
+  Roster membership is guaranteed, but they get no exemption from the quality floor or from the
+  headline ranking's minimum-battle cutoff (task G1). If one ends up below the cutoff, they stay
+  in the full CSV and the report says why.
+- Published "top N generals" lists are a reference check only, never a roster source or a weight.
 - No `Co-Authored-By` or other AI attribution in commit messages.
 
 ## Phase E: Identity and roster
@@ -48,15 +54,19 @@ What went wrong, from the previous run's sanity pass:
       Wikidata ID merge into one general. A link that resolves to a disambiguation page counts as
       an unidentified commander. Update tests. Verify: no two `general_id`s share a Wikidata ID,
       and the full test suite passes.
-- [ ] E3. Gold-set mapping. Write the 19 gold `general_id`s to canonical titles as a small table
-      in the repo, and a script that reports which gold generals are in the auto roster and, for
-      each one missing, why (not a commander in any parsed battle, too few usable battles, and
-      so on).
+- [ ] E3. Must-include list. Write `data/must_include.csv` with the 19 gold-set generals mapped to
+      their canonical Wikipedia titles, plus Han Xin. Add a script that reports, for each one,
+      whether they are in the auto roster and, if not, why (not a commander in any parsed battle,
+      too few usable battles, and so on).
 - [ ] E4. Drop the seed requirement. Any commander with at least N battles that have usable
-      strength figures joins the roster, whether or not they were on a seed list. Keep the seed
-      list only as a flag in the output. Choose N so the roster lands in the target band and write
-      down the roster size at N=1 through 5. Verify with E3's report that Caesar and the other
-      missing gold generals appear, or explain each one that does not.
+      strength figures joins the roster, whether or not they were on a seed list, and every
+      must-include general joins regardless of N. Keep the seed list only as a flag in the
+      output. Choose N so the rule-based roster lands in the target band and write down the roster
+      size at N=1 through 5. Verify with E3's report. For a must-include general with fewer than
+      N usable pipeline battles: the 19 gold-set generals fall back to their hand-curated rows
+      (migrated to the current schema, and marked as hand-curated in the notes column of
+      `generals.csv`); Han Xin has no hand-curated rows, so use whatever the pipeline finds and
+      record why if it is thin or empty. Report each case.
 
 ## Phase F: Where rows are lost
 
@@ -83,10 +93,18 @@ What went wrong, from the previous run's sanity pass:
 - [ ] G2. Archive the current `data/auto/`, regenerate it with the full pipeline, and re-run the
       quality gate with `scripts/eval_ingest.py` against the floor above. If it fails, write why
       in Notes and stop.
-- [ ] G3. Regenerate `output/viz_auto/`. Sanity-check the new ranking against historian
-      consensus: report where the 19 gold generals landed and flag anything that looks like a
-      bug or a roster artifact. Do not hand-tune weights. Update README.md: remove the two bugs
-      from the known-limitations list if they are fixed, and add the minimum-battle cutoff.
+- [ ] G3. Published-ranking reference. Collect 3-5 published "top N greatest generals" lists from
+      different kinds of sources (for example a Wikipedia list, a historians' survey, a popular
+      list). Fetch the pages with plain HTTP; reading names off a list page is fine, no research
+      per general. Save the names, ranks, and source URLs in `data/reference/top_n_lists.csv`.
+      Map names to canonical titles with E1's resolver. Report which listed generals are missing
+      from our roster, and for those in both, how our ranking compares (rank correlation and the
+      biggest disagreements). This is a reference check only.
+- [ ] G4. Regenerate `output/viz_auto/`. Sanity-check the new ranking against historian
+      consensus and G3's reference lists: report where the 19 gold generals and Han Xin landed
+      and flag anything that looks like a bug or a roster artifact. Do not hand-tune weights.
+      Update README.md: remove the two bugs from the known-limitations list if they are fixed,
+      and add the minimum-battle cutoff.
 
 ## Notes / deviations
 (none yet)
