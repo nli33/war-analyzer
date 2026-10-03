@@ -334,11 +334,43 @@ What went wrong, from the previous run's sanity pass:
       cache/report output (same convention as every other `data/raw/*.json`); the numbers above
       are the durable record. `eval_ingest.py`/`validate_data.py` not run -- this task reads
       `data/auto/` and the gold set but writes neither.
-- [ ] G4. Regenerate `output/viz_auto/`. Sanity-check the new ranking against historian
+- [x] G4. Regenerate `output/viz_auto/`. Sanity-check the new ranking against historian
       consensus and G3's reference lists: report where the 19 gold generals and Han Xin landed
       and flag anything that looks like a bug or a roster artifact. Do not hand-tune weights.
       Update README.md: remove the two bugs from the known-limitations list if they are fixed,
       and add the minimum-battle cutoff.
+      Regeneration first hit a real documentation bug, not a pipeline bug: README's own
+      `--output output/viz_auto` examples are wrong for all four render scripts (each treats
+      `--output` as the primary output file path, not a directory); run as documented,
+      `render_ranking_tables.py` crashed (`IsADirectoryError`, masked as exit 0 by a `| tail`
+      pipe) and the three scatter scripts clobbered a single stray `output/viz_auto.png`/`.csv`
+      pair at `output/`'s top level instead of writing per-chart files. Cleaned up the stray
+      files (untracked, nothing lost) and reran all four with explicit output file paths; fixed
+      README's examples to match. All 9 files regenerated and verified without a display (PNG
+      dimensions, CSV row counts, HTML table/column presence, the min-battles floor actually
+      dropping 170 of 330 composite rows from the HTML while keeping them in the CSV).
+      All 20 must-include generals (19 gold-set + Han Xin) resolved and ranked in the 330-ranked/
+      340-general roster -- confirms E1/E2/E4 hold at this dataset. Two flagged, neither fixed
+      here (out of this task's scope): Eisenhower ranks #1/330, a carry-over from G3 and a
+      documented structural consequence of the gold set's own "singular supreme command" scoping
+      decision (6-0-0 record), not a new bug -- closed without hand-tuning per this task's rule.
+      Rommel (2 final battle rows) and Manstein (3) both fall below the 5-battle display floor
+      despite their roster-selection "usable-strength" counts being higher (5 and 6) -- their
+      `generals.csv` notes clear the roster bar, but C6's final-row requirement (resolved
+      outcome, not just parsed strength) is stricter, the same outcome-resolution loss stage
+      F1-F3 already narrowed -- flagged as the concrete mechanism, not re-opened as new work.
+      Hand-checked the gold set's lowest-looking ranks (Saladin #253, Lee #215, Washington #183)
+      against their actual auto win/loss rows -- all honestly mixed records, not bugs. Top-15/
+      bottom-10 historian-consensus spot check: nobody with a reputation as an incompetent
+      commander sits at #1; clearest sample-size artifact is Nelson A. Miles at #4 with 1 battle
+      (matches the already-documented "no sample-size weighting" limitation). README: removed
+      the identity-merge and ruler-general known-limitations bullets (both confirmed fixed),
+      added the minimum-battle-cutoff note, fixed the `--output` usage examples. 472 tests pass
+      (unchanged, no library code touched). `eval_ingest.py`/`validate_data.py` not re-run --
+      this task writes neither `data/auto/` nor the gold set. Full detail in the dev log's G4
+      entry.
 
 ## Notes / deviations
 (none yet)
+
+DONE

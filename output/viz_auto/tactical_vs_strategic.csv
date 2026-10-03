@@ -1,236 +1,290 @@
 general_id,display_name,tactical_rating,strategic_rating
+abbas-the-great,Abbas the Great,0.875,0.0
+abdul-fatah-younis,Abdul Fatah Younis,0.5555555555555556,0.4
+abu-bakr-al-baghdadi,Abu Bakr al-Baghdadi,0.3333333333333333,0.0
 adam-ludwig-lewenhaupt,Adam Ludwig Lewenhaupt,1.0,0.0
-ahmed-rifai-al-joju,Ahmed Rifai al-Joju,1.0,0.0
-albert-vii-archduke-of-austria,Archduke Albert von Austria,1.0,0.0
-albrecht-von-wallenstein,Albrecht von Wallenstein,1.0,0.0
-alexander-farnese-duke-of-parma,"Alexander Farnese, Prince of Parma",0.6666666666666666,0.0
-alexander-suvorov,Alexander Suvorov,1.0,0.0
-alexander-tormasov,Alexander Tormasov,0.5,0.0
-alexandre-ma-tre-marquis-de-bay,Marquis de Bay,0.5,0.0
-ambrogio-spinola-1st-marquis-of-the-balbases,Ambrosio Spinola,0.6666666666666666,0.0
-andr-de-foix,André de Foix,1.0,0.0
-andr-mass-na,André Masséna,0.75,0.0
-antigonus-i-monophthalmus,Antigonos,0.4,0.0
-antipater,Antipatros,1.0,0.0
-anton-count-szt-ray-de-nagy-mihaly,Count Anton Sztáray,0.5,0.0
+ahmad-ibn-ibrahim-al-ghazi,Ahmad ibn Ibrahim,0.75,0.0
+akbar,Akbar,1.0,0.0
+albert-vii-of-austria,Archduke Albert von Austria,0.3333333333333333,0.0
+albrecht-von-wallenstein,Albrecht von Wallenstein,0.6666666666666666,0.0
+alexander-farnese-duke-of-parma,"Alexander Farnese, Prince of Parma",0.8,0.0
+alexander-i-of-russia,Alexander I,1.0,0.0
+alexander-suvorov,Alexander Suvorov,0.9166666666666666,0.0
+alexander-the-great,Alexander the Great,1.0,0.0
+ambrogio-spinola,Ambrosio Spinola,0.6666666666666666,0.0
+andr-mass-na,André Masséna,0.6,0.0
+andrea-doria,Andrea Doria,0.5,0.0
+andrew-cunningham-1st-viscount-cunningham-of-hyndhope,Andrew Cunningham,0.5,0.0
+andrew-jackson,Andrew Jackson,0.6666666666666666,0.0
+anthony-wayne,Anthony Wayne,0.5,0.0
+antigonus-i-monophthalmus,Antigonos,0.5,0.0
+antiochus-iii-the-great,Antiochus III the Great,0.6666666666666666,0.0
+anton-denikin,Anton Denikin,0.5,0.0
+antonio-l-pez-de-santa-anna,Antonio López de Santa Anna,0.2857142857142857,0.0
 antonio-ricardos,Antonio Ricardos,0.6666666666666666,0.0
-archduke-charles-duke-of-teschen,Archduke Charles,0.625,0.0
+archduke-charles-duke-of-teschen,Archduke Charles,0.5,0.0
 archduke-john-of-austria,Archduke John of Austria,0.5,0.0
-archelaus-pontic-army-officer,Archelaus,0.5,0.0
-armand-philippon,Armand Philippon,1.0,0.0
-arthur-wellesley-1st-duke-of-wellington,Arthur Wellesley,0.4666666666666667,0.0
-auguste-de-marmont,Auguste de Marmont,0.5,0.0
-aylmer-hunter-weston,Aylmer Hunter-Weston,1.0,0.0
-bogislav-friedrich-emanuel-von-tauentzien,Bogislav von Tauentzien,0.5,0.0
-bohdan-khmelnytsky,Bohdan Khmelnytskyi,0.5,0.0
+arthur-wellesley-1st-duke-of-wellington,Arthur Wellesley,0.6666666666666666,0.0
+auguste-de-marmont,Auguste de Marmont,0.4,0.0
+aurangzeb,Aurangzeb,0.75,0.0
+banastre-tarleton,Banastre Tarleton,0.5714285714285714,0.0
+barth-lemy-louis-joseph-sch-rer,Barthélemy Schérer,0.25,0.0
+belisarius,Belisarius,0.875,0.0
+benjamin-butler,Benjamin F. Butler,0.3333333333333333,0.0
+benjamin-lincoln,Benjamin Lincoln,0.5,0.0
+bernard-montgomery,Bernard Montgomery,1.0,0.0
+bernardo-de-g-lvez,Bernardo de Gálvez,1.0,0.0
+bohdan-khmelnytsky,Bohdan Khmelnytskyi,0.8,0.0
+bohemond-i-of-antioch,Bohemond of Taranto,0.6666666666666666,0.0
+boiorix,Boiorix,0.5,0.0
 boris-sheremetev,Boris Sheremetev,0.3333333333333333,0.0
-brigadier-general,Brig. Gen.,1.0,0.0
+boris-trajkovski,Boris Trajkovski,0.4,0.0
+brigadier-general,Brig. Gen.,0.5,0.0
 captain,Capt.,1.0,0.0
-carl-gustaf-wrangel,Carl Gustaf Wrangel,1.0,0.0
+cardinal-infante-ferdinand-of-austria,Cardinal-Infante Ferdinand,0.8,0.0
 carl-johan-adlercreutz,Carl Johan Adlercreutz,1.0,0.0
-caupolic-n,Caupolicán,0.5,0.0
-charles-cornwallis-1st-marquess-cornwallis,Charles Cornwallis,1.0,0.0
-charles-de-lambert-soldier,Charles de Lambert,1.0,0.0
+charles-cornwallis-1st-marquess-cornwallis,Charles Cornwallis,0.5,0.0
+charles-edward-stuart,Charles Edward Stuart,0.6,0.0
+charles-emmanuel-iii,Charles Emmanuel III of Savoy,0.4,0.0
 charles-fran-ois-dumouriez,Charles Dumouriez,1.0,0.0
-charles-william-ferdinand-duke-of-brunswick,Duke of Brunswick,0.5,0.0
-charles-william-ferdinand-duke-of-brunswick-wolfenb-ttel,"Charles William Ferdinand, Duke of Brunswick-Wolfenbüttel",0.5,0.0
-charles-x-gustav,Charles X Gustav,0.6,0.0
-charles-xii-of-sweden,Charles XII,1.0,0.0
-chief-joseph,Chief Joseph,0.75,0.0
-chu-huy-m-n,Chu Huy Mân,0.75,0.0
+charles-henri-hector-count-of-estaing,Count of Estaing,0.6,0.0
+charles-i-of-england,Charles I,0.375,0.0
+charles-the-bold,Charles the Bold,0.16666666666666666,0.0
+charles-v-holy-roman-emperor,Charles V,1.0,0.0
+charles-v-of-lorraine,"Charles V, Duke of Lorraine",0.6666666666666666,0.0
+charles-william-ferdinand-duke-of-brunswick,Duke of Brunswick,0.6666666666666666,0.0
+charles-x-gustav,Charles X Gustav,0.7777777777777778,0.0
+charles-xii-of-sweden,Charles XII,0.9333333333333333,0.0
+charles-xiv-john,Charles John,0.8571428571428571,0.0
+chief-joseph,Chief Joseph,0.5,0.0
 claude-lecourbe,Claude Lecourbe,0.4,0.0
-claude-louis-hector-de-villars,Claude de Villars,1.0,0.0
-claude-victor,Claude Victor,1.0,0.0
-claude-victor-perrin,Claude-Victor Perrin,1.0,0.0
-claude-victor-perrin-duc-de-belluno,Claude Victor-Perrin,1.0,0.0
-colonel,Col,0.5,0.0
-count-of-clerfayt,Count of Clerfayt,0.4,0.0
-crist-bal-de-mondrag-n,Cristóbal de Mondragón,1.0,0.0
-dagobert-sigmund-von-wurmser,Graf von Wurmser,0.2,0.0
-diego-de-ca-as-y-portocarrero-duke-del-parque,Duke del Parque,0.5,0.0
-djemal-pasha,Djemal Pasha,0.5,0.0
-donatien-de-rochambeau,Donatien de Rochambeau,0.5,0.0
+claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars,1.0,0.0
+claude-victor-perrin,Claude Victor-Perrin,0.375,0.0
+colonel,Col,0.6666666666666666,0.0
+constantine-i-of-greece,Crown Prince Constantine,1.0,0.0
+crist-bal-de-mondrag-n,Cristóbal de Mondragón,0.75,0.0
+cyrus-the-great,Kyros II,0.8,0.0
+dagobert-sigmund-von-wurmser,Graf von Wurmser,0.2222222222222222,0.0
+dionysius-i-of-syracuse,Dionysius,0.6,0.0
+douglas-haig-1st-earl-haig,Douglas Haig,0.6666666666666666,0.0
+douglas-macarthur,Douglas MacArthur,1.0,0.0
+dragut,Dragut,0.25,0.0
+duke-ferdinand-frederick-augustus-of-w-rttemberg,Duke Ferdinand of Württemberg,0.25,0.0
+duke-ferdinand-of-brunswick-wolfenb-ttel,Duke Ferdinand of Brunswick-Wolfenbüttel,0.375,0.0
+dwight-d-eisenhower,Dwight D. Eisenhower,1.0,1.0
 eberhard-von-vegesack,Eberhard Vegesack,0.6666666666666666,0.0
-edmund-allenby,Edmund Allenby,1.0,0.0
-edmund-allenby-1st-viscount-allenby,Edmund Allenby,1.0,0.0
-edmund-kirby-smith,E. Kirby Smith,1.0,0.0
-edmund-taczanowski,Edmund Taczanowski,0.5,0.0
-epaminondas,Epaminondas,0.5,0.0
-erich-von-falkenhayn,Erich von Falkenhayn,0.2857142857142857,0.0
-ernst-gideon-von-laudon,Ernst von Laudon,0.5,0.0
+edmund-allenby-1st-viscount-allenby,Edmund Allenby,0.8461538461538461,0.0
+edward-canby,Edward Canby,0.5,0.0
+edward-iii,Edward III of England,0.7777777777777778,0.0
+emilio-aguinaldo,Emilio Aguinaldo,0.75,0.0
+enrique-o-donnell-conde-de-la-bisbal,Enrique O'Donnell,0.75,0.0
+erich-von-falkenhayn,Erich von Falkenhayn,0.2,0.0
+erich-von-manstein,Erich von Manstein,0.6666666666666666,0.0
+ernst-gideon-von-laudon,Ernst Gideon von Laudon,0.5,0.0
+ernst-von-mansfeld,Ernst von Mansfeld,0.5,0.0
 eug-ne-de-beauharnais,Eugène de Beauharnais,0.5,0.0
-eustache-charles-d-aoust,Eustache d'Aoust,0.5,0.0
-eyre-coote-east-india-company-officer,Eyre Coote,1.0,0.0
-ferdinand-foch,Ferdinand Foch,1.0,0.0
+eumenes,Eumenes,0.25,0.0
+fedor-von-bock,Fedor von Bock,1.0,0.0
+fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba,1.0,0.0
+fran-ois-henri-de-montmorency-duc-de-luxembourg,Duke of Luxembourg,1.0,0.0
 fran-ois-joseph-lefebvre,François Lefebvre,0.75,0.0
-fran-ois-s-verin-marceau,François Marceau,1.0,0.0
-fran-ois-tienne-de-kellermann,François Kellermann,0.5,0.0
-francisco-espoz-y-mina,Francisco Espoz y Mina,1.0,0.0
-francisco-javier-casta-os-1st-duke-of-bail-n,Francisco Javier Castaños,0.6666666666666666,0.0
-francisco-verdugo,Francisco Verdugo,0.25,0.0
-franz-von-mercy,Franz von Mercy,0.3333333333333333,0.0
-franz-wenzel-graf-von-kaunitz-rietberg,Graf von Kaunitz,1.0,0.0
-frederick-steele,Frederick Steele,1.0,0.0
-friedrich-freiherr-kress-von-kressenstein,Friedrich Freiherr Kress von Kressenstein,0.5,0.0
-friedrich-freiherr-von-hotze,Friedrich Hotze,0.5,0.0
+fran-ois-s-bastien-charles-joseph-de-croix-count-of-clerfayt,Count of Clerfayt,0.5,0.0
+francisco-verdugo,Francisco Verdugo,0.2,0.0
+frederick-barbarossa,Frederick Barbarossa,0.5,0.0
+frederick-henry-prince-of-orange,Frederick Henry,0.7142857142857143,0.0
+frederick-ii-holy-roman-emperor,Frederick II,0.25,1.0
+frederick-roberts-1st-earl-roberts,Frederick Roberts,1.0,0.0
+frederick-the-great,Frederick the Great,0.75,0.0
 friedrich-wilhelm-freiherr-von-b-low,Friedrich Wilhelm von Bülow,1.0,0.0
-g-kb-ri,Gökböri,0.5,0.0
-garc-a-hurtado-de-mendoza-5th-marquis-of-ca-ete,García Hurtado de Mendoza,1.0,0.0
-gaspard-ii-de-coligny,Gaspard II de Coligny,0.5,0.0
-gebhard-leberecht-von-bl-cher,Gebhard von Blücher,0.4,0.0
-georg-carl-von-d-beln,Georg Carl von Döbeln,1.0,0.0
+fyodor-ushakov,Fyodor Ushakov,1.0,0.0
+gebhard-leberecht-von-bl-cher,Gebhard von Blücher,0.5714285714285714,0.0
+general-officer,General,0.8,0.0
+genghis-khan,Temujin,0.7777777777777778,0.0
+george-armstrong-custer,George Armstrong Custer,0.3333333333333333,0.0
 george-b-mcclellan,George B. McClellan,0.5,0.0
-george-monck,George Monck,1.0,0.0
-george-washington,George Washington,0.3333333333333333,0.0
-gerard-lake-1st-viscount-lake,Gerard Lake,0.6666666666666666,0.0
-giuseppe-garibaldi,Giuseppe Garibaldi,1.0,0.0
-gnaeus-cornelius-scipio-calvus,Gnaeus Cornelius Scipio Calvus,1.0,0.0
-gonzalo-fern-ndez-de-c-rdoba,Gonzalo Fernández de Córdoba,1.0,0.3333333333333333
+george-crook,George Crook,0.75,0.0
+george-rooke,George Rooke,0.5,0.0
+george-washington,George Washington,0.5454545454545454,0.0
+george-wootten,George Wootten,1.0,0.0
+georgy-zhukov,Georgy Zhukov,0.8333333333333334,1.0
+gerard-lake-1st-viscount-lake,Gerard Lake,0.7142857142857143,0.0
+gerd-von-rundstedt,Gerd von Rundstedt,0.5714285714285714,0.0
+giuseppe-garibaldi,Giuseppe Garibaldi,0.8,0.0
+gordon-bremer,Gordon Bremer,1.0,0.0
 gouverneur-k-warren,Gouverneur K. Warren,1.0,0.0
-guido-starhemberg,Starhemberg,1.0,0.0
 guillaume-brune,Guillaume Brune,1.0,0.0
+guru-gobind-singh,Guru Gobind Singh,0.6666666666666666,0.0
 gustaf-mauritz-armfelt,Gustaf Mauritz Armfelt,0.5,0.0
-gustavus-adolphus,Gustavus Adolphus,0.8,0.0
-hamilcar,Hamilcar,0.5,0.0
-hannibal,Hannibal,0.6923076923076923,0.1111111111111111
-hans-karl-von-diebitsch,Hans Karl von Diebitsch,0.5,0.0
+gustav-horn,Gustav Horn,0.5,0.0
+gustavus-adolphus,Gustavus Adolphus,0.7142857142857143,0.0
+guy-carleton-1st-baron-dorchester,Guy Carleton,0.75,0.0
+h-j-ujiyasu,Hōjō Ujiyasu,1.0,0.2
+haider-al-abadi,Haider al-Abadi,0.75,0.0
+han-xin,Han Xin,1.0,0.25
+hannibal,Hannibal,0.65,0.07692307692307693
+hans-karl-von-diebitsch,Hans Karl von Diebitsch,0.6666666666666666,0.0
 hasdrubal-barca,Hasdrubal Barca,0.25,0.0
+hayreddin-barbarossa,Hayreddin Pasha,0.75,0.3333333333333333
 henri-de-la-rochejaquelein,Rochejaquelein,0.6666666666666666,0.0
-henry-iii-of-france,Henry of Anjou,0.5,0.0
-henry-iv-of-france,Henry IV,0.6,0.0
-henry-o-donnell-1st-count-of-la-bisbal,Henry O'Donnell,0.6666666666666666,0.0
-ibrahim-pasha-of-egypt,Ibrahim Pasha,1.0,0.0
-igo-fern-ndez-de-velasco-2nd-duke-of-fr-as,Iñigo Fernández de Velasco,1.0,0.0
-ilya-alekseyev,Ilya Alekseyev,0.5,0.0
-j-zef-poniatowski,Józef Poniatowski,1.0,0.0
-jacques-fran-ois-dugommier,Jacques Dugommier,1.0,0.0
-jacques-macdonald,Jacques MacDonald,0.4,0.0
+henri-de-la-tour-d-auvergne-viscount-of-turenne,Turenne,0.2,0.0
+henry-hastings-sibley,Henry Hastings Sibley,1.0,0.0
+henry-iv-of-france,Henry IV,0.625,0.0
+horatio-nelson-1st-viscount-nelson,Horatio Nelson,0.6666666666666666,0.0
+hugh-gough-1st-viscount-gough,Hugh Gough,0.9090909090909091,0.0
+i-smet-i-n-n,İsmet Bey,0.6666666666666666,0.0
+ibn-saud,Abdulaziz Ibn Saud,0.75,0.0
+ismail-i,Ismail I,0.8333333333333334,0.0
+j-zsef-alvinczi,József Alvinczi,0.5,0.0
+jacques-fran-ois-dugommier,Jacques Dugommier,0.8333333333333334,0.0
+jalal-al-din-mangburni,Jalal al-Din Mangburni,0.42857142857142855,0.0
+james-fitzjames-1st-duke-of-berwick,Duke of Berwick,0.6666666666666666,0.0
 james-g-blunt,James G. Blunt,1.0,0.0
-jan-krukowiecki,Jan Krukowiecki,0.5,0.0
-jan-willem-de-winter,Jan Willem de Winter,0.5,0.0
+james-graham-1st-marquess-of-montrose,Lord Montrose,0.7777777777777778,0.0
+jan-karol-chodkiewicz,Jan Karol Chodkiewicz,0.75,0.0
+jan-zamoyski,Jan Zamoyski,1.0,0.0
 janusz-radziwi-1612-1655,Janusz Radziwiłł,0.6,0.0
-jean-baptiste-bernadotte,Jean-Baptiste Bernadotte,0.8,0.0
-jean-baptiste-bessi-res,Jean-Baptiste Bessières,0.5,0.0
-jean-baptiste-jourdan,General Jourdan,0.5555555555555556,0.0
-jean-baptiste-kl-ber,Jean Baptiste Kléber,0.8,0.0
-jean-charles-pichegru,Jean-Charles Pichegru,0.75,0.0
-jean-de-dieu-soult,Jean-de-Dieu Soult,0.625,0.0
-jean-isidore-harispe,Jean Harispe,1.0,0.0
-jean-joseph-amable-humbert,Jean Humbert,0.5,0.0
+jean-armand-de-maill-2nd-marquis-of-br-z,Jean Armand de Maillé-Brézé,0.5,0.0
+jean-baptiste-jourdan,General Jourdan,0.42857142857142855,0.0
+jean-baptiste-kl-ber,Jean Baptiste Kléber,0.8333333333333334,0.0
+jean-charles-pichegru,Jean-Charles Pichegru,0.6,0.0
+jean-de-dieu-soult,Jean-de-Dieu Soult,0.5625,0.0
+jean-jacques-dessalines,Jean-Jacques Dessalines,0.5,0.0
 jean-lannes,Jean Lannes,1.0,0.0
 jean-nicolas-houchard,Jean Houchard,1.0,0.0
-jean-ren-moreaux,René Moreaux,0.3333333333333333,0.0
-jean-victor-marie-moreau,Jean Moreau,0.8181818181818182,0.0
-jeremi-wi-niowiecki,Jeremi Wiśniowiecki,1.0,0.0
-joachim-murat,Joachim Murat,0.7777777777777778,0.0
-joaqu-n-blake,Joaquín Blake,0.5,0.0
-joaqu-n-blake-y-joyes,Joaquín Blake y Joyes,0.2,0.0
-johan-august-sandels,Johan August Sandels,0.6666666666666666,0.0
-johann-maria-philipp-frimont,Johann Frimont,1.0,0.0
-johann-peter-beaulieu,Johann Beaulieu,0.3333333333333333,0.0
-johann-tserclaes-count-of-tilly,Count of Tilly,0.5,0.0
+jean-victor-marie-moreau,Jean Moreau,0.8571428571428571,0.0
+joachim-murat,Joachim Murat,0.7,0.0
+joaqu-n-blake,Joaquín Blake y Joyes,0.2222222222222222,0.0
+johan-august-sandels,Johan August Sandels,0.75,0.0
+johann-peter-beaulieu,Johann von Beaulieu,0.25,0.0
+johann-tserclaes-count-of-tilly,Count of Tilly,0.6,0.0
 johann-von-hiller,Johann von Hiller,0.5,0.0
+johannes-blaskowitz,Johannes Blaskowitz,0.5,0.0
+john-bell-hood,John B. Hood,0.3333333333333333,0.0
+john-c-pemberton,John C. Pemberton,0.5,0.0
 john-churchill-1st-duke-of-marlborough,Duke of Marlborough,1.0,0.0
 john-hunyadi,John Hunyadi,0.6666666666666666,0.0
-john-ii-casimir-of-poland,John II Casimir,0.3333333333333333,0.0
-john-joseph-of-austria,John of Austria,1.0,0.0
-john-m-schofield,John M. Schofield,1.0,0.0
-john-murray-8th-baronet,John Murray,1.0,0.0
-jos-de-urbina-y-urbina-3rd-conde-de-cartaojal,Conde de Cartaojal,1.0,0.0
-joseph-bonaparte,Joseph Bonaparte,1.0,0.0
-joseph-j-reynolds,Joseph J. Reynolds,1.0,0.0
-joseph-joffre,Joseph Joffre,0.25,0.0
-joseph-radetzky-von-radetz,Joseph Radetzky,1.0,0.5
+john-ii-casimir-vasa,John II Casimir,0.3333333333333333,0.0
+john-iii-sobieski,John III Sobieski,0.8888888888888888,0.0
+john-j-pershing,John J. Pershing,1.0,0.0
+john-schofield,John M. Schofield,1.0,0.0
+jos-de-urrea,José de Urrea,1.0,0.0
+joseph-bonaparte,Joseph Bonaparte,0.3333333333333333,0.0
+joseph-e-johnston,Joseph E. Johnston,0.16666666666666666,0.0
+joseph-joffre,Joseph Joffre,0.4,0.0
 joseph-souham,Joseph Souham,1.0,0.0
-juan-yag-e,Juan Yagüe,1.0,0.0
+julius-caesar,Julius Caesar,0.8823529411764706,0.0
+k-pr-l-zade-faz-l-ahmed-pasha,Fazıl Ahmed,0.6,0.0
+k-z-m-karabekir,Kâzım Karabekir,0.6,0.0
 karl-philipp-prince-of-schwarzenberg,Karl von Schwarzenberg,0.3333333333333333,0.0
-karl-wilhelm-malm,Karl Wilhelm Malm,1.0,0.0
-koca-yusuf-pasha,Koca Yusuf Pasha,0.6666666666666666,0.0
-laurent-gouvion-saint-cyr,Laurent Saint-Cyr,1.0,0.0
-lazare-hoche,Lazare Hoche,0.5,0.0
-lennart-torstensson,Lennart Torstensson,1.0,0.0
-louis-charles-de-flers,Louis-Charles de Flers,0.5,0.0
-louis-desaix,Louis Desaix,0.5,0.0
-louis-gabriel-suchet,Louis Gabriel Suchet,0.7142857142857143,0.0
+khalid-ibn-al-walid,Khalid ibn al-Walid,1.0,0.0
+laurent-de-gouvion-saint-cyr,Laurent Saint-Cyr,0.8571428571428571,0.0
+lazare-hoche,Louis-Lazare Hoche,0.7142857142857143,0.0
+lee-kwon-mu,Lee Kwon Mu,0.6666666666666666,0.0
+leopold-joseph-von-daun,Leopold Joseph von Daun,0.6,0.0
+li-zongren,Li Zongren,0.5,0.0
+louis-gabriel-suchet,Louis Gabriel Suchet,0.75,0.0
 louis-grand-cond,"Louis, Grand Condé",0.5,0.0
-louis-ii-de-la-tr-moille,Louis II de la Trémoille,0.5,0.0
-louis-joseph-duke-of-vend-me,Duke of Vendôme,1.0,0.0
-louis-marie-de-lescure,Louis de Lescure,0.5,0.0
+louis-joseph-de-montcalm,Marquis de Montcalm,0.6666666666666666,0.0
+louis-joseph-duke-of-vend-me,Duke of Vendôme,0.6666666666666666,0.0
 louis-nicolas-davout,Louis-Nicolas Davout,1.0,0.0
-lucius-cornelius-sulla,Lucius Cornelius Sulla,1.0,0.0
-ludwig-yorck-von-wartenburg,Ludwig Yorck,0.3333333333333333,0.0
-maarten-tromp,Maarten Tromp,0.3333333333333333,0.0
-marcin-kalinowski,Marcin Kalinowski,0.6666666666666666,0.0
-marian-langiewicz,Marian Langiewicz,0.5,0.0
-matthias-corvinus,Matthias Corvinus,0.5,0.0
-maurice-d-elb-e,Maurice d'Elbée,0.5,0.0
-maurice-of-nassau,Maurice of Nassau,0.3333333333333333,0.0
-maurice-of-nassau-prince-of-orange,Maurice of Nassau,0.6,0.0
-maurice-of-orange,Maurice of Orange,1.0,0.0
-maurice-prince-of-orange,Maurice of Nassau,1.0,0.0
-maximilian-anton-karl-count-baillet-de-latour,Count Latour,0.25,0.0
-mehmed-ii,Mehmed II,0.8571428571428571,0.0
-micha-serwacy-wi-niowiecki,Michał Serwacy Wiśniowiecki,0.3333333333333333,0.0
-michael-von-kienmayer,Michael Kienmayer,1.0,0.0
-michael-von-melas,Michael von Melas,0.5,0.0
-michel-ney,Michel Ney,0.36363636363636365,0.0
+louis-william-margrave-of-baden-baden,Margrave of Baden,0.75,0.0
+louis-xiii,Louis XIII,0.6,0.0
+louis-xiv,Louis XIV,1.0,0.0
+manuel-belgrano,Manuel Belgrano,0.42857142857142855,0.3333333333333333
+manuel-oribe,Manuel Oribe,0.75,0.0
+mark-antony,Mark Antony,0.3333333333333333,0.0
+maurice-d-elb-e,Maurice d'Elbée,0.3333333333333333,0.0
+maurice-de-saxe,Maurice de Saxe,0.5,0.0
+maurice-prince-of-orange,Maurice of Nassau,0.8,0.0
+maximilian-anton-karl-count-baillet-de-latour,Count Latour,0.2,0.0
+mehmed-ii,Mehmed the Conqueror,0.8888888888888888,0.0
+melchior-von-hatzfeldt,Melchior von Hatzfeld,0.5,0.0
+micha-serwacy-wi-niowiecki,Michał Serwacy Wiśniowiecki,0.5,0.0
+michael-the-brave,Michael the Brave,0.8,0.0
+michel-ney,Michel Ney,0.3076923076923077,0.0
+miguel-miram-n,Miguel Miramón,0.5,0.0
 mikhail-kutuzov,Mikhail Kutuzov,1.0,0.0
-miko-aj-potocki,Mikołaj Potocki,1.0,0.0
-mu-ammad-ibn-abdall-h-hassan,Mohamed Hassan,1.0,0.0
+muammar-gaddafi,Muammar Gaddafi,0.5,0.0
+muhammad,Muhammad,0.5714285714285714,0.0
+muqtada-al-sadr,Muqtada al-Sadr,0.2,0.0
 murad-ii,Murad II,0.75,0.0
-mustafa-ii,Mustafa II,1.0,0.0
-napoleon,Napoleon I,1.0,0.0
-napoleon-bonaparte,Napoleon Bonaparte,1.0,0.0
-napoleon-i,Napoleon I,0.6,0.0
-napoleon-i-of-france,Napoleon I,1.0,0.0
+mustafa-ii,Mustafa II,0.75,0.0
+mustafa-kemal-atat-rk,Mustafa Kemal,0.6,0.0
+nader-shah,Nader,0.7647058823529411,0.0
+napoleon,Napoleon I,0.8571428571428571,0.0
+nathan-bedford-forrest,Nathan Bedford Forrest,0.5,0.0
+nathanael-greene,Nathanael Greene,0.5,0.0
+nathaniel-p-banks,Nathaniel P. Banks,1.0,0.0
+nelson-a-miles,Nelson A. Miles,1.0,1.0
 nicolas-oudinot,Nicolas Oudinot,0.3333333333333333,0.0
-nikolai-ruzsky,Nikolai Ruzsky,1.0,0.0
-nikolay-kamensky,Nikolay Kamensky,1.0,0.0
-p-l-kray,Pál Kray,0.2,0.0
-pablo-morillo,Pablo Morillo,0.5,0.0
-paul-davidovich,Paul Davidovich,0.5,0.0
-paul-grenier,Paul Grenier,1.0,0.0
+nikolay-kamensky,Nikolay Kamensky,0.75,0.0
+oda-nobunaga,Oda Nobunaga,0.7272727272727273,0.25
+otto-liman-von-sanders,Otto Liman von Sanders,0.125,0.0
+p-g-t-beauregard,P.G.T. Beauregard,0.6666666666666666,0.0
+paul-kray,Pál Kray,0.3333333333333333,0.0
+paul-methuen-3rd-baron-methuen,Lord Methuen,1.0,0.0
+paul-von-hindenburg,Paul von Hindenburg,0.4,0.0
+paul-von-lettow-vorbeck,Paul von Lettow-Vorbeck,0.8333333333333334,0.0
 pedro-de-valdivia,Pedro de Valdivia,0.75,0.0
-pedro-de-villagra,Pedro de Villagra,1.0,0.0
-pedro-santana,Pedro Santana,1.0,0.0
-pelopidas,Pelopidas,0.5,0.0
 peter-the-great,Peter I,0.8,0.0
-peter-wittgenstein,Peter Wittgenstein,0.8,0.0
-philip-ii-of-france,Philip II,1.0,0.0
+peter-wittgenstein,Peter Wittgenstein,0.8333333333333334,0.0
 philip-sheridan,Philip Sheridan,1.0,0.0
-pierre-dupont-de-l-tang,Pierre Dupont,0.5,0.0
-prince-eugene-of-savoy,Prince Eugene of Savoy,0.6,0.0
-prince-friedrich-franz-xaver-of-hohenzollern-hechingen,Prince Hohenzollern,0.5,0.0
-prince-henry-of-prussia-1726-1802,Prince Henry of Prussia,1.0,0.0
-prince-josias-of-saxe-coburg-saalfeld,Prince of Coburg,0.25,0.0
-prince-rupert-of-the-rhine,Prince Rupert,0.5,0.0
-prospero-colonna,Prospero Colonna,1.0,0.0
-pyotr-bagration,Pyotr Bagration,0.6666666666666666,0.0
-pyrrhus-of-epirus,Pyrrhus of Epirus,0.25,0.0
-quintus-fabius-maximus-rullianus,Quintus Fabius Maximus Rullianus,1.0,0.0
-quintus-fulvius-flaccus-consul-237-bc,Quintus Fulvius Flaccus,0.5,0.0
-re-id-mehmed-pasha,Reşid Mehmed Pasha,0.5,0.0
-robert-blake-admiral,Robert Blake,0.5,0.0
-robert-e-lee,Robert E. Lee,0.14285714285714285,0.0
-saladin,Saladin,0.8333333333333334,0.0
-scipio-africanus,Scipio Africanus,1.0,0.2
-seleucus-i-nicator,Seleukos I,1.0,0.0
-skanderbeg,Skanderbeg,1.0,0.0
-stanis-aw-kiewski,Stanisław Żółkiewski,0.6666666666666666,0.0
+philip-the-good,Philip the Good,1.0,0.0
+pietro-badoglio,Pietro Badoglio,0.75,0.0
+pompey,Pompey,0.7142857142857143,0.0
+prince-charles-alexander-of-lorraine,Prince Charles Alexander of Lorraine,0.125,0.0
+prince-eugene-of-savoy,Prince Eugene of Savoy,0.5555555555555556,0.0
+prince-josias-of-saxe-coburg-saalfeld,Prince of Coburg,0.5,0.0
+prince-rupert-of-the-rhine,Prince Rupert,0.6,0.0
+prince-william-duke-of-cumberland,Duke of Cumberland,0.5,0.0
+pyotr-bagration,Pyotr Bagration,0.5,0.0
+pyrrhus-of-epirus,Pyrrhus of Epirus,0.5,0.0
+radko-dimitriev,Radko Dimitriev,1.0,0.0
+ralph-abercromby,Ralph Abercromby,0.8,0.0
+ralph-hopton-1st-baron-hopton,Ralph Hopton,0.42857142857142855,0.0
+ram-n-blanco-1st-marquess-of-pe-a-plata,Ramón Blanco,0.3333333333333333,0.0
+richard-i-of-england,Richard I of England,1.0,0.0
+robert-devereux-3rd-earl-of-essex,Earl of Essex,0.3333333333333333,0.0
+robert-e-lee,Robert E. Lee,0.16666666666666666,0.0
+robert-the-bruce,King Robert I,0.625,0.0
+roger-of-lauria,Roger of Lauria,1.0,0.0
+rupprecht-crown-prince-of-bavaria,Crown Prince Rupprecht,0.2,0.0
+saladin,Saladin,0.5,0.0
+samuel-ryan-curtis,Samuel Ryan Curtis,1.0,0.0
+scipio-africanus,Scipio Africanus,0.8571428571428571,0.16666666666666666
+seleucus-i-nicator,Seleukos I,0.8333333333333334,0.0
+selim-i,Selim I,0.8333333333333334,0.0
+sim-n-bol-var,Simón Bolívar,1.0,0.0
+sir-charles-knowles-1st-baronet,Charles Knowles,0.25,0.0
+skanderbeg,Skanderbeg,0.8181818181818182,0.0
+stanis-aw-kiewski,Stanisław Żółkiewski,0.75,0.0
 stanis-aw-koniecpolski,Stanisław Koniecpolski,1.0,0.0
+stanis-aw-rewera-potocki,Stanisław Potocki,0.5,0.0
 stefan-czarniecki,Stefan Czarniecki,0.6363636363636364,0.0
-stephen-the-great,Stephen the Great,0.75,0.0
-tadeusz-ko-ciuszko,Tadeusz Kościuszko,0.5,0.0
-thomas-cochrane-10th-earl-of-dundonald,Lord Cochrane,0.5,0.0
-tiberius-sempronius-longus-consul-218-bc,Sempronius Longus,0.5,0.0
-ulysses-s-grant,Ulysses S. Grant,0.625,0.0
-vicente-rojo-lluch,Vicente Rojo Lluch,0.5,0.0
-wichard-joachim-heinrich-von-m-llendorf,Wichard Möllendorf,0.5,0.0
-william-draper-british-army-officer,William Draper,1.0,0.0
+stephen-the-great,Stephen the Great,0.8333333333333334,0.0
+stilicho,Stilicho,0.75,0.0
+stonewall-jackson,Stonewall Jackson,0.6666666666666666,0.0
+subutai,Subutai,1.0,1.0
+suleiman-the-magnificent,Suleiman I,0.8181818181818182,0.0
+sulla,Lucius Cornelius Sulla,1.0,0.0
+tadeusz-ko-ciuszko,Tadeusz Kościuszko,0.4,0.0
+takeda-shingen,Takeda Shingen,0.8,0.0
+thomas-fairfax,Sir Thomas Fairfax,0.8333333333333334,0.0
+thomas-sumter,Thomas Sumter,0.6666666666666666,0.0
+tienne-macdonald,Jacques MacDonald,0.25,0.0
+tokugawa-ieyasu,Matsudaira Motoyasu,0.75,0.0
+toyotomi-hideyoshi,Hashiba Hideyoshi,0.7142857142857143,0.2
+ulysses-s-grant,Ulysses S. Grant,0.7,0.0
+william-halsey-jr,William Halsey,1.0,0.0
+william-howe-5th-viscount-howe,Sir William Howe,0.3,0.0
 william-i-of-the-netherlands,Prince of Orange,0.75,0.0
-william-iii-of-england,William of Orange,0.5,0.0
-william-lee-davidson,William Lee Davidson,1.0,0.0
+william-iii-of-england,William of Orange,0.3333333333333333,0.0
 william-rosecrans,William S. Rosecrans,1.0,0.0
-william-tecumseh-sherman,William T. Sherman,1.0,0.0
-yakov-petrovich-kulnev,Yakov Petrovich Kulnev,0.5,0.0
-yashwantrao-holkar,Jaswantaro Holkar,0.5,0.0
+william-tecumseh-sherman,William T. Sherman,0.7142857142857143,0.0
+william-the-silent,William of Orange,0.5,0.0
+william-waller,William Waller,0.3333333333333333,0.0
+winfield-scott,Winfield Scott,0.75,0.0
+xue-yue,Xue Yue,1.0,0.0
+yama-iwao,Ōyama Iwao,0.5,0.0
+yohannes-iv,Kassa Mercha,0.6666666666666666,0.0
+zachary-taylor,Zachary Taylor,0.5,0.0

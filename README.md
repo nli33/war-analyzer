@@ -22,22 +22,24 @@ live in `output/viz_auto/`. Setup: `pip install -r requirements.txt` (or `uv syn
 
 No network access needed — this just reruns the metrics/viz code against whichever CSVs you point
 it at. Each script defaults to the gold set and takes `--battles`/`--generals`/`--output` to
-target `data/auto/` (or any other battles/generals CSV pair) instead:
+target `data/auto/` (or any other battles/generals CSV pair) instead. `--output` is the path of
+the primary output *file* (sibling CSVs are derived from its name), not a directory:
 
 ```
 python scripts/validate_data.py                     # schema check, run this first
 python scripts/render_ranking_tables.py --battles data/auto/battles.csv \
-    --generals data/auto/generals.csv --output output/viz_auto
+    --generals data/auto/generals.csv --output output/viz_auto/ranking_tables.html
 python scripts/render_scatter_oar_resource_backing.py --battles data/auto/battles.csv \
-    --generals data/auto/generals.csv --output output/viz_auto
+    --generals data/auto/generals.csv --output output/viz_auto/oar_vs_resource_backing.png
 python scripts/render_scatter_tactical_strategic.py --battles data/auto/battles.csv \
-    --generals data/auto/generals.csv --output output/viz_auto
+    --generals data/auto/generals.csv --output output/viz_auto/tactical_vs_strategic.png
 python scripts/render_scatter_volume_efficiency.py --battles data/auto/battles.csv \
-    --generals data/auto/generals.csv --output output/viz_auto
+    --generals data/auto/generals.csv --output output/viz_auto/volume_vs_efficiency.png
 ```
 
-`render_ranking_tables.py` also takes `--top-n` (default 25) for how many rows its HTML tables
-show; the CSV outputs next to it are always the full set.
+`render_ranking_tables.py` also takes `--top-n` (default 25, how many rows its HTML tables show)
+and `--min-battles` (default 5, the floor below which a general's HTML row is dropped) — the CSV
+outputs next to it are always the full set, every general, with a `battle_count` column.
 
 ## Rerunning ingestion (growing `data/auto/`)
 
@@ -79,23 +81,14 @@ generals) that hand-curation can't reach — all without per-battle research. `s
 shows it clears this project's accuracy floor against the hand-curated gold set.
 
 **Can't (known, unfixed, as of the last run):**
-- **Doesn't merge alternate Wikipedia titles for the same person.** A general with two Wikipedia
-  pages (a full-name article and a shorter common-name one — Napoleon/Napoleon Bonaparte,
-  Wellington/Arthur Wellesley, Hannibal/Hannibal Barca) ends up as two separate roster entries,
-  each with half that person's real battle record. This both double-counts them in ranking tables
-  and makes their individual stats noisier than they should be.
-- **Misses ruler-generals in roster selection.** The automated roster is seeded from Wikipedia
-  categories like "Generals by century/war/nationality"; someone who commanded armies but is
-  categorized primarily as a king, khan, shogun, president, or field marshal (Julius Caesar,
-  Alexander the Great, Genghis Khan, Eisenhower, Zhukov, Rommel) is often missing entirely, and
-  the pipeline's fallback rule (pull in an unseeded general if they fought a seeded one) doesn't
-  help when both sides of a battle share that same blind spot. Of the 19 gold-set generals, only
-  6 appear in the current `data/auto/` roster under a shared id (several more are present but
-  split across a different id per the point above).
 - **No sample-size weighting in the composite ranking.** A general with 2-3 recorded battles and a
   general with 30 are z-scored the same way within their era, so a thin, lucky record can outrank
   a long, well-documented one. A sensitivity test found the ranking formula itself holds up fine
-  against per-battle noise; this is a separate, roster-composition problem.
+  against per-battle noise; this is a separate, roster-composition problem. The headline ranking
+  tables mitigate the worst of this with a display-only minimum-battle cutoff (5 battles, matching
+  the gold set's own thinnest cases) that drops thin-record generals from the rendered HTML; the
+  CSV outputs next to it keep every general, with a `battle_count` column, so nobody is hidden,
+  only de-emphasized.
 - **Casualty figures are the sparsest field** (gold-set coverage ~58-62%, see `eval_ingest.py`
   output for current numbers). Wikipedia infoboxes often describe casualties qualitatively
   ("heavy losses") instead of giving a number, and those are left null by design instead of
