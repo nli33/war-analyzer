@@ -1,6 +1,6 @@
 # Progress: find out why the ranking disagrees with historian consensus
 
-The auto dataset now has 340 generals and 1,887 battle rows (task log archived at
+The auto dataset now has 343 generals and 2,327 battle rows (task log archived at
 `notes/PROGRESS-v3.md`, earlier ones at `notes/PROGRESS-v2.md` and `notes/PROGRESS-v1.md`). The
 ranking it produces does not pass a gut check: Eisenhower is #1 on 6 rows, Nelson A. Miles is #4 on
 1 battle, Napoleon is #49, Wellington #120, Genghis Khan #142, Hannibal #147, Rommel #312.
@@ -81,7 +81,7 @@ this run. The user reviews the report and decides.
       shrinkage version (average pulled toward 0.5 by a pseudo-count) as a comparison only. Report
       Spearman against each reference list, the top 20 for each variant, and which variant moves the
       reference agreement most. Answer: which component is overrated and which is underrated?
-- [ ] H4. Missing battles. Find out why Waterloo has no rows for either side, why Rommel has only 2
+- [x] H4. Missing battles. Find out why Waterloo has no rows for either side, why Rommel has only 2
       rows, and why Patton and Bradley are not in the roster. Trace each through the funnel
       (candidate, parsed commander, side match, strength, outcome). Then measure how many battles
       with several named commanders per side are lost or credited to only one of them, and how many
@@ -161,3 +161,26 @@ this run. The user reviews the report and decides.
   Shrinking decisiveness toward 0.5 was the biggest overall improvement of any variant tried
   (+0.032 mean Spearman), bigger than equal weights (-0.013, i.e. no help). No weights or roster
   changed.
+- **H4**: wrote `scripts/h4_missing_battles.py` (funnel trace, report at
+  `data/raw/h4_report.json`, gitignored), report at `notes/ranking-diagnosis/H4-missing-battles.md`.
+  Root cause: `war/scrape.py`'s generic "delete every `{{template}}`" pass lost information for
+  three template families whose argument text is a field's *only* copy of the data (flag templates
+  for combatant country, date-range templates for Waterloo's whole `date` field, and list templates
+  once their nested flags were already erased) plus a fourth alias (`ublist`) missing from the list
+  set and dropping `result` text (e.g. Battle of the Bulge). Fixed with `_expand_known_templates`
+  in `war/scrape.py`, 4 new tests in `tests/test_scrape.py`. Regenerated `data/auto/` after
+  archiving to `data/archive/2026-10-03-pre-h4-combatant-date-template-fix/`: battle rows 1,887 ->
+  2,327, generals with >=1 row 333 -> 343, Rommel's own-perspective rows 2 -> 3. Verified: 500
+  pytest passing, `scripts/validate_data.py` passes, `scripts/eval_ingest.py` unchanged within
+  noise (67%/65% strength coverage, 58%/61% casualty coverage, matching pre-fix). Waterloo still
+  produces zero rows after the fix (second, unfixed cause): its `result` field is "Coalition
+  victory", and demonym side-matching has no literal "coalition" to match against either
+  combatant's text without a per-conflict alliance lookup table, which is out of scope
+  (historical judgment, not parsing). Same mechanism explains most of Rommel's other missing North
+  Africa battles (Allied/Axis phrasing) and is unrelated to Patton/Bradley's absence, which is
+  `primary_commander`'s documented first-listed-commander limitation, not a bug — both list
+  someone else first on their headline battles. Measured corpus-wide: 49% of battle sides name
+  more than one commander, 18,278 named co-commanders get zero credit under the current rule.
+  Famous-battle probe (18 reference-list generals not in must_include): 18/18 titles found in
+  cache, only 6/18 (33%) produce a row, for the same generic-victory-phrasing and first-listed-name
+  reasons. No weights, roster design, or `war/rules.py` changed; all open causes flagged for H9.

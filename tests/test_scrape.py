@@ -92,6 +92,63 @@ def test_double_encoded_nbsp_entity_decodes_to_real_whitespace():
     assert fields["date"] == "Early 209 BC"
 
 
+# H4: `{{Start date|...}}`-style templates encode a date as template arguments rather than
+# surrounding plain text, so the generic "delete every template" cleanup used to drop the date
+# field entirely -- the real cause of Waterloo having no rows for either side (its `date` field
+# is `{{Start date and age|1815|06|18|df=yes}}`, with no plain-text fallback anywhere else in the
+# field, so `war.roster.extract_year` saw an empty string and the row never got a year).
+def test_start_date_template_expands_to_a_parseable_date():
+    wikitext = "{{Infobox military conflict\n| date = {{Start date and age|1815|06|18|df=yes}}\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["date"] == "1815-06-18"
+
+
+# H4: flag templates (`{{flag|X}}`, `{{flagcountry|X}}`, `{{flagicon|X}}`, `{{flagdeco|X}}`) are
+# how most WWII-era infoboxes write a combatant's country -- X is a template argument, not
+# surrounding text, so the generic template-delete used to erase the country name completely.
+# Real "Battle of Arras (1940)" example: this left `combatant2` empty, which made the deterministic
+# outcome rule unable to match "German victory" against either side and the row fall through to
+# `no_outcome`/`ambiguous_side_match` -- one concrete mechanism behind why most of Rommel's
+# battles are missing from the roster.
+def test_flag_templates_keep_the_country_name_not_just_the_icon():
+    wikitext = "{{Infobox military conflict\n| combatant2 = {{flagcountry|Nazi Germany}}\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["combatant2"] == "Nazi Germany"
+
+
+def test_flag_template_with_year_disambiguator_keeps_only_the_country_name():
+    wikitext = "{{Infobox military conflict\n| combatant1 = {{flag|Canada|1921}}\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["combatant1"] == "Canada"
+
+
+# H4: a `{{ubl|...}}` list of flag templates (a coalition's several national contingents) used
+# to be deleted as one opaque blob once the generic template-delete regex saw no nested braces
+# left inside it (the flag templates having already vanished the same way) -- each item now
+# survives as its own clause instead of the whole list collapsing to nothing.
+def test_ubl_list_of_flag_templates_keeps_every_country_name():
+    wikitext = (
+        "{{Infobox military conflict\n"
+        "| combatant1 = {{ubl|{{flag|United Kingdom}}|{{flagcountry|French Third Republic}}}}\n"
+        "}}"
+    )
+    fields = parse_military_infobox(wikitext)
+    assert "United Kingdom" in fields["combatant1"]
+    assert "French Third Republic" in fields["combatant1"]
+
+
+# H4: `{{ublist|...}}` is the alias Wikipedia's own `{{Unbulleted list}}` template redirects
+# to, and is how 132 of 8,433 cached battle infoboxes (measured while tracing why Battle of the
+# Bulge's `result` field came back empty, the reason Patton/Bradley's side never resolved an
+# outcome for it) wrap a one-line `result` field -- it was missing from `_LIST_TEMPLATE_NAMES`
+# even though the longer-named aliases ("unbulleted list", "ubl") were already there, so the
+# generic template-delete pass erased the whole result field instead of keeping its text.
+def test_ublist_alias_keeps_result_field_text():
+    wikitext = "{{Infobox military conflict\n| result = {{ublist|Allied victory}}\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["result"] == "Allied victory"
+
+
 def test_split_infobox_params_does_not_truncate_on_nested_template_close():
     # Regression test (C2): a value containing a nested multi-line {{efn|...}} citation has its
     # own "}}" before the field's real end. The old single-regex param splitter

@@ -16,3 +16,9 @@ own README.md for the full source/method/scores/replacement-reason.
   in `war/scrape.py`, together the cause of Napoleon's 1,105-year "career" and 8 other absurd
   spans) and an unbounded "WWII" era bucket (`war/rules.py`, added a "Modern" era); superseded by
   a rerun of `scripts/build_roster_selection.py`/`build_auto_battles.py` against the fixed code.
+- `2026-10-03-pre-h4-combatant-date-template-fix/` (2026-10-03) — `data/auto/{generals,battles}.csv`
+  from H1's regen, before H4 fixed three (four, counting a Wikipedia redirect alias) template-
+  expansion bugs in `war/scrape.py` (flag templates, date-range templates, and list templates were
+  deleted outright instead of having their argument text kept, the literal reason Waterloo had zero
+  rows and most of Rommel's battles were missing); superseded by a rerun of
+  `scripts/build_roster_selection.py`/`build_auto_battles.py` against the fixed code.

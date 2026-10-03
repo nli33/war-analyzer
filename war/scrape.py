@@ -17,7 +17,7 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 
-from war.wikitext import balanced_template_end
+from war.wikitext import balanced_template_end, split_top_level, template_name_at
 
 WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = "war-analyzer-research-scraper/0.1 (draft-data only, not for direct citation)"
@@ -206,11 +206,77 @@ def _unescape_html_entities(value: str) -> str:
     return value
 
 
+# Three template families whose only content is a template *argument*, not surrounding plain
+# text -- the generic "delete every template" pass below would otherwise lose that argument
+# outright rather than just tidying punctuation (H4 dev log entry; found by tracing why Waterloo
+# has no rows and why most of Rommel's battles are missing). `{{flag|Australia}}`'s country
+# name, `{{Start date|1815|06|18|df=yes}}`'s year/month/day, and `{{ubl|a|b}}`'s list items are
+# each the *only* copy of that information in the field -- unlike `{{ndash}}` or `{{sfn|...}}`,
+# which are fine to delete because the surrounding text already carries the meaning.
+_FLAG_TEMPLATE_NAMES = frozenset({"flag", "flagcountry", "flagicon", "flagdeco", "flagu"})
+_DATE_RANGE_TEMPLATE_NAMES = frozenset(
+    {"start date", "end date", "start date and age", "end date and age"}
+)
+_LIST_TEMPLATE_NAMES = frozenset(
+    {
+        "ubl",
+        "ubli",
+        "plainlist",
+        "plain list",
+        "indented plainlist",
+        "unbulleted list",
+        "ublist",
+        "flatlist",
+        "bulletedlist",
+        "bulleted list",
+    }
+)
+
+
+def _template_positional_args(args_text: str) -> list[str]:
+    return [a.strip() for a in split_top_level(args_text, "|") if "=" not in a]
+
+
+def _expand_known_templates(text: str) -> str:
+    """Replace `_FLAG_TEMPLATE_NAMES`/`_DATE_RANGE_TEMPLATE_NAMES`/`_LIST_TEMPLATE_NAMES`
+    templates with their meaningful argument text, recursing into nested templates (a flag
+    template is routinely one item of a `{{ubl|...}}` list, e.g. Tobruk's combatant field).
+    Every other template is left as `{{...}}` for `_strip_wikitext_markup`'s later blanket
+    delete -- this function only rescues the three families whose information has nowhere
+    else to come from.
+    """
+    out = []
+    i, n = 0, len(text)
+    while i < n:
+        if text[i : i + 2] == "{{":
+            end = balanced_template_end(text, i)
+            name = template_name_at(text, i).strip().lower()
+            inner = text[i + 2 : end - 2]
+            _, _, args_text = inner.partition("|")
+            if name in _FLAG_TEMPLATE_NAMES:
+                positional = _template_positional_args(args_text)
+                out.append(" " + (positional[0] if positional else "") + " ")
+            elif name in _DATE_RANGE_TEMPLATE_NAMES:
+                positional = _template_positional_args(args_text)
+                out.append(" " + "-".join(positional[:3]) + " ")
+            elif name in _LIST_TEMPLATE_NAMES:
+                items = [_expand_known_templates(a) for a in split_top_level(args_text, "|")]
+                out.append(" " + "; ".join(item.strip() for item in items if item.strip()) + " ")
+            else:
+                out.append("{{" + _expand_known_templates(inner) + "}}")
+            i = end
+            continue
+        out.append(text[i])
+        i += 1
+    return "".join(out)
+
+
 def _strip_wikitext_markup(value: str) -> str:
     """Best-effort cleanup: drop refs, wikilinks brackets, templates, collapse whitespace."""
     value = _unescape_html_entities(value)
     value = re.sub(r"<ref[^>]*>.*?</ref>", "", value, flags=re.DOTALL)
     value = re.sub(r"<ref[^>]*/>", "", value)
+    value = _expand_known_templates(value)
     # Replaced with a space, not deleted outright: a template with no surrounding whitespace
     # (e.g. a date range written "11{{ndash}}12 April 1796") would otherwise splice the digits
     # on either side into one run ("1112 April 1796"), which `war.roster.extract_year` then
