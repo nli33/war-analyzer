@@ -68,7 +68,7 @@ this run. The user reviews the report and decides.
       no career over 80 years except hand-checked ones, Napoleon's career is about 1796-1815, the
       quality floor still passes, and the gold-set comparison from `eval_ingest.py` does not get
       worse.
-- [ ] H2. Baseline diagnostic. For the top 30 and for the must-include generals, print each
+- [x] H2. Baseline diagnostic. For the top 30 and for the must-include generals, print each
       component's z-score and its weighted contribution to the composite (OAR, WAR residual,
       decisiveness, longevity). Report, over all ranked generals: the rank correlation of each
       component and of the composite with battle count; how many top-30 generals owe their place
@@ -129,3 +129,14 @@ this run. The user reviews the report and decides.
   a date bug — left for a future task (closest fit is H4's funnel tracing). Full writeup:
   `data/archive/2026-10-03-pre-h1-date-era-fix/README.md`. Napoleon moved #49 -> #27 and Hannibal
   #147 -> #123 in the composite as a side effect (not the point of this task, not re-tuned).
+- **H2**: wrote `scripts/diagnose_baseline.py`, report at `notes/ranking-diagnosis/H2-baseline.md`
+  (table CSV alongside it). Deviation found and fixed in the diagnostic script itself (not the
+  pipeline): resolving must-include generals by `data/must_include.csv`'s own `general_id` column
+  silently dropped Napoleon/Hannibal/Wellington, because that column is a hand-curated gold-set
+  label (`napoleon-bonaparte`) that doesn't match the id the auto pipeline actually assigned
+  (`napoleon`) — fixed by resolving through the same canonical-title identity pipeline
+  `scripts/report_must_include.py` already uses. Headline finding: 11 of the top 30 have fewer
+  than 5 battles and 11 of 30 (37%) are carried by one component outweighing the other three
+  combined (8 OAR, 3 decisiveness) — thin samples swinging small-cohort z-scores, not rounded
+  records. Full numbers and the correlation/win-rate/tier tables are in the report; this is
+  diagnosis only, no weights or roster changed.
