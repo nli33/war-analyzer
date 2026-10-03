@@ -10,10 +10,10 @@ A battle page contributes zero, one, or two rows: one per side whose primary com
 rule) is both wikilinked (has a `general_id`) and on the roster (`war.roster`'s C4b selection).
 A row is dropped (not written) rather than written with a fabricated value when either of the
 two columns the schema requires can't be derived at all: `outcome` (see
-`war.rules.outcome_from_result` for when that fails) or `date`/`era` (when `war.roster.extract_year`
-finds no year-shaped text in the infobox `date` field). Every numeric field
-(own/enemy strength and casualties) stays `None` rather than dropping the row when it alone is
-missing — nullable by design since B1.
+`war.rules.outcome_from_result` for when that fails, and F3's `resolved_outcome` fallback below)
+or `date`/`era` (when `war.roster.extract_year` finds no year-shaped text in the infobox `date`
+field). Every numeric field (own/enemy strength and casualties) stays `None` rather than dropping
+the row when it alone is missing — nullable by design since B1.
 """
 
 from __future__ import annotations
@@ -33,6 +33,12 @@ from war.scrape import parse_military_infobox
 
 _SIDE_NUMBERS = ("1", "2")
 
+_RESOLVED_OUTCOME_SIDES = {
+    "side1": ("Win", "Loss"),
+    "side2": ("Loss", "Win"),
+    "draw": ("Draw", "Draw"),
+}
+
 
 def _resolved_point(
     field_numbers: dict, resolved_fields: dict, field_name: str
@@ -50,6 +56,7 @@ def build_battle_rows(
     roster_ids: set[str],
     resolved_fields: dict | None = None,
     identity_resolver: dict[str, str | None] | None = None,
+    resolved_outcome: str | None = None,
 ) -> list[dict]:
     """Zero-to-two `war.schema.BATTLE_COLUMNS`-shaped dict rows for one battle page.
 
@@ -60,7 +67,10 @@ def build_battle_rows(
     `war.identity.build_general_id_resolver` output) is forwarded to
     `war.commanders.extract_commander_fields` unchanged, so `general_id`/`opponent_general_id`
     here use the same canonicalized ids `roster_ids` was built from; `None` keeps the pre-E2
-    raw-slug behavior.
+    raw-slug behavior. `resolved_outcome` is this battle's F3 value from
+    `data/auto/f3_resolved_outcomes.json` ("side1"/"side2"/"draw", or `None`), used as a fallback
+    only when `war.rules.outcome_from_result` itself returns `(None, None)` -- same fallback
+    shape as `resolved_fields`, one LLM-resolved field standing in for a regex/rule miss.
     """
     resolved_fields = resolved_fields or {}
 
@@ -80,6 +90,8 @@ def build_battle_rows(
     outcome1, outcome2 = outcome_from_result(
         infobox.get("result"), infobox.get("combatant1"), infobox.get("combatant2")
     )
+    if outcome1 is None and outcome2 is None and resolved_outcome in _RESOLVED_OUTCOME_SIDES:
+        outcome1, outcome2 = _RESOLVED_OUTCOME_SIDES[resolved_outcome]
     outcomes = {"1": outcome1, "2": outcome2}
 
     field_numbers = extract_strength_and_casualties(wikitext)

@@ -8,7 +8,9 @@ titles still missing are fetched) and C4b's selected roster (`data/auto/generals
 every candidate battle title in C1's universe, builds 0-2 rows (one per roster general on
 either side) with `war.battles_dataset.build_battle_rows`, folding in C5's LLM-resolved fields
 (`data/auto/c5_resolved_fields.json`) as a fallback for strength/casualty fields C2's regex
-parser couldn't read. Writes `data/auto/battles.csv`, validates it against `war/schema.py`
+parser couldn't read, and F3's LLM-resolved outcomes (`data/auto/f3_resolved_outcomes.json`) as
+a fallback for a battle whose `outcome_from_result` couldn't match `result` text to a side.
+Writes `data/auto/battles.csv`, validates it against `war/schema.py`
 (`war.validate.validate_file`/`validate_ranges`, plus the general_id foreign-key check
 `validate_all` does for the gold set), and logs row counts and per-field null rates.
 
@@ -42,6 +44,7 @@ BATTLE_UNIVERSE_PATH = REPO_ROOT / "data" / "raw" / "battle_universe.csv"
 WIKITEXT_CACHE_PATH = REPO_ROOT / "data" / "raw" / "battle_wikitext_cache.json"
 GENERALS_PATH = REPO_ROOT / "data" / "auto" / "generals.csv"
 RESOLVED_FIELDS_PATH = REPO_ROOT / "data" / "auto" / "c5_resolved_fields.json"
+RESOLVED_OUTCOMES_PATH = REPO_ROOT / "data" / "auto" / "f3_resolved_outcomes.json"
 IDENTITY_MAP_PATH = REPO_ROOT / "data" / "raw" / "identity_map.json"
 ROSTER_REPORT_PATH = REPO_ROOT / "data" / "raw" / "roster_selection_report.json"
 GOLD_BATTLES_PATH = REPO_ROOT / "data" / "battles.csv"
@@ -127,6 +130,7 @@ def build_rows(
     roster_ids: set[str],
     resolved: dict,
     identity_resolver: dict[str, str | None] | None,
+    resolved_outcomes: dict,
 ) -> list[dict]:
     used_ids: set[str] = set()
     rows: list[dict] = []
@@ -135,7 +139,12 @@ def build_rows(
         if not wikitext:
             continue
         for row in build_battle_rows(
-            title, wikitext, roster_ids, resolved.get(title), identity_resolver
+            title,
+            wikitext,
+            roster_ids,
+            resolved.get(title),
+            identity_resolver,
+            resolved_outcomes.get(title),
         ):
             battle_id = _unique_battle_id(row["general_id"], row["battle_title"], used_ids)
             csv_row = {"battle_id": battle_id, "battle_name": row["battle_title"]}
@@ -194,6 +203,7 @@ def main() -> int:
     titles = _read_column(BATTLE_UNIVERSE_PATH, "battle_title")
     roster_ids = set(_read_column(GENERALS_PATH, "general_id"))
     resolved = _load_json(RESOLVED_FIELDS_PATH)
+    resolved_outcomes = _load_json(RESOLVED_OUTCOMES_PATH)
 
     hand_curated_ids = hand_curated_fallback_ids() & roster_ids
     pipeline_roster_ids = roster_ids - hand_curated_ids
@@ -209,7 +219,7 @@ def main() -> int:
         else "identity resolver: none (data/raw/identity_map.json not found, falling back to raw slugs)"
     )
 
-    rows = build_rows(titles, cache, pipeline_roster_ids, resolved, identity_resolver)
+    rows = build_rows(titles, cache, pipeline_roster_ids, resolved, identity_resolver, resolved_outcomes)
     print(f"{len(rows)} battle rows built for {len(pipeline_roster_ids)} pipeline roster generals")
 
     if hand_curated_ids:

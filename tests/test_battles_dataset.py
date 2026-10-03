@@ -129,3 +129,46 @@ def test_build_battle_rows_missing_strength_without_resolution_stays_null():
 """
     rows = build_battle_rows("Battle of Unresolved", wikitext, {"general-one"})
     assert rows[0]["own_troop_strength"] is None
+
+
+def test_build_battle_rows_unresolved_outcome_falls_back_to_f3_resolved_value():
+    wikitext = """
+{{Infobox military conflict
+|date = 1800
+|result = Ceasefire agreed
+|combatant1 = France
+|combatant2 = Britain
+|commander1 = [[General One]]
+|commander2 = [[General Two]]
+}}
+"""
+    rows = build_battle_rows(
+        "Battle of F3 Resolved", wikitext, {"general-one", "general-two"}, resolved_outcome="side2"
+    )
+    mine = next(r for r in rows if r["general_id"] == "general-one")
+    theirs = next(r for r in rows if r["general_id"] == "general-two")
+    assert mine["outcome"] == "Loss"
+    assert theirs["outcome"] == "Win"
+
+
+def test_build_battle_rows_unresolved_outcome_without_f3_resolution_stays_dropped():
+    wikitext = """
+{{Infobox military conflict
+|date = 1800
+|result = Ceasefire agreed
+|combatant1 = France
+|combatant2 = Britain
+|commander1 = [[General One]]
+|commander2 = [[General Two]]
+}}
+"""
+    assert build_battle_rows("Battle of Still Unresolved", wikitext, {"general-one"}) == []
+    assert (
+        build_battle_rows(
+            "Battle of Bad F3 Value",
+            wikitext,
+            {"general-one"},
+            resolved_outcome="unresolvable",
+        )
+        == []
+    )

@@ -1,0 +1,10 @@
+{
+  "min_battles": 2,
+  "candidate_battle_titles": 8824,
+  "battle_pages_found": 8430,
+  "appearances_parsed": 11734,
+  "seed_general_titles": 3707,
+  "generals_kept": 434,
+  "generals_written": 417,
+  "generals_dropped_no_dateable_battle": 17
+}
