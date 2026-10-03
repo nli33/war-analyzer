@@ -109,7 +109,7 @@ this run. The user reviews the report and decides.
       cohort size, and the singleton-era problem. For longevity, compare wins per career year with
       alternatives (wins per battle, career span from the general's birth and death years from
       Wikidata if cheap) after H1's fix. Report whether longevity still rewards tiny careers.
-- [ ] H9. Findings report at `notes/ranking-diagnosis/FINDINGS.md`. List root causes ranked by how
+- [x] H9. Findings report at `notes/ranking-diagnosis/FINDINGS.md`. List root causes ranked by how
       much of the gap to the reference lists each explains (use H3's numbers). For each: what it
       is, evidence, whether it is a data bug, a method flaw, or a scope limit, a proposed fix with
       cost, and what it would risk. End with a recommended order of work and the open decisions for
@@ -283,3 +283,19 @@ this run. The user reviews the report and decides.
   H's rules and H4-H7's precedent already set (zero new network calls this run) rather than
   carving out an exception; flagged as a future ingestion-task candidate with that cost estimate.
   No weights, roster, or `war/` code changed -- diagnosis only.
+- **H9**: wrote `notes/ranking-diagnosis/FINDINGS.md`, synthesizing H1-H8 into 9 ranked root
+  causes (method-shape ceiling, decisiveness sparsity, longevity's impossible values, missing
+  head-to-head anchors, co-commander credit, OAR overweighting from thin records, no sample-size
+  weighting, flat-1500 opponents, and three small leftover bugs), each with its evidence, data-bug
+  vs. method-flaw vs. scope-limit classification, a proposed fix with cost/risk, and a
+  recommended order of work plus 5 open decisions for the user. Added 6 new bullets to the
+  README's known-limitations section with the headline numbers (H7's +0.296/+0.222/+0.188
+  ceiling, decisiveness's +0.032 best-variant improvement, longevity's 20%-over-ceiling count, the
+  ~115-Elo Napoleon-Wellington swing, the 49%-of-sides multi-commander figure). One deviation from
+  the task's own text: also fixed the stale `war/metrics/composite.py` docstring H8 flagged (it
+  still described a locked 8-general demo roster's singleton-era problem as live, which H8 found
+  no longer applies to the real 343-general roster) -- a direct textual correction with no
+  behavior change, not one of the ranking proposals the task says not to implement, so judged in
+  scope alongside the README update. Verified: 504 tests pass, `scripts/validate_data.py` passes
+  (neither touches ranking logic or data, so no `eval_ingest.py` rerun needed). No weights,
+  roster, or ranking behavior changed.

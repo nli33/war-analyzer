@@ -88,11 +88,38 @@ shows it clears this project's accuracy floor against the hand-curated gold set.
   tables mitigate the worst of this with a display-only minimum-battle cutoff (5 battles, matching
   the gold set's own thinnest cases) that drops thin-record generals from the rendered HTML; the
   CSV outputs next to it keep every general, with a `battle_count` column, so nobody is hidden,
-  only de-emphasized.
+  only de-emphasized. 11 of the current top 30 have fewer than 5 battles.
 - **Casualty figures are the sparsest field** (gold-set coverage ~58-62%, see `eval_ingest.py`
   output for current numbers). Wikipedia infoboxes often describe casualties qualitatively
   ("heavy losses") instead of giving a number, and those are left null by design instead of
   guessed at.
+- **The composite ranks statistical performance within an era cohort, not historical reputation.**
+  Fed the 19 hand-curated gold generals on their own gold battle rows (the method's best-case
+  input), the unmodified composite still only reaches +0.296 Spearman agreement with the published
+  "greatest generals" lists in `data/reference/top_n_lists.csv`. Switching to the auto pipeline's
+  data for the same 19 people drops that to +0.222, and the real 343-general roster drops it again
+  to +0.188 — roughly half the total gap to those lists is the method's own definition of "good,"
+  not data quality. Treat the reference lists as a sanity check, not a target.
+- **Decisiveness is sparse and currently amplifies small samples.** Only 41 of 1,887 pre-H4 battle
+  rows (2.2%) carry a Strategic or Rout label, so a general with one or two labeled wins gets a
+  near-binary z-score. Shrinking that value toward 0.5 (a pseudo-count of 5) was the single biggest
+  improvement found across 16 tested ranking variants; the shipped composite does not do this yet.
+- **Longevity can exceed its own ceiling.** `longevity_adjusted_value` sums outcome scores across a
+  career and divides by career years, not battle count, so 20% of ranked generals have a value
+  above 1.0 — impossible for a bounded rate metric. Every general in the top 10 by this metric has
+  a 1- or 2-year career; swapping in plain win rate drops all of them sharply.
+- **Some head-to-head comparisons have no shared battle to anchor them.** Napoleon and Wellington
+  share zero opponents in `data/auto/`: Waterloo produces no row for either side because its result
+  is phrased as a generic "Coalition victory" with no literal country name to match against either
+  combatant, and the side-matching logic has no per-conflict alliance lookup to resolve that. Their
+  relative order depends entirely on their disjoint opponent pools, and the gap between them swings
+  by roughly 115 Elo points across three otherwise-reasonable opponent-rating methods.
+- **Credit for a battle goes entirely to one commander per side.** Whoever is listed first in a
+  battle's infobox gets the full outcome and the full troop strength; every other named commander
+  on that side gets nothing for that battle. 49% of battle sides name more than one commander, and
+  this is the documented reason Patton and Bradley never make the roster (someone else is always
+  listed first on their headline battles).
 
 Full detail, measurements, and the reasoning behind each of these — including the specific
-battles used to verify them — are logged in `~/notes/war-analyzer/ingestion.md`.
+battles used to verify them — are logged in `~/notes/war-analyzer/ingestion.md` and
+`notes/ranking-diagnosis/FINDINGS.md`.

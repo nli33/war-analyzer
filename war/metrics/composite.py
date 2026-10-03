@@ -22,20 +22,17 @@ rule but not the exact combination mechanics:
   sample of a larger one. The composite score is then
   `sum(weight_i * z_i)` using `war/config.py`'s `CompositeWeights`, and the
   final ranking is that score sorted descending.
-* **Zero-variance cohort convention**: a cohort with only one general (this
-  8-general roster has four: Frederick/Napoleon/Grant/Zhukov are each the
-  sole representative of Early Modern/Napoleonic/Industrial/WWII) has no
+* **Zero-variance cohort convention**: a cohort with only one general has no
   within-era spread to measure, so `std == 0` and standard z-scoring
   (`(x - mean) / std`) divides by zero. The convention here is `z = 0.0` in
   that case — "no evidence this general is above or below their own era's
   average" is the only honest reading when the era's average *is* that one
-  general. This is a real limitation of tonight's locked 8-general/one-per-
-  era roster (SCOPE.md), not a bug: it means those four generals' composite
-  scores are driven entirely by whichever inputs *do* have cohort-mates
-  (none, for a singleton era), i.e. their composite score is exactly 0
-  regardless of weights. Flagged here for Phase 7's sanity pass and as a
-  reason to prioritize roster expansion (more generals per era) over
-  reweighting if the sanity pass finds this suspicious.
+  general. This was a real limitation of the original locked 8-general/
+  one-per-era demo roster (SCOPE.md), where four of eight generals were
+  singleton-era and so scored exactly 0 regardless of weights; the real
+  343-general pipeline roster has grown every era cohort past that edge case
+  (smallest is 12, per `notes/ranking-diagnosis/H8-era-longevity.md`), but
+  the convention stays correct code for any cohort that thins out again.
 * **Missing/`None` inputs**: `rate.py`'s `decisive_win_rate` is `None` for a
   general with zero wins (not reachable in the current 8-general dataset,
   since every roster general has at least one win, but reachable in
