@@ -205,6 +205,29 @@ def _strip_wikitext_markup(value: str) -> str:
     return value
 
 
+_BARE_REDIRECT_RE = re.compile(r"^\s*#REDIRECT\s*\[\[([^\]|]+)", re.IGNORECASE)
+
+
+def redirect_stub_target(wikitext: str) -> str | None:
+    """Return the target title of a bare `#REDIRECT [[Target]]` stub, or `None` if `wikitext`
+    isn't one (also `None` for a `#REDIRECT [[Page#Section]]` anchor redirect to part of a
+    different page — re-fetching `Page` would hand every title anchored to it the *same* first
+    infobox on that page regardless of which section each title actually names, which risks
+    attributing the wrong sub-battle's numbers rather than leaving the title unresolved; see F2
+    dev log entry).
+
+    Used by `scripts/refresh_redirect_stubs.py` (F2) to find stale cache entries fetched before
+    `fetch_wikitext_batch` followed redirects server-side (b57cc1b) — those entries are the
+    one-line stub itself, not the target page's content, so they look infobox-less even though
+    the target page has one.
+    """
+    match = _BARE_REDIRECT_RE.match(wikitext)
+    if not match:
+        return None
+    target = match.group(1).strip()
+    return None if "#" in target else target
+
+
 def find_infobox_body(wikitext: str) -> str | None:
     """Return the inner content of the first `{{Infobox military conflict ...}}` template.
 

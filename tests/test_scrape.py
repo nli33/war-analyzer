@@ -12,6 +12,7 @@ from war.scrape import (
     fetch_wikitext_batch,
     find_infobox_body,
     parse_military_infobox,
+    redirect_stub_target,
     split_infobox_params,
 )
 
@@ -104,6 +105,28 @@ def test_find_infobox_body_stops_at_matching_close_not_rest_of_article():
     )
     body = find_infobox_body(wikitext)
     assert "unrelated" not in body
+
+
+def test_redirect_stub_target_bare_redirect():
+    assert redirect_stub_target("#REDIRECT [[Battle of Ras Kamboni (2007)]]") == (
+        "Battle of Ras Kamboni (2007)"
+    )
+
+
+def test_redirect_stub_target_tolerates_trailing_redirect_category_templates():
+    wikitext = "#REDIRECT [[Battle of Bronkhorstspruit]]\n\n{{R from move}}"
+    assert redirect_stub_target(wikitext) == "Battle of Bronkhorstspruit"
+
+
+def test_redirect_stub_target_none_for_anchor_redirect():
+    # Points at a section of a different page, not its own infobox -- re-fetching would risk
+    # handing every title anchored to that page the same (wrong) first infobox. See docstring.
+    wikitext = "#REDIRECT [[Battles of Saratoga#First Saratoga]]"
+    assert redirect_stub_target(wikitext) is None
+
+
+def test_redirect_stub_target_none_for_non_redirect_page():
+    assert redirect_stub_target(CANNAE_WIKITEXT) is None
 
 
 def _query_response(pages, redirects=None):
