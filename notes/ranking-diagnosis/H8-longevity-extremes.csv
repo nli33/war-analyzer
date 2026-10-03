@@ -1,0 +1,344 @@
+general_id,display_name,longevity_adjusted_value,career_value,career_length_years,battles_commanded,win_rate,baseline_rank,win_rate_longevity_rank
+edmund-allenby-1st-viscount-allenby,Edmund Allenby,7.5,15.0,2,16,0.9375,1,8
+abdul-fatah-younis,Abdul Fatah Younis,6.0,6.0,1,9,0.5555555555555556,13,50
+henri-de-la-rochejaquelein,Rochejaquelein,6.0,6.0,1,9,0.6666666666666666,31,135
+lee-kwon-mu,Lee Kwon Mu,5.0,5.0,1,5,1.0,3,3
+carl-johan-adlercreutz,Carl Johan Adlercreutz,5.0,5.0,1,5,1.0,11,38
+pietro-badoglio,Pietro Badoglio,4.5,4.5,1,5,0.8,30,70
+charles-x-gustav,Charles X Gustav,4.0,8.0,2,10,0.8,6,56
+jos-de-urrea,José de Urrea,4.0,4.0,1,4,1.0,18,45
+oku-yasukata,Oku Yasukata,4.0,4.0,1,4,1.0,19,46
+ram-n-blanco-1st-marquess-of-pe-a-plata,Ramón Blanco,4.0,4.0,1,6,0.6666666666666666,72,133
+antonio-ricardos,Antonio Ricardos,4.0,4.0,1,6,0.6666666666666666,83,157
+chief-joseph,Chief Joseph,4.0,4.0,1,6,0.5,115,190
+douglas-haig-1st-earl-haig,Douglas Haig,3.875,15.5,4,18,0.7777777777777778,68,97
+khalid-ibn-al-walid,Khalid ibn al-Walid,3.857142857142857,27.0,7,27,1.0,4,26
+philip-sheridan,Philip Sheridan,3.75,7.5,2,9,0.7777777777777778,48,92
+stonewall-jackson,Stonewall Jackson,3.5,7.0,2,10,0.6,74,124
+george-b-mcclellan,George B. McClellan,3.25,6.5,2,10,0.4,92,160
+thomas-sumter,Thomas Sumter,3.0,3.0,1,5,0.6,95,199
+ulysses-s-grant,Ulysses S. Grant,2.875,11.5,4,13,0.7692307692307693,20,44
+peter-wittgenstein,Peter Wittgenstein,2.75,5.5,2,6,0.8333333333333334,10,13
+banastre-tarleton,Banastre Tarleton,2.75,5.5,2,8,0.625,90,187
+william-howe-5th-viscount-howe,Sir William Howe,2.625,10.5,4,12,0.8333333333333334,5,12
+napoleon,Napoleon I,2.5454545454545454,56.0,22,63,0.873015873015873,12,16
+jacques-fran-ois-dugommier,Jacques Dugommier,2.5,5.0,2,5,1.0,26,33
+boris-trajkovski,Boris Trajkovski,2.5,2.5,1,5,0.4,164,192
+william-tecumseh-sherman,William T. Sherman,2.25,9.0,4,12,0.6666666666666666,114,139
+jean-nicolas-houchard,Jean Houchard,2.0,4.0,2,4,1.0,22,19
+john-schofield,John M. Schofield,2.0,4.0,2,4,1.0,23,21
+tomitar-horii,Tomitarō Horii,2.0,2.0,1,2,1.0,61,60
+guy-carleton-1st-baron-dorchester,Guy Carleton,2.0,4.0,2,5,0.8,69,107
+hans-karl-von-diebitsch,Hans Karl von Diebitsch,2.0,2.0,1,3,0.6666666666666666,150,167
+benjamin-butler,Benjamin F. Butler,2.0,2.0,1,5,0.2,203,229
+jean-charles-pichegru,Jean-Charles Pichegru,2.0,6.0,3,10,0.6,213,227
+robert-e-lee,Robert E. Lee,1.9,9.5,5,23,0.2608695652173913,179,212
+jean-victor-marie-moreau,Jean Moreau,1.8571428571428572,13.0,7,15,0.8666666666666667,40,48
+james-g-blunt,James G. Blunt,1.8333333333333333,5.5,3,7,0.7142857142857143,131,143
+samuel-ryan-curtis,Samuel Ryan Curtis,1.6666666666666667,5.0,3,5,1.0,27,20
+radomir-putnik,Radomir Putnik,1.6666666666666667,5.0,3,5,1.0,35,36
+nathan-bedford-forrest,Nathan Bedford Forrest,1.6666666666666667,5.0,3,6,0.8333333333333334,106,102
+ambrose-burnside,Ambrose Burnside,1.6666666666666667,5.0,3,7,0.7142857142857143,155,164
+fran-ois-s-bastien-charles-joseph-de-croix-count-of-clerfayt,Count of Clerfayt,1.6666666666666667,5.0,3,10,0.5,233,240
+dwight-d-eisenhower,Dwight D. Eisenhower,1.5,6.0,4,6,1.0,7,4
+alexander-the-great,Alexander the Great,1.5,15.0,10,15,1.0,9,15
+friedrich-wilhelm-freiherr-von-b-low,Friedrich Wilhelm von Bülow,1.5,3.0,2,3,1.0,38,32
+gouverneur-k-warren,Gouverneur K. Warren,1.5,4.5,3,5,0.8,46,53
+andrew-jackson,Andrew Jackson,1.5,4.5,3,5,0.8,58,65
+fedor-von-bock,Fedor von Bock,1.5,6.0,4,6,1.0,63,57
+alfred-pleasonton,Alfred Pleasonton,1.5,3.0,2,4,0.5,98,113
+william-i-of-the-netherlands,Prince of Orange,1.5,3.0,2,4,0.75,112,115
+william-w-averell,William W. Averell,1.5,3.0,2,4,0.5,143,165
+charles-henri-hector-count-of-estaing,Count of Estaing,1.5,3.0,2,5,0.6,166,207
+john-b-magruder,John B. Magruder,1.5,1.5,1,3,0.0,192,228
+guillaume-brune,Guillaume Brune,1.5,3.0,2,5,0.6,193,201
+charles-edward-stuart,Charles Edward Stuart,1.5,3.0,2,5,0.6,231,255
+louis-gabriel-suchet,Louis Gabriel Suchet,1.4,7.0,5,9,0.7777777777777778,118,120
+han-xin,Han Xin,1.3333333333333333,4.0,3,4,1.0,14,29
+bernard-montgomery,Bernard Montgomery,1.3333333333333333,4.0,3,4,1.0,17,6
+bernardo-de-g-lvez,Bernardo de Gálvez,1.3333333333333333,4.0,3,4,1.0,53,66
+william-halsey-jr,William Halsey,1.3333333333333333,4.0,3,5,0.8,94,93
+gerd-von-rundstedt,Gerd von Rundstedt,1.3333333333333333,8.0,6,11,0.7272727272727273,120,121
+william-rosecrans,William S. Rosecrans,1.3333333333333333,4.0,3,5,0.8,124,123
+nathaniel-p-banks,Nathaniel P. Banks,1.3333333333333333,4.0,3,7,0.5714285714285714,220,218
+luigi-cadorna,Luigi Cadorna,1.3333333333333333,4.0,3,8,0.375,228,232
+paul-von-lettow-vorbeck,Paul von Lettow-Vorbeck,1.25,5.0,4,6,0.8333333333333334,70,68
+yama-iwao,Ōyama Iwao,1.25,2.5,2,3,0.6666666666666666,113,110
+p-g-t-beauregard,P.G.T. Beauregard,1.25,5.0,4,7,0.5714285714285714,140,146
+julius-caesar,Julius Caesar,1.2142857142857142,17.0,14,20,0.85,77,103
+arthur-wellesley-1st-duke-of-wellington,Arthur Wellesley,1.2058823529411764,20.5,17,27,0.7037037037037037,78,84
+robert-devereux-3rd-earl-of-essex,Earl of Essex,1.1666666666666667,3.5,3,6,0.3333333333333333,206,237
+hugh-gough-1st-viscount-gough,Hugh Gough,1.1111111111111112,10.0,9,11,0.9090909090909091,60,54
+sulla,Lucius Cornelius Sulla,1.0,6.0,6,6,1.0,50,62
+ralph-abercromby,Ralph Abercromby,1.0,5.0,5,6,0.8333333333333334,62,61
+radko-dimitriev,Radko Dimitriev,1.0,3.0,3,3,1.0,65,51
+charles-fran-ois-dumouriez,Charles Dumouriez,1.0,2.0,2,2,1.0,71,59
+louis-joseph-de-montcalm,Marquis de Montcalm,1.0,4.0,4,5,0.8,101,106
+j-zsef-alvinczi,József Alvinczi,1.0,2.0,2,4,0.5,102,116
+fran-ois-joseph-lefebvre,François Lefebvre,1.0,3.0,3,4,0.75,117,112
+lazare-hoche,Louis-Lazare Hoche,1.0,5.0,5,7,0.7142857142857143,153,150
+mustafa-ii,Mustafa II,1.0,3.0,3,4,0.75,163,174
+erich-von-manstein,Erich von Manstein,1.0,3.0,3,5,0.6,172,169
+nikolay-kamensky,Nikolay Kamensky,1.0,3.0,3,4,0.75,188,171
+andrew-cunningham-1st-viscount-cunningham-of-hyndhope,Andrew Cunningham,1.0,2.0,2,3,0.3333333333333333,194,204
+claude-lecourbe,Claude Lecourbe,1.0,2.0,2,5,0.4,226,231
+joseph-joffre,Joseph Joffre,1.0,3.0,3,7,0.2857142857142857,243,250
+maurice-d-elb-e,Maurice d'Elbée,1.0,2.0,2,6,0.3333333333333333,270,277
+franz-conrad-von-h-tzendorf,Conrad von Hötzendorf,1.0,2.0,2,6,0.16666666666666666,277,284
+maximilian-anton-karl-count-baillet-de-latour,Count Latour,1.0,1.0,1,5,0.2,283,292
+minoru-sasaki,Minoru Sasaki,1.0,1.0,1,4,0.25,285,285
+william-waller,William Waller,1.0,2.0,2,6,0.3333333333333333,296,314
+charles-xii-of-sweden,Charles XII,0.9411764705882353,16.0,17,17,0.9411764705882353,15,11
+mustafa-kemal-atat-rk,Mustafa Kemal,0.9166666666666666,11.0,12,12,0.9166666666666666,36,27
+stefan-czarniecki,Stefan Czarniecki,0.9,9.0,10,14,0.6428571428571429,176,193
+louis-xiii,Louis XIII,0.8888888888888888,8.0,9,10,0.7,73,90
+manuel-oribe,Manuel Oribe,0.875,3.5,4,4,0.75,105,95
+erich-von-falkenhayn,Erich von Falkenhayn,0.875,3.5,4,11,0.18181818181818182,256,268
+jean-baptiste-jourdan,General Jourdan,0.8571428571428571,6.0,7,14,0.42857142857142855,240,241
+alexander-farnese-duke-of-parma,"Alexander Farnese, Prince of Parma",0.8461538461538461,11.0,13,13,0.8461538461538461,138,140
+thomas-fairfax,Sir Thomas Fairfax,0.8333333333333334,5.0,6,6,0.8333333333333334,82,91
+wade-hampton-iii,Wade Hampton,0.8333333333333334,2.5,3,4,0.25,126,154
+eug-ne-de-beauharnais,Eugène de Beauharnais,0.8333333333333334,5.0,6,9,0.5555555555555556,199,198
+archduke-charles-duke-of-teschen,Archduke Charles,0.8214285714285714,11.5,14,24,0.4583333333333333,165,176
+joachim-murat,Joachim Murat,0.8181818181818182,9.0,11,15,0.6,200,197
+stilicho,Stilicho,0.8,4.0,5,4,1.0,25,24
+paul-von-hindenburg,Paul von Hindenburg,0.8,4.0,5,6,0.5,175,177
+nader-shah,Nader,0.7631578947368421,14.5,19,18,0.7777777777777778,99,98
+manuel-belgrano,Manuel Belgrano,0.75,3.0,4,7,0.42857142857142855,59,76
+giuseppe-garibaldi,Giuseppe Garibaldi,0.75,6.0,8,7,0.8571428571428571,64,55
+haider-al-abadi,Haider al-Abadi,0.75,3.0,4,4,0.75,103,85
+enrique-o-donnell-conde-de-la-bisbal,Enrique O'Donnell,0.75,3.0,4,4,0.75,125,117
+nicolas-oudinot,Nicolas Oudinot,0.75,1.5,2,3,0.3333333333333333,214,223
+georgy-zhukov,Georgy Zhukov,0.7142857142857143,5.0,7,6,0.8333333333333334,16,7
+cardinal-infante-ferdinand-of-austria,Cardinal-Infante Ferdinand,0.7142857142857143,5.0,7,5,1.0,28,17
+muhammad,Muhammad,0.7142857142857143,5.0,7,7,0.5714285714285714,177,196
+duke-ferdinand-of-brunswick-wolfenb-ttel,Duke Ferdinand of Brunswick-Wolfenbüttel,0.7,3.5,5,9,0.3333333333333333,229,246
+scipio-africanus,Scipio Africanus,0.6666666666666666,6.0,9,7,0.8571428571428571,34,42
+jean-lannes,Jean Lannes,0.6666666666666666,6.0,9,6,1.0,39,18
+hugh-judson-kilpatrick,Judson Kilpatrick,0.6666666666666666,2.0,3,4,0.25,197,205
+miguel-miram-n,Miguel Miramón,0.6666666666666666,2.0,3,4,0.5,218,213
+karl-philipp-prince-of-schwarzenberg,Karl von Schwarzenberg,0.6666666666666666,2.0,3,6,0.3333333333333333,251,257
+douglas-h-cooper,Douglas H. Cooper,0.6666666666666666,2.0,3,4,0.5,264,256
+frederick-the-great,Frederick the Great,0.6590909090909091,14.5,22,19,0.7368421052631579,100,99
+douglas-macarthur,Douglas MacArthur,0.6363636363636364,7.0,11,12,0.5833333333333334,157,144
+maurice-prince-of-orange,Maurice of Nassau,0.6285714285714286,22.0,35,27,0.8148148148148148,116,108
+jean-baptiste-kl-ber,Jean Baptiste Kléber,0.625,5.0,8,6,0.8333333333333334,136,111
+gerard-lake-1st-viscount-lake,Gerard Lake,0.625,5.0,8,7,0.7142857142857143,169,159
+j-e-b-stuart,J.E.B. Stuart,0.625,2.5,4,7,0.0,254,271
+k-z-m-karabekir,Kâzım Karabekir,0.6,3.0,5,5,0.6,219,208
+joseph-e-johnston,Joseph E. Johnston,0.6,3.0,5,9,0.2222222222222222,247,247
+ralph-hopton-1st-baron-hopton,Ralph Hopton,0.6,3.0,5,7,0.42857142857142855,289,290
+jean-de-dieu-soult,Jean-de-Dieu Soult,0.59375,9.5,16,17,0.5294117647058824,212,206
+sim-n-bol-var,Simón Bolívar,0.5833333333333334,7.0,12,7,1.0,57,39
+james-graham-1st-marquess-of-montrose,Lord Montrose,0.5833333333333334,7.0,12,9,0.7777777777777778,123,125
+maurice-de-saxe,Maurice de Saxe,0.5714285714285714,4.0,7,4,1.0,49,41
+michael-the-brave,Michael the Brave,0.5714285714285714,4.0,7,5,0.8,128,126
+prince-josias-of-saxe-coburg-saalfeld,Prince of Coburg,0.5714285714285714,4.0,7,8,0.5,276,270
+bohdan-khmelnytsky,Bohdan Khmelnytskyi,0.5625,4.5,8,6,0.6666666666666666,158,161
+andr-mass-na,André Masséna,0.5625,9.0,16,15,0.6,160,156
+selim-i,Selim I,0.5454545454545454,6.0,11,7,0.8571428571428571,87,83
+takeda-shingen,Takeda Shingen,0.53125,17.0,32,20,0.8,88,89
+henry-hastings-sibley,Henry Hastings Sibley,0.5,1.0,2,1,1.0,91,71
+john-iii-sobieski,John III Sobieski,0.5,8.5,17,9,0.8888888888888888,96,86
+paul-methuen-3rd-baron-methuen,Lord Methuen,0.5,2.0,4,2,1.0,104,78
+johan-august-sandels,Johan August Sandels,0.5,3.0,6,4,0.75,127,109
+adam-ludwig-lewenhaupt,Adam Ludwig Lewenhaupt,0.5,3.0,6,4,0.75,129,128
+leopold-joseph-von-daun,Leopold Joseph von Daun,0.5,3.0,6,5,0.6,154,163
+edward-canby,Edward Canby,0.5,2.0,4,3,0.6666666666666666,181,166
+pyrrhus-of-epirus,Pyrrhus of Epirus,0.5,4.5,9,8,0.5,209,216
+robert-the-bruce,King Robert I,0.5,5.0,10,8,0.625,221,224
+john-c-pemberton,John C. Pemberton,0.5,1.0,2,3,0.3333333333333333,224,220
+jean-jacques-dessalines,Jean-Jacques Dessalines,0.5,2.0,4,4,0.5,238,230
+janusz-radziwi-1612-1655,Janusz Radziwiłł,0.5,3.5,7,6,0.5,244,248
+paul-kray,Pál Kray,0.5,3.5,7,9,0.3333333333333333,250,252
+sterling-price,Sterling Price,0.5,2.0,4,7,0.2857142857142857,258,258
+peter-tordenskjold,Peter Tordenskjold,0.5,1.0,2,4,0.25,280,288
+richard-taylor-confederate-general,Richard Taylor,0.5,1.0,2,4,0.25,294,289
+joaqu-n-blake,Joaquín Blake y Joyes,0.5,2.0,4,9,0.2222222222222222,295,295
+erich-ludendorff,Erich Ludendorff,0.5,1.5,3,12,0.0,300,310
+earl-van-dorn,Earl Van Dorn,0.5,1.0,2,4,0.25,314,303
+louis-joseph-duke-of-vend-me,Duke of Vendôme,0.4642857142857143,6.5,14,7,0.8571428571428571,54,52
+toyotomi-hideyoshi,Hashiba Hideyoshi,0.46153846153846156,6.0,13,7,0.7142857142857143,32,40
+johann-tserclaes-count-of-tilly,Count of Tilly,0.46153846153846156,6.0,13,10,0.6,237,234
+louis-nicolas-davout,Louis-Nicolas Davout,0.45454545454545453,5.0,11,5,1.0,43,25
+henry-iv-of-france,Henry IV,0.45454545454545453,5.0,11,8,0.625,207,203
+hannibal,Hannibal,0.45,13.5,30,20,0.65,147,158
+oda-nobunaga,Oda Nobunaga,0.4444444444444444,8.0,18,11,0.7272727272727273,42,47
+fyodor-ushakov,Fyodor Ushakov,0.4444444444444444,4.0,9,4,1.0,79,64
+laurent-de-gouvion-saint-cyr,Laurent Saint-Cyr,0.42857142857142855,6.0,14,7,0.8571428571428571,80,67
+gustavus-adolphus,Gustavus Adolphus,0.42857142857142855,9.0,21,12,0.75,133,129
+jean-armand-de-maill-2nd-marquis-of-br-z,Jean Armand de Maillé-Brézé,0.42857142857142855,3.0,7,4,0.75,205,191
+peng-dehuai,Peng Dehuai,0.42857142857142855,3.0,7,6,0.5,263,249
+edward-iii,Edward III of England,0.4166666666666667,7.5,18,9,0.7777777777777778,75,80
+g-nther-von-kluge,Günther von Kluge,0.4166666666666667,2.5,6,5,0.4,234,226
+charles-cornwallis-1st-marquess-cornwallis,Charles Cornwallis,0.4090909090909091,9.0,22,13,0.6923076923076923,204,194
+constantine-i-of-greece,Crown Prince Constantine,0.4,4.0,10,4,1.0,52,31
+richard-i-of-england,Richard I of England,0.4,4.0,10,4,1.0,67,58
+gebhard-leberecht-von-bl-cher,Gebhard von Blücher,0.4,4.0,10,9,0.4444444444444444,167,168
+i-smet-i-n-n,İsmet Bey,0.4,2.0,5,4,0.5,235,221
+dagobert-sigmund-von-wurmser,Graf von Wurmser,0.4,2.0,5,9,0.2222222222222222,303,306
+auguste-de-marmont,Auguste de Marmont,0.3888888888888889,3.5,9,6,0.5,191,188
+horatio-nelson-1st-viscount-nelson,Horatio Nelson,0.38461538461538464,5.0,13,7,0.5714285714285714,151,145
+alexander-suvorov,Alexander Suvorov,0.3793103448275862,11.0,29,12,0.9166666666666666,51,35
+pedro-de-valdivia,Pedro de Valdivia,0.375,3.0,8,4,0.75,161,152
+skanderbeg,Skanderbeg,0.375,9.0,24,12,0.75,182,172
+braxton-bragg,Braxton Bragg,0.375,1.5,4,5,0.2,242,243
+michel-ney,Michel Ney,0.35294117647058826,6.0,17,13,0.3076923076923077,217,222
+saladin,Saladin,0.34782608695652173,8.0,23,14,0.5,257,263
+charles-xiv-john,Charles John,0.3333333333333333,6.0,18,7,0.8571428571428571,37,23
+jan-zamoyski,Jan Zamoyski,0.3333333333333333,5.0,15,5,1.0,45,30
+ismail-i,Ismail I,0.3333333333333333,5.0,15,6,0.8333333333333334,148,134
+ahmad-ibn-ibrahim-al-ghazi,Ahmad ibn Ibrahim,0.3333333333333333,5.0,15,7,0.7142857142857143,186,170
+william-the-silent,William of Orange,0.3333333333333333,2.0,6,4,0.5,210,211
+anton-denikin,Anton Denikin,0.3333333333333333,2.0,6,4,0.5,223,214
+micha-serwacy-wi-niowiecki,Michał Serwacy Wiśniowiecki,0.3333333333333333,2.0,6,4,0.5,253,251
+albert-vii-of-austria,Archduke Albert von Austria,0.3333333333333333,2.0,6,4,0.5,259,259
+hitoshi-imamura,Hitoshi Imamura,0.3333333333333333,1.0,3,3,0.3333333333333333,261,261
+boris-sheremetev,Boris Sheremetev,0.3333333333333333,3.0,9,6,0.5,267,266
+james-longstreet,James Longstreet,0.3333333333333333,1.0,3,3,0.3333333333333333,287,279
+cyrus-the-great,Kyros II,0.32142857142857145,4.5,14,5,0.8,135,118
+frederick-henry-prince-of-orange,Frederick Henry,0.3157894736842105,6.0,19,9,0.6666666666666666,185,175
+george-crook,George Crook,0.3076923076923077,4.0,13,5,0.8,159,131
+alexander-i-of-russia,Alexander I,0.3,3.0,10,6,0.5,146,148
+guru-gobind-singh,Guru Gobind Singh,0.3,6.0,20,9,0.6666666666666666,190,179
+barth-lemy-louis-joseph-sch-rer,Barthélemy Schérer,0.3,1.5,5,4,0.25,278,278
+muqtada-al-sadr,Muqtada al-Sadr,0.3,1.5,5,5,0.2,288,286
+peter-the-great,Peter I,0.2857142857142857,6.0,21,7,0.8571428571428571,84,75
+louis-xiv,Louis XIV,0.2857142857142857,6.0,21,6,1.0,93,72
+george-washington,George Washington,0.2857142857142857,8.0,28,15,0.4666666666666667,174,184
+prince-eugene-of-savoy,Prince Eugene of Savoy,0.2857142857142857,6.0,21,10,0.5,178,185
+albrecht-von-wallenstein,Albrecht von Wallenstein,0.2857142857142857,2.0,7,4,0.5,180,186
+eberhard-von-vegesack,Eberhard Vegesack,0.2857142857142857,2.0,7,3,0.6666666666666666,202,182
+claude-victor-perrin,Claude Victor-Perrin,0.28125,4.5,16,9,0.4444444444444444,215,210
+fran-ois-henri-de-montmorency-duc-de-luxembourg,Duke of Luxembourg,0.2727272727272727,6.0,22,6,1.0,47,28
+jalal-al-din-mangburni,Jalal al-Din Mangburni,0.2727272727272727,3.0,11,7,0.42857142857142855,275,274
+mehmed-ii,Mehmed the Conqueror,0.2692307692307692,7.0,26,8,0.875,107,94
+john-hunyadi,John Hunyadi,0.26666666666666666,4.0,15,6,0.6666666666666666,184,181
+jan-karol-chodkiewicz,Jan Karol Chodkiewicz,0.2631578947368421,5.0,19,6,0.8333333333333334,189,162
+frederick-roberts-1st-earl-roberts,Frederick Roberts,0.2608695652173913,6.0,23,6,1.0,56,34
+subutai,Subutai,0.25,5.0,20,5,1.0,21,10
+abbas-the-great,Abbas the Great,0.25,7.0,28,8,0.875,86,74
+john-j-pershing,John J. Pershing,0.25,2.0,8,2,1.0,144,101
+belisarius,Belisarius,0.25,8.0,32,10,0.8,152,142
+george-armstrong-custer,George Armstrong Custer,0.25,3.0,12,5,0.4,201,195
+xue-yue,Xue Yue,0.25,1.0,4,2,0.5,227,215
+charles-emmanuel-iii,Charles Emmanuel III of Savoy,0.25,3.0,12,6,0.5,236,233
+jean-reynier,Jean Reynier,0.25,2.0,8,5,0.4,255,245
+erwin-rommel,Erwin Rommel,0.25,1.0,4,3,0.3333333333333333,273,265
+pyotr-bagration,Pyotr Bagration,0.25,2.0,8,6,0.3333333333333333,284,281
+otto-liman-von-sanders,Otto Liman von Sanders,0.25,1.0,4,8,0.125,293,293
+aleksey-kuropatkin,Aleksey Kuropatkin,0.25,0.5,2,3,0.0,297,296
+abu-bakr-al-baghdadi,Abu Bakr al-Baghdadi,0.25,1.0,4,4,0.25,304,300
+rupprecht-crown-prince-of-bavaria,Crown Prince Rupprecht,0.25,1.0,4,9,0.1111111111111111,307,308
+thomas-c-hindman,Thomas C. Hindman,0.25,0.5,2,4,0.0,315,316
+emilio-aguinaldo,Emilio Aguinaldo,0.25,1.0,4,5,0.2,320,315
+wolmar-anton-von-schlippenbach,Wolmar Anton von Schlippenbach,0.25,1.0,4,4,0.25,321,324
+murad-ii,Murad II,0.2413793103448276,7.0,29,9,0.7777777777777778,81,81
+stanis-aw-koniecpolski,Stanisław Koniecpolski,0.23809523809523808,5.0,21,5,1.0,41,22
+antigonus-i-monophthalmus,Antigonos,0.23684210526315788,4.5,19,8,0.5,266,264
+roger-of-lauria,Roger of Lauria,0.23529411764705882,4.0,17,4,1.0,134,105
+louis-william-margrave-of-baden-baden,Margrave of Baden,0.23529411764705882,4.0,17,6,0.6666666666666666,196,183
+genghis-khan,Temujin,0.22857142857142856,8.0,35,10,0.8,130,119
+john-churchill-1st-duke-of-marlborough,Duke of Marlborough,0.22727272727272727,5.0,22,5,1.0,55,37
+bohemond-i-of-antioch,Bohemond of Taranto,0.2222222222222222,4.0,18,6,0.6666666666666666,141,141
+gustav-horn,Gustav Horn,0.2222222222222222,2.0,9,4,0.5,249,242
+ernst-von-mansfeld,Ernst von Mansfeld,0.2222222222222222,2.0,9,5,0.4,282,283
+dionysius-i-of-syracuse,Dionysius,0.21666666666666667,6.5,30,10,0.6,211,200
+eumenes,Eumenes,0.21428571428571427,1.5,7,4,0.25,298,299
+stanis-aw-kiewski,Stanisław Żółkiewski,0.21052631578947367,4.0,19,5,0.8,171,151
+george-rooke,George Rooke,0.20833333333333334,2.5,12,5,0.4,268,272
+pompey,Pompey,0.20689655172413793,6.0,29,8,0.75,222,202
+prince-rupert-of-the-rhine,Prince Rupert,0.203125,6.5,32,11,0.5454545454545454,232,225
+h-j-ujiyasu,Hōjō Ujiyasu,0.2,5.0,25,5,1.0,8,2
+joseph-souham,Joseph Souham,0.2,4.0,20,4,1.0,29,9
+hayreddin-barbarossa,Hayreddin Pasha,0.2,3.0,15,4,0.75,44,43
+gordon-bremer,Gordon Bremer,0.2,3.0,15,3,1.0,119,87
+archduke-john-of-austria,Archduke John of Austria,0.2,2.0,10,5,0.4,241,235
+melchior-von-hatzfeldt,Melchior von Hatzfeld,0.2,2.0,10,4,0.5,252,244
+johann-von-hiller,Johann von Hiller,0.2,1.0,5,4,0.25,292,291
+johann-peter-beaulieu,Johann von Beaulieu,0.2,1.0,5,5,0.2,299,298
+duke-ferdinand-frederick-augustus-of-w-rttemberg,Duke Ferdinand of Württemberg,0.2,1.0,5,4,0.25,317,313
+suleiman-the-magnificent,Suleiman I,0.1956521739130435,9.0,46,12,0.75,149,138
+henri-de-la-tour-d-auvergne-viscount-of-turenne,Turenne,0.1935483870967742,6.0,31,9,0.5555555555555556,183,180
+boiorix,Boiorix,0.19230769230769232,2.5,13,4,0.5,245,238
+ambrogio-spinola,Ambrosio Spinola,0.19047619047619047,4.0,21,6,0.6666666666666666,139,130
+john-bell-hood,John B. Hood,0.1875,1.5,8,8,0.125,322,317
+charles-v-holy-roman-emperor,Charles V,0.18181818181818182,2.0,11,4,0.5,246,239
+ibn-saud,Abdulaziz Ibn Saud,0.17857142857142858,5.0,28,6,0.8333333333333334,121,96
+k-pr-l-zade-faz-l-ahmed-pasha,Fazıl Ahmed,0.17647058823529413,3.0,17,5,0.6,195,189
+philip-the-good,Philip the Good,0.175,7.0,40,7,1.0,111,88
+winfield-scott,Winfield Scott,0.16666666666666666,6.0,36,7,0.8571428571428571,97,73
+george-wootten,George Wootten,0.16666666666666666,1.0,6,1,1.0,110,77
+sir-charles-knowles-1st-baronet,Charles Knowles,0.16666666666666666,1.0,6,4,0.25,262,273
+johannes-blaskowitz,Johannes Blaskowitz,0.16666666666666666,1.0,6,3,0.3333333333333333,265,260
+joseph-bonaparte,Joseph Bonaparte,0.16666666666666666,1.0,6,3,0.3333333333333333,272,267
+john-hunt-morgan,John H. Morgan,0.16666666666666666,0.5,3,4,0.0,302,302
+charles-v-of-lorraine,"Charles V, Duke of Lorraine",0.16666666666666666,2.0,12,5,0.4,309,301
+a-p-hill,A. P. Hill,0.16666666666666666,0.5,3,4,0.0,313,312
+seleucus-i-nicator,Seleukos I,0.16129032258064516,5.0,31,6,0.8333333333333334,187,155
+yohannes-iv,Kassa Mercha,0.15789473684210525,3.0,19,4,0.75,162,137
+charles-i-of-england,Charles I,0.15789473684210525,3.0,19,8,0.25,286,287
+claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars,0.15625,5.0,32,5,1.0,24,5
+nelson-a-miles,Nelson A. Miles,0.15384615384615385,2.0,13,2,1.0,2,1
+muammar-gaddafi,Muammar Gaddafi,0.15384615384615385,4.0,26,9,0.4444444444444444,216,209
+tadeusz-ko-ciuszko,Tadeusz Kościuszko,0.15384615384615385,2.0,13,5,0.4,230,219
+gustaf-mauritz-armfelt,Gustaf Mauritz Armfelt,0.15,3.0,20,4,0.75,145,127
+akbar,Akbar,0.14285714285714285,3.0,21,3,1.0,85,63
+mark-antony,Mark Antony,0.14285714285714285,2.0,14,6,0.3333333333333333,326,325
+michiel-de-ruyter,Michiel de Ruyter,0.14,3.5,25,5,0.6,66,69
+stephen-the-great,Stephen the Great,0.1388888888888889,5.0,36,6,0.8333333333333334,170,153
+antiochus-iii-the-great,Antiochus III the Great,0.13793103448275862,4.0,29,7,0.5714285714285714,306,294
+antonio-l-pez-de-santa-anna,Antonio López de Santa Anna,0.13157894736842105,2.5,19,8,0.25,281,275
+fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba,0.1282051282051282,5.0,39,5,1.0,33,14
+mikhail-kutuzov,Mikhail Kutuzov,0.125,1.0,8,1,1.0,76,49
+crist-bal-de-mondrag-n,Cristóbal de Mondragón,0.125,3.0,24,4,0.75,132,114
+louis-grand-cond,"Louis, Grand Condé",0.125,4.0,32,5,0.6,137,136
+john-ii-casimir-vasa,John II Casimir,0.125,2.0,16,6,0.3333333333333333,305,305
+tienne-macdonald,Jacques MacDonald,0.125,2.0,16,8,0.25,312,304
+john-s-marmaduke,John S. Marmaduke,0.125,0.5,4,9,0.0,327,327
+charles-william-ferdinand-duke-of-brunswick,Duke of Brunswick,0.11764705882352941,4.0,34,6,0.6666666666666666,168,149
+tokugawa-ieyasu,Matsudaira Motoyasu,0.11607142857142858,6.5,56,8,0.75,142,122
+charles-the-bold,Charles the Bold,0.11538461538461539,1.5,13,6,0.16666666666666666,301,311
+li-zongren,Li Zongren,0.1111111111111111,1.0,9,2,0.5,109,100
+anthony-wayne,Anthony Wayne,0.1111111111111111,2.0,18,4,0.5,248,236
+hasdrubal-barca,Hasdrubal Barca,0.1111111111111111,1.0,9,4,0.25,336,333
+ernst-gideon-von-laudon,Ernst Gideon von Laudon,0.109375,3.5,32,6,0.5,225,217
+zachary-taylor,Zachary Taylor,0.09722222222222222,3.5,36,5,0.6,198,173
+frederick-ii-holy-roman-emperor,Frederick II,0.09090909090909091,1.0,11,4,0.25,239,253
+frederick-barbarossa,Frederick Barbarossa,0.09090909090909091,2.0,22,4,0.5,274,269
+james-fitzjames-1st-duke-of-berwick,Duke of Berwick,0.08888888888888889,4.0,45,5,0.8,173,147
+chiang-kai-shek,Chiang Kai-shek,0.08333333333333333,1.0,12,4,0.0,271,276
+prince-william-duke-of-cumberland,Duke of Cumberland,0.07692307692307693,1.0,13,3,0.3333333333333333,279,280
+francisco-verdugo,Francisco Verdugo,0.07692307692307693,1.0,13,5,0.2,316,320
+aurangzeb,Aurangzeb,0.06382978723404255,3.0,47,4,0.75,89,79
+stanis-aw-rewera-potocki,Stanisław Potocki,0.0625,2.0,32,4,0.5,260,254
+levin-august-von-bennigsen,Levin Bennigsen,0.0625,0.5,8,5,0.0,290,297
+louis-i-prince-of-cond,"Louis I, Prince of Condé",0.0625,0.5,8,4,0.0,334,337
+prince-charles-alexander-of-lorraine,Prince Charles Alexander of Lorraine,0.0625,1.0,16,9,0.1111111111111111,339,339
+ahmed-muhtar-pasha,Ahmed Pasha,0.06,1.5,25,4,0.25,269,262
+andrea-doria,Andrea Doria,0.058823529411764705,2.0,34,4,0.5,291,282
+william-iii-of-england,William of Orange,0.041666666666666664,1.0,24,5,0.2,325,326
+dragut,Dragut,0.038461538461538464,1.0,26,4,0.25,323,323
+brigadier-general,Brig. Gen.,0.030612244897959183,4.5,147,6,0.6666666666666666,156,132
+colonel,Col,0.029900332225913623,9.0,301,14,0.6428571428571429,122,104
+v-nguy-n-gi-p,Võ Nguyên Giáp,0.027777777777777776,0.5,18,4,0.0,310,319
+captain,Capt.,0.02564102564102564,3.0,117,4,0.75,108,82
+joseph-wheeler,Joseph Wheeler,0.013888888888888888,0.5,36,4,0.0,324,322
+general-officer,General,0.012232415902140673,4.0,327,6,0.6666666666666666,208,178
+piet-joubert,Piet Joubert,0.0,0.0,19,1,0.0,308,307
+louis-botha,Louis Botha,0.0,0.0,3,1,0.0,311,309
+georg-von-der-marwitz,Georg von der Marwitz,0.0,0.0,5,2,0.0,318,321
+inkpaduta,Inkpaduta,0.0,0.0,1,1,0.0,319,318
+michelangelo-alessandro-colli-marchi,Michelangelo Colli-Marchi,0.0,0.0,4,4,0.0,328,330
+jean-antoine-rossignol,Jean Rossignol,0.0,0.0,1,4,0.0,329,331
+charles-pierre-augereau,Pierre Augereau,0.0,0.0,5,3,0.0,330,332
+piet-cronj,Piet Cronjé,0.0,0.0,2,3,0.0,331,328
+sigismund-holy-roman-emperor,King Sigismund of Hungary,0.0,0.0,28,4,0.0,332,336
+semyon-budyonny,Semyon Budyonny,0.0,0.0,22,4,0.0,333,329
+luis-ferm-n-de-carvajal-conde-de-la-uni-n,"Luis Fermín de Carvajal, Conde de la Unión",0.0,0.0,1,5,0.0,335,335
+charles-of-blois-ch-tillon,Charles of Blois,0.0,0.0,23,4,0.0,337,338
+jubal-early,Jubal Early,0.0,0.0,3,5,0.0,338,334
+nathanael-greene,Nathanael Greene,0.0,0.0,2,2,0.0,340,340
+prince-georg-friedrich-of-waldeck,Georg Friedrich of Waldeck,0.0,0.0,36,3,0.0,341,341
+benjamin-lincoln,Benjamin Lincoln,0.0,0.0,4,4,0.0,342,342
+augustus-ii-the-strong,"Frederick August I, Elector of Saxony",0.0,0.0,11,5,0.0,343,343

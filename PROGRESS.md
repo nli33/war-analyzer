@@ -104,7 +104,7 @@ this run. The user reviews the report and decides.
       auto data and compare. For each general, list the difference in battle count, outcomes, and
       strengths, and what moved their rank. This separates data error from method error. Answer:
       if the method is fed good data, how close does it get to the reference lists?
-- [ ] H8. Era cohorts and longevity. Measure how much of each general's composite comes from their
+- [x] H8. Era cohorts and longevity. Measure how much of each general's composite comes from their
       cohort (rank under a global z-score against rank under per-era z-scores), the effect of
       cohort size, and the singleton-era problem. For longevity, compare wins per career year with
       alternatives (wins per battle, career span from the general's birth and death years from
@@ -257,3 +257,29 @@ this run. The user reviews the report and decides.
   H5's force-ratio finding -- infobox strength figures for these campaigns are more often
   unparseable prose estimates than a clean headline number. No weights, roster, or `war/` code
   changed -- diagnosis only.
+- **H8**: wrote `scripts/h8_era_longevity.py`, report at
+  `notes/ranking-diagnosis/H8-era-longevity.md` (two CSVs alongside it). Era-cohort finding is a
+  non-finding worth recording precisely because `composite.py`'s own docstring predicts the
+  opposite: that docstring's "this 8-general roster has four singleton-era generals" concern no
+  longer applies to the real 343-general roster (zero singleton or two-person era cohorts today,
+  smallest is Modern at 12 -- grown past the danger zone as a side effect of H1/H4's fixes, not by
+  design); flagged for H9 as a stale-docstring cleanup. Swapping to one global z-score instead of
+  per-era moves the ranking only a little (+0.989 Spearman vs. shipped, 3 of top 30 swap) and
+  doesn't clearly help reference-list agreement (+0.363 per-era vs. +0.332 global). Checked
+  whether cohort size still predicts z-score extremity without the singleton/pair edge case:
+  no -- size vs. mean |z| Spearman is -0.180, size vs. max |z| is +0.591 (the *largest* cohort has
+  the single most extreme z-score, opposite of the "small cohorts get stretched" intuition); the
+  two-member mechanical z=±1-regardless-of-gap-size effect is still algebraically true (proven in
+  the report) but isn't today's shape of the problem. Longevity finding is a clean yes: 70 of 343
+  ranked generals (20%) have `longevity_adjusted_value` > 1.0, mechanically impossible for a
+  bounded win-rate-style metric, because it sums (not averages) outcome scores over career years;
+  every top-10-by-longevity general has a 1-2 year career and <20 battles, and every one drops
+  under a verified drop-in `win_rate` swap (Allenby 1->8, Abdul Fatah Younis 13->50,
+  Rochejaquelein 31->135, Adlercreutz 11->38) -- confirms H1's date fix did not touch this, since
+  it fixed *which* years a career spans, not the sum-over-years-not-battles shape of the metric.
+  Third alternative (birth/death-year career span from Wikidata) deliberately not computed: no
+  cached source exists for it anywhere in `data/raw/`, and although a batched Wikidata query would
+  likely be cheap (~50 ids/call, so a handful of requests for 343 generals), held the line Phase
+  H's rules and H4-H7's precedent already set (zero new network calls this run) rather than
+  carving out an exception; flagged as a future ingestion-task candidate with that cost estimate.
+  No weights, roster, or `war/` code changed -- diagnosis only.
