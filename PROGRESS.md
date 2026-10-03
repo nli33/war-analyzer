@@ -250,9 +250,29 @@ What went wrong, from the previous run's sanity pass:
       `eval_ingest.py`/`validate_data.py` not run -- this task touches the ranking renderer only,
       not `data/auto/battles.csv` or the gold set's data. Full reasoning in the dev log's G1
       entry.
-- [ ] G2. Archive the current `data/auto/`, regenerate it with the full pipeline, and re-run the
+- [x] G2. Archive the current `data/auto/`, regenerate it with the full pipeline, and re-run the
       quality gate with `scripts/eval_ingest.py` against the floor above. If it fails, write why
       in Notes and stop.
+      Archiving (pre-E4/F3 snapshot, `data/archive/2026-10-03-pre-e4-f3-regen/`) and the F3
+      fallback wiring into `build_battle_rows` were already done by the previous iteration
+      (commit `1a97871`); this task ran the regeneration itself.
+      `scripts/build_roster_selection.py` (--min-battles 4, E4's decision) -> 340 generals (3
+      must-include generals fell back to hand-curated gold rows: zhukov, subutai, eisenhower;
+      Han Xin stayed pipeline-thin, no hand-curated rows to fall back to). Fewer must-include
+      generals needed the fallback than E4 found (4 here vs. 7 then) -- F2's parser fixes let
+      genghis-khan/rommel/manstein clear the bar on pipeline data alone this time.
+      `scripts/build_auto_battles.py` -> 1,884 battle rows for 333 generals (up from 920/342 pre-
+      E4/F3), validated clean against the schema and the general_id foreign-key check.
+      Quality floor, checked by hand against PROGRESS's three thresholds: strength within 3x of
+      gold on rows where both exist 94%/91% (floor 75%, via `eval_ingest.py`, unchanged since
+      this task doesn't touch C2/C3 extraction); strength present both sides 85.8% of rows (floor
+      60%); casualties present 70.8%/75.3% own/enemy (floor 40%). All three clear comfortably.
+      All 20 must-include generals (19 gold-set + Han Xin) confirmed present in
+      `data/auto/generals.csv` by canonical title (3 of them -- Napoleon, Hannibal, Wellington --
+      have a pipeline `general_id` that differs from the gold slug, so this has to be checked by
+      canonical title, not slug equality, per E3's note). 463 tests pass (unchanged, no new
+      library code this task). `scripts/validate_data.py` (gold set) still clean. Full numbers
+      and reasoning in the dev log's G2 entry.
 - [ ] G3. Published-ranking reference. Collect 3-5 published "top N greatest generals" lists from
       different kinds of sources (for example a Wikipedia list, a historians' survey, a popular
       list). Fetch the pages with plain HTTP; reading names off a list page is fine, no research
