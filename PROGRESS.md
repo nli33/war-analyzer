@@ -1,6 +1,6 @@
 # Progress: find out why the ranking disagrees with historian consensus
 
-The auto dataset now has 340 generals and 1,884 battle rows (task log archived at
+The auto dataset now has 340 generals and 1,887 battle rows (task log archived at
 `notes/PROGRESS-v3.md`, earlier ones at `notes/PROGRESS-v2.md` and `notes/PROGRESS-v1.md`). The
 ranking it produces does not pass a gut check: Eisenhower is #1 on 6 rows, Nelson A. Miles is #4 on
 1 battle, Napoleon is #49, Wellington #120, Genghis Khan #142, Hannibal #147, Rommel #312.
