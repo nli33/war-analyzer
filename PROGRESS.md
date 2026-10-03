@@ -133,10 +133,25 @@ What went wrong, from the previous run's sanity pass:
 
 ## Phase F: Where rows are lost
 
-- [ ] F1. Funnel analysis script: from the 8,824 candidate titles, count how many survive each
+- [x] F1. Funnel analysis script: from the 8,824 candidate titles, count how many survive each
       stage (page has an infobox, a linked primary commander on a side, usable strength, outcome
       resolved) and write the table to the dev log. List the top loss causes with counts and a few
       real examples each.
+      `scripts/funnel_analysis.py` (read-only, no network calls; reuses the real pipeline's
+      parsing functions). Full table and root-caused loss breakdown in the dev log
+      (`~/notes/war-analyzer/ingestion.md`, "F1" entry); summary: of 8,824 candidates, 394 never
+      fetched, 1,160 have no infobox (981 of those are unresolved `#REDIRECT` stubs, not
+      genuinely infobox-less), 453 have no parseable year, 621 have no wikilinked primary
+      commander on either side, 2,716 have no resolved outcome (2,141 of those are
+      `ambiguous_side_match`, and 924 of *those* trace to one demonym-table gap: "British" maps
+      to "Britain" but real infobox text says "United Kingdom", whose words are both stopwords).
+      3,480 titles (39%) would produce at least one row. Report written to
+      `data/raw/funnel_report.json` (full loss-reason list, top 6 summarized in the dev log).
+      431 tests pass (11 new, `tests/test_funnel_analysis.py`). `eval_ingest.py`/
+      `validate_data.py` not re-run -- this task touches neither `data/auto/` nor the gold set.
+      The two cheapest, highest-volume candidates for F2 (not implemented here): follow
+      `#REDIRECT` targets before giving up on "no infobox" (~981 recoverable), and fix the
+      "British"/"United Kingdom" demonym gap (~924 recoverable from one table edit).
 - [ ] F2. Fix the biggest deterministic loss causes from F1, at most three fixes. Each one gets a
       test and a before/after row count. Stop after three even if loss remains and note what is
       left.
