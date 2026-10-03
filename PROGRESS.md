@@ -44,12 +44,20 @@ What went wrong, from the previous run's sanity pass:
 
 ## Phase E: Identity and roster
 
-- [ ] E1. Canonical identity resolver. Batch every distinct commander wikilink title through the
+- [x] E1. Canonical identity resolver. Batch every distinct commander wikilink title through the
       MediaWiki API (redirects plus page properties, 50 titles per call, cached under `data/raw/`,
       resumable) to get the canonical page title, the Wikidata ID, and whether the page is a
       disambiguation page. Unit tests use small fixtures taken from real responses. Verify:
       Napoleon, Wellington, and Hannibal variants each resolve to one canonical title, and print
       distinct title counts before and after.
+      `war/identity.py` + `scripts/build_identity_map.py`. Ran against the full wikitext cache:
+      14,967 distinct commander wikilink titles -> 13,988 distinct identities after merging shared
+      Wikidata IDs. Napoleon/Wellington/Hannibal spot-checks all collapse to one identity. Full run
+      took about 35 minutes against the live MediaWiki API (rate-limit backoff, not CPU-bound);
+      `resolve_cached` only persists the cache once the whole batch finishes rather than per-chunk,
+      so a kill mid-run would have lost all progress — it finished cleanly this time, but if a
+      future re-run (e.g. `--refresh`) gets interrupted, note that caveat rather than assuming
+      resumability works at the batch level. 375 tests pass.
 - [ ] E2. Use it in the pipeline. `general_id` comes from the canonical title, and titles sharing a
       Wikidata ID merge into one general. A link that resolves to a disambiguation page counts as
       an unidentified commander. Update tests. Verify: no two `general_id`s share a Wikidata ID,
