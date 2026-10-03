@@ -75,7 +75,7 @@ this run. The user reviews the report and decides.
       to a single component; the win-rate-by-battle-count table; the tier distributions; and how
       sparse the decisiveness input is. Answer: what puts generals who are not considered the best
       in the top 25?
-- [ ] H3. Ablation harness. Write a script that recomputes the ranking under variants and compares
+- [x] H3. Ablation harness. Write a script that recomputes the ranking under variants and compares
       each with the reference lists (`data/reference/top_n_lists.csv`) and with the baseline: each
       component alone, drop-one component, equal weights, minimum battles of 1/3/5/10/20, and a
       shrinkage version (average pulled toward 0.5 by a pseudo-count) as a comparison only. Report
@@ -140,3 +140,24 @@ this run. The user reviews the report and decides.
   combined (8 OAR, 3 decisiveness) — thin samples swinging small-cohort z-scores, not rounded
   records. Full numbers and the correlation/win-rate/tier tables are in the report; this is
   diagnosis only, no weights or roster changed.
+- **H3**: wrote `scripts/ablation_harness.py` (+ `tests/test_ablation_harness.py`), report at
+  `notes/ranking-diagnosis/H3-ablation.md` (CSVs alongside it). 16 variants against 330 ranked
+  generals and 4 reference-list sources, reusing `scripts/report_reference_rankings.py`'s cached
+  identity resolution (all 32 reference names already cached, zero new network calls). Picked
+  decisiveness as the one component to shrink — H3's "average pulled toward 0.5 by a pseudo-count"
+  only fits a [0,1] rate, and of the four inputs only `decisive_win_rate` is one — with
+  pseudo_count=5 reusing the project's existing `MIN_BATTLES_FOR_HEADLINE_RANKING` floor rather
+  than guessing a number; min-battles variants filter the baseline ranking rather than re-rank it,
+  matching `ranking_tables.py`'s own display-floor convention. Side finding, not fixed (out of
+  this task's scope, flagged for H9): `composite_ranking`'s tie-breaking for generals with equal
+  composite score depends on Python's hash-randomized set iteration order, so `decisiveness alone`
+  (96 of 330 generals tied at the "no data" z=0.0 default) gives a different exact top-20 on every
+  process run, confirmed by rerunning under several `PYTHONHASHSEED` values; every other variant's
+  tied group is small enough that this doesn't matter. Headline numbers: dropping decisiveness or
+  WAR-residual from the default weights both *hurt* mean reference-list Spearman (-0.026, -0.022),
+  dropping OAR *helps* it slightly (+0.026) — on this reference-list signal OAR is mildly overrated
+  and decisiveness/WAR-residual are not overweighted, though decisiveness alone is the
+  single worst-performing input (-0.614 vs. baseline) because of its sparsity, not its weight.
+  Shrinking decisiveness toward 0.5 was the biggest overall improvement of any variant tried
+  (+0.032 mean Spearman), bigger than equal weights (-0.013, i.e. no help). No weights or roster
+  changed.

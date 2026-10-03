@@ -1,0 +1,308 @@
+variant,rank,general_id,display_name
+baseline,1,dwight-d-eisenhower,Dwight D. Eisenhower
+baseline,2,charles-x-gustav,Charles X Gustav
+baseline,3,h-j-ujiyasu,Hōjō Ujiyasu
+baseline,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+baseline,5,nelson-a-miles,Nelson A. Miles
+baseline,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+baseline,7,samuel-ryan-curtis,Samuel Ryan Curtis
+baseline,8,han-xin,Han Xin
+baseline,9,douglas-macarthur,Douglas MacArthur
+baseline,10,carl-johan-adlercreutz,Carl Johan Adlercreutz
+baseline,11,jos-de-urrea,José de Urrea
+baseline,12,alexander-the-great,Alexander the Great
+baseline,13,abdul-fatah-younis,Abdul Fatah Younis
+baseline,14,peter-wittgenstein,Peter Wittgenstein
+baseline,15,charles-xii-of-sweden,Charles XII
+baseline,16,toyotomi-hideyoshi,Hashiba Hideyoshi
+baseline,17,scipio-africanus,Scipio Africanus
+baseline,18,bernard-montgomery,Bernard Montgomery
+baseline,19,oda-nobunaga,Oda Nobunaga
+baseline,20,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+oar_alone,1,douglas-macarthur,Douglas MacArthur
+oar_alone,2,dwight-d-eisenhower,Dwight D. Eisenhower
+oar_alone,3,bernard-montgomery,Bernard Montgomery
+oar_alone,4,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+oar_alone,5,charles-xii-of-sweden,Charles XII
+oar_alone,6,h-j-ujiyasu,Hōjō Ujiyasu
+oar_alone,7,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+oar_alone,8,alexander-the-great,Alexander the Great
+oar_alone,9,charles-xiv-john,Charles John
+oar_alone,10,alexander-i-of-russia,Alexander I
+oar_alone,11,peter-wittgenstein,Peter Wittgenstein
+oar_alone,12,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+oar_alone,13,khalid-ibn-al-walid,Khalid ibn al-Walid
+oar_alone,14,constantine-i-of-greece,Crown Prince Constantine
+oar_alone,15,joseph-souham,Joseph Souham
+oar_alone,16,samuel-ryan-curtis,Samuel Ryan Curtis
+oar_alone,17,napoleon,Napoleon I
+oar_alone,18,stanis-aw-koniecpolski,Stanisław Koniecpolski
+oar_alone,19,sim-n-bol-var,Simón Bolívar
+oar_alone,20,alexander-suvorov,Alexander Suvorov
+war_residual_alone,1,douglas-macarthur,Douglas MacArthur
+war_residual_alone,2,bernardo-de-g-lvez,Bernardo de Gálvez
+war_residual_alone,3,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+war_residual_alone,4,maurice-de-saxe,Maurice de Saxe
+war_residual_alone,5,john-churchill-1st-duke-of-marlborough,Duke of Marlborough
+war_residual_alone,6,fyodor-ushakov,Fyodor Ushakov
+war_residual_alone,7,adam-ludwig-lewenhaupt,Adam Ludwig Lewenhaupt
+war_residual_alone,8,mikhail-kutuzov,Mikhail Kutuzov
+war_residual_alone,9,jean-nicolas-houchard,Jean Houchard
+war_residual_alone,10,alexander-i-of-russia,Alexander I
+war_residual_alone,11,charles-fran-ois-dumouriez,Charles Dumouriez
+war_residual_alone,12,carl-johan-adlercreutz,Carl Johan Adlercreutz
+war_residual_alone,13,louis-nicolas-davout,Louis-Nicolas Davout
+war_residual_alone,14,friedrich-wilhelm-freiherr-von-b-low,Friedrich Wilhelm von Bülow
+war_residual_alone,15,guillaume-brune,Guillaume Brune
+war_residual_alone,16,jean-lannes,Jean Lannes
+war_residual_alone,17,joseph-souham,Joseph Souham
+war_residual_alone,18,horatio-nelson-1st-viscount-nelson,Horatio Nelson
+war_residual_alone,19,aurangzeb,Aurangzeb
+war_residual_alone,20,charles-v-holy-roman-emperor,Charles V
+decisiveness_alone,1,manuel-belgrano,Manuel Belgrano
+decisiveness_alone,2,nelson-a-miles,Nelson A. Miles
+decisiveness_alone,3,hayreddin-barbarossa,Hayreddin Pasha
+decisiveness_alone,4,oda-nobunaga,Oda Nobunaga
+decisiveness_alone,5,h-j-ujiyasu,Hōjō Ujiyasu
+decisiveness_alone,6,toyotomi-hideyoshi,Hashiba Hideyoshi
+decisiveness_alone,7,georgy-zhukov,Georgy Zhukov
+decisiveness_alone,8,dwight-d-eisenhower,Dwight D. Eisenhower
+decisiveness_alone,9,han-xin,Han Xin
+decisiveness_alone,10,subutai,Subutai
+decisiveness_alone,11,frederick-ii-holy-roman-emperor,Frederick II
+decisiveness_alone,12,abdul-fatah-younis,Abdul Fatah Younis
+decisiveness_alone,13,scipio-africanus,Scipio Africanus
+decisiveness_alone,14,hannibal,Hannibal
+decisiveness_alone,15,charles-pierre-augereau,Pierre Augereau
+decisiveness_alone,16,john-s-marmaduke,John S. Marmaduke
+decisiveness_alone,17,aleksey-kuropatkin,Aleksey Kuropatkin
+decisiveness_alone,18,richard-taylor-confederate-general,Richard Taylor
+decisiveness_alone,19,michelangelo-alessandro-colli-marchi,Michelangelo Colli-Marchi
+decisiveness_alone,20,g-nther-von-kluge,Günther von Kluge
+longevity_alone,1,charles-x-gustav,Charles X Gustav
+longevity_alone,2,henri-de-la-rochejaquelein,Rochejaquelein
+longevity_alone,3,khalid-ibn-al-walid,Khalid ibn al-Walid
+longevity_alone,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+longevity_alone,5,carl-johan-adlercreutz,Carl Johan Adlercreutz
+longevity_alone,6,banastre-tarleton,Banastre Tarleton
+longevity_alone,7,jos-de-urrea,José de Urrea
+longevity_alone,8,chief-joseph,Chief Joseph
+longevity_alone,9,samuel-ryan-curtis,Samuel Ryan Curtis
+longevity_alone,10,thomas-sumter,Thomas Sumter
+longevity_alone,11,antonio-ricardos,Antonio Ricardos
+longevity_alone,12,abdul-fatah-younis,Abdul Fatah Younis
+longevity_alone,13,pietro-badoglio,Pietro Badoglio
+longevity_alone,14,charles-edward-stuart,Charles Edward Stuart
+longevity_alone,15,guy-carleton-1st-baron-dorchester,Guy Carleton
+longevity_alone,16,charles-henri-hector-count-of-estaing,Count of Estaing
+longevity_alone,17,han-xin,Han Xin
+longevity_alone,18,alexander-the-great,Alexander the Great
+longevity_alone,19,peter-wittgenstein,Peter Wittgenstein
+longevity_alone,20,jacques-fran-ois-dugommier,Jacques Dugommier
+drop_oar,1,nelson-a-miles,Nelson A. Miles
+drop_oar,2,charles-x-gustav,Charles X Gustav
+drop_oar,3,han-xin,Han Xin
+drop_oar,4,abdul-fatah-younis,Abdul Fatah Younis
+drop_oar,5,carl-johan-adlercreutz,Carl Johan Adlercreutz
+drop_oar,6,dwight-d-eisenhower,Dwight D. Eisenhower
+drop_oar,7,hayreddin-barbarossa,Hayreddin Pasha
+drop_oar,8,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+drop_oar,9,manuel-belgrano,Manuel Belgrano
+drop_oar,10,h-j-ujiyasu,Hōjō Ujiyasu
+drop_oar,11,khalid-ibn-al-walid,Khalid ibn al-Walid
+drop_oar,12,samuel-ryan-curtis,Samuel Ryan Curtis
+drop_oar,13,jos-de-urrea,José de Urrea
+drop_oar,14,scipio-africanus,Scipio Africanus
+drop_oar,15,subutai,Subutai
+drop_oar,16,henri-de-la-rochejaquelein,Rochejaquelein
+drop_oar,17,toyotomi-hideyoshi,Hashiba Hideyoshi
+drop_oar,18,georgy-zhukov,Georgy Zhukov
+drop_oar,19,oda-nobunaga,Oda Nobunaga
+drop_oar,20,alexander-the-great,Alexander the Great
+drop_war_residual,1,dwight-d-eisenhower,Dwight D. Eisenhower
+drop_war_residual,2,khalid-ibn-al-walid,Khalid ibn al-Walid
+drop_war_residual,3,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+drop_war_residual,4,charles-x-gustav,Charles X Gustav
+drop_war_residual,5,nelson-a-miles,Nelson A. Miles
+drop_war_residual,6,h-j-ujiyasu,Hōjō Ujiyasu
+drop_war_residual,7,oda-nobunaga,Oda Nobunaga
+drop_war_residual,8,samuel-ryan-curtis,Samuel Ryan Curtis
+drop_war_residual,9,abdul-fatah-younis,Abdul Fatah Younis
+drop_war_residual,10,han-xin,Han Xin
+drop_war_residual,11,toyotomi-hideyoshi,Hashiba Hideyoshi
+drop_war_residual,12,jos-de-urrea,José de Urrea
+drop_war_residual,13,hayreddin-barbarossa,Hayreddin Pasha
+drop_war_residual,14,manuel-belgrano,Manuel Belgrano
+drop_war_residual,15,peter-wittgenstein,Peter Wittgenstein
+drop_war_residual,16,alexander-the-great,Alexander the Great
+drop_war_residual,17,henri-de-la-rochejaquelein,Rochejaquelein
+drop_war_residual,18,carl-johan-adlercreutz,Carl Johan Adlercreutz
+drop_war_residual,19,georgy-zhukov,Georgy Zhukov
+drop_war_residual,20,charles-xii-of-sweden,Charles XII
+drop_decisiveness,1,charles-x-gustav,Charles X Gustav
+drop_decisiveness,2,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+drop_decisiveness,3,khalid-ibn-al-walid,Khalid ibn al-Walid
+drop_decisiveness,4,samuel-ryan-curtis,Samuel Ryan Curtis
+drop_decisiveness,5,douglas-macarthur,Douglas MacArthur
+drop_decisiveness,6,alexander-the-great,Alexander the Great
+drop_decisiveness,7,carl-johan-adlercreutz,Carl Johan Adlercreutz
+drop_decisiveness,8,jos-de-urrea,José de Urrea
+drop_decisiveness,9,peter-wittgenstein,Peter Wittgenstein
+drop_decisiveness,10,dwight-d-eisenhower,Dwight D. Eisenhower
+drop_decisiveness,11,charles-xii-of-sweden,Charles XII
+drop_decisiveness,12,bernard-montgomery,Bernard Montgomery
+drop_decisiveness,13,h-j-ujiyasu,Hōjō Ujiyasu
+drop_decisiveness,14,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+drop_decisiveness,15,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+drop_decisiveness,16,alexander-i-of-russia,Alexander I
+drop_decisiveness,17,jean-nicolas-houchard,Jean Houchard
+drop_decisiveness,18,napoleon,Napoleon I
+drop_decisiveness,19,pietro-badoglio,Pietro Badoglio
+drop_decisiveness,20,sulla,Lucius Cornelius Sulla
+drop_longevity,1,h-j-ujiyasu,Hōjō Ujiyasu
+drop_longevity,2,dwight-d-eisenhower,Dwight D. Eisenhower
+drop_longevity,3,nelson-a-miles,Nelson A. Miles
+drop_longevity,4,douglas-macarthur,Douglas MacArthur
+drop_longevity,5,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+drop_longevity,6,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+drop_longevity,7,toyotomi-hideyoshi,Hashiba Hideyoshi
+drop_longevity,8,alexander-i-of-russia,Alexander I
+drop_longevity,9,charles-xii-of-sweden,Charles XII
+drop_longevity,10,hayreddin-barbarossa,Hayreddin Pasha
+drop_longevity,11,han-xin,Han Xin
+drop_longevity,12,subutai,Subutai
+drop_longevity,13,bernard-montgomery,Bernard Montgomery
+drop_longevity,14,oda-nobunaga,Oda Nobunaga
+drop_longevity,15,georgy-zhukov,Georgy Zhukov
+drop_longevity,16,scipio-africanus,Scipio Africanus
+drop_longevity,17,alexander-the-great,Alexander the Great
+drop_longevity,18,peter-wittgenstein,Peter Wittgenstein
+drop_longevity,19,joseph-souham,Joseph Souham
+drop_longevity,20,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+equal_weights,1,nelson-a-miles,Nelson A. Miles
+equal_weights,2,charles-x-gustav,Charles X Gustav
+equal_weights,3,dwight-d-eisenhower,Dwight D. Eisenhower
+equal_weights,4,han-xin,Han Xin
+equal_weights,5,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+equal_weights,6,abdul-fatah-younis,Abdul Fatah Younis
+equal_weights,7,khalid-ibn-al-walid,Khalid ibn al-Walid
+equal_weights,8,h-j-ujiyasu,Hōjō Ujiyasu
+equal_weights,9,manuel-belgrano,Manuel Belgrano
+equal_weights,10,hayreddin-barbarossa,Hayreddin Pasha
+equal_weights,11,samuel-ryan-curtis,Samuel Ryan Curtis
+equal_weights,12,carl-johan-adlercreutz,Carl Johan Adlercreutz
+equal_weights,13,oda-nobunaga,Oda Nobunaga
+equal_weights,14,jos-de-urrea,José de Urrea
+equal_weights,15,toyotomi-hideyoshi,Hashiba Hideyoshi
+equal_weights,16,henri-de-la-rochejaquelein,Rochejaquelein
+equal_weights,17,georgy-zhukov,Georgy Zhukov
+equal_weights,18,subutai,Subutai
+equal_weights,19,peter-wittgenstein,Peter Wittgenstein
+equal_weights,20,scipio-africanus,Scipio Africanus
+min_battles_1,1,dwight-d-eisenhower,Dwight D. Eisenhower
+min_battles_1,2,charles-x-gustav,Charles X Gustav
+min_battles_1,3,h-j-ujiyasu,Hōjō Ujiyasu
+min_battles_1,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+min_battles_1,5,nelson-a-miles,Nelson A. Miles
+min_battles_1,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+min_battles_1,7,samuel-ryan-curtis,Samuel Ryan Curtis
+min_battles_1,8,han-xin,Han Xin
+min_battles_1,9,douglas-macarthur,Douglas MacArthur
+min_battles_1,10,carl-johan-adlercreutz,Carl Johan Adlercreutz
+min_battles_1,11,jos-de-urrea,José de Urrea
+min_battles_1,12,alexander-the-great,Alexander the Great
+min_battles_1,13,abdul-fatah-younis,Abdul Fatah Younis
+min_battles_1,14,peter-wittgenstein,Peter Wittgenstein
+min_battles_1,15,charles-xii-of-sweden,Charles XII
+min_battles_1,16,toyotomi-hideyoshi,Hashiba Hideyoshi
+min_battles_1,17,scipio-africanus,Scipio Africanus
+min_battles_1,18,bernard-montgomery,Bernard Montgomery
+min_battles_1,19,oda-nobunaga,Oda Nobunaga
+min_battles_1,20,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+min_battles_3,1,dwight-d-eisenhower,Dwight D. Eisenhower
+min_battles_3,2,charles-x-gustav,Charles X Gustav
+min_battles_3,3,h-j-ujiyasu,Hōjō Ujiyasu
+min_battles_3,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+min_battles_3,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+min_battles_3,7,samuel-ryan-curtis,Samuel Ryan Curtis
+min_battles_3,8,han-xin,Han Xin
+min_battles_3,9,douglas-macarthur,Douglas MacArthur
+min_battles_3,10,carl-johan-adlercreutz,Carl Johan Adlercreutz
+min_battles_3,11,jos-de-urrea,José de Urrea
+min_battles_3,12,alexander-the-great,Alexander the Great
+min_battles_3,13,abdul-fatah-younis,Abdul Fatah Younis
+min_battles_3,14,peter-wittgenstein,Peter Wittgenstein
+min_battles_3,15,charles-xii-of-sweden,Charles XII
+min_battles_3,16,toyotomi-hideyoshi,Hashiba Hideyoshi
+min_battles_3,17,scipio-africanus,Scipio Africanus
+min_battles_3,18,bernard-montgomery,Bernard Montgomery
+min_battles_3,19,oda-nobunaga,Oda Nobunaga
+min_battles_3,20,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+min_battles_3,21,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+min_battles_5,1,dwight-d-eisenhower,Dwight D. Eisenhower
+min_battles_5,2,charles-x-gustav,Charles X Gustav
+min_battles_5,3,h-j-ujiyasu,Hōjō Ujiyasu
+min_battles_5,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+min_battles_5,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+min_battles_5,9,douglas-macarthur,Douglas MacArthur
+min_battles_5,10,carl-johan-adlercreutz,Carl Johan Adlercreutz
+min_battles_5,12,alexander-the-great,Alexander the Great
+min_battles_5,13,abdul-fatah-younis,Abdul Fatah Younis
+min_battles_5,14,peter-wittgenstein,Peter Wittgenstein
+min_battles_5,15,charles-xii-of-sweden,Charles XII
+min_battles_5,16,toyotomi-hideyoshi,Hashiba Hideyoshi
+min_battles_5,17,scipio-africanus,Scipio Africanus
+min_battles_5,19,oda-nobunaga,Oda Nobunaga
+min_battles_5,21,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+min_battles_5,22,georgy-zhukov,Georgy Zhukov
+min_battles_5,23,subutai,Subutai
+min_battles_5,27,napoleon,Napoleon I
+min_battles_5,30,sulla,Lucius Cornelius Sulla
+min_battles_5,32,henri-de-la-rochejaquelein,Rochejaquelein
+min_battles_10,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+min_battles_10,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+min_battles_10,12,alexander-the-great,Alexander the Great
+min_battles_10,15,charles-xii-of-sweden,Charles XII
+min_battles_10,19,oda-nobunaga,Oda Nobunaga
+min_battles_10,27,napoleon,Napoleon I
+min_battles_10,36,ulysses-s-grant,Ulysses S. Grant
+min_battles_10,40,jean-victor-marie-moreau,Jean Moreau
+min_battles_10,42,hugh-gough-1st-viscount-gough,Hugh Gough
+min_battles_10,46,alexander-suvorov,Alexander Suvorov
+min_battles_10,59,takeda-shingen,Takeda Shingen
+min_battles_10,65,douglas-haig-1st-earl-haig,Douglas Haig
+min_battles_10,72,frederick-the-great,Frederick the Great
+min_battles_10,75,julius-caesar,Julius Caesar
+min_battles_10,84,nader-shah,Nader
+min_battles_10,99,arthur-wellesley-1st-duke-of-wellington,Arthur Wellesley
+min_battles_10,100,maurice-prince-of-orange,Maurice of Nassau
+min_battles_10,123,hannibal,Hannibal
+min_battles_10,126,mustafa-kemal-atat-rk,Mustafa Kemal
+min_battles_10,127,colonel,Col
+min_battles_20,6,khalid-ibn-al-walid,Khalid ibn al-Walid
+min_battles_20,27,napoleon,Napoleon I
+min_battles_20,59,takeda-shingen,Takeda Shingen
+min_battles_20,99,arthur-wellesley-1st-duke-of-wellington,Arthur Wellesley
+min_battles_20,100,maurice-prince-of-orange,Maurice of Nassau
+min_battles_20,123,hannibal,Hannibal
+min_battles_20,152,archduke-charles-duke-of-teschen,Archduke Charles
+shrinkage_decisiveness,1,dwight-d-eisenhower,Dwight D. Eisenhower
+shrinkage_decisiveness,2,charles-x-gustav,Charles X Gustav
+shrinkage_decisiveness,3,khalid-ibn-al-walid,Khalid ibn al-Walid
+shrinkage_decisiveness,4,edmund-allenby-1st-viscount-allenby,Edmund Allenby
+shrinkage_decisiveness,5,samuel-ryan-curtis,Samuel Ryan Curtis
+shrinkage_decisiveness,6,carl-johan-adlercreutz,Carl Johan Adlercreutz
+shrinkage_decisiveness,7,peter-wittgenstein,Peter Wittgenstein
+shrinkage_decisiveness,8,h-j-ujiyasu,Hōjō Ujiyasu
+shrinkage_decisiveness,9,douglas-macarthur,Douglas MacArthur
+shrinkage_decisiveness,10,jos-de-urrea,José de Urrea
+shrinkage_decisiveness,11,han-xin,Han Xin
+shrinkage_decisiveness,12,alexander-the-great,Alexander the Great
+shrinkage_decisiveness,13,alexander-i-of-russia,Alexander I
+shrinkage_decisiveness,14,subutai,Subutai
+shrinkage_decisiveness,15,bernard-montgomery,Bernard Montgomery
+shrinkage_decisiveness,16,claude-louis-hector-de-villars-1st-duke-of-villars,Claude de Villars
+shrinkage_decisiveness,17,jean-nicolas-houchard,Jean Houchard
+shrinkage_decisiveness,18,abdul-fatah-younis,Abdul Fatah Younis
+shrinkage_decisiveness,19,fernando-lvarez-de-toledo-3rd-duke-of-alba,Duke of Alba
+shrinkage_decisiveness,20,nelson-a-miles,Nelson A. Miles
