@@ -100,7 +100,7 @@ this run. The user reviews the report and decides.
       opponent rating quality. Report how many opponents have enough rows to rate and how the top 30
       and the must-include ranks change. Check the Napoleon-Wellington effect specifically: with
       Waterloo missing, what do the two ratings depend on?
-- [ ] H7. Gold set against auto. Rank the 19 gold generals on the hand-curated data and on the
+- [x] H7. Gold set against auto. Rank the 19 gold generals on the hand-curated data and on the
       auto data and compare. For each general, list the difference in battle count, outcomes, and
       strengths, and what moved their rank. This separates data error from method error. Answer:
       if the method is fed good data, how close does it get to the reference lists?
@@ -229,3 +229,31 @@ this run. The user reviews the report and decides.
   head-to-head that has no shared battle to anchor it, though neither general's rating ever
   reverses relative to the other. No weights, roster, or `war/` code changed -- diagnosis only,
   per Phase H's rules.
+- **H7**: wrote `scripts/h7_gold_vs_auto.py`, report at `notes/ranking-diagnosis/H7-gold-vs-auto.md`
+  (per-general CSV alongside it). Ran the unmodified `composite_ranking` three times: **gold-19**
+  (the 19 gold generals, gold battle rows, population=19), **auto-19** (same 19 people resolved to
+  their pipeline `general_id` via `must_include.csv`'s canonical-title route, auto battle rows,
+  same population=19 -- the data-only control), and **auto-full** (the real 343-general pipeline
+  ranking, for context). Headline answer to the task's own question: fed its own hand-curated
+  data, the method reaches only +0.296 pooled Spearman against the published reference lists
+  (24 pairs, percentile-normalized); switching only the data to auto-19 drops that to +0.222, and
+  the real auto-full pipeline drops it further to +0.188. Both steps (data, then cohort/population
+  shape) cost a comparable amount of agreement on top of a weak, data-independent ceiling -- so
+  the gap to the reference lists is not purely a data problem; the composite is answering a
+  different question (z-scored statistical performance within an era cohort) than the published
+  lists are (subjective historical reputation), a method-shape limit for H9 to weigh. Per-general
+  findings: Napoleon's gold-19 -> auto-19 rank swing (14 -> 2, the biggest in the table) looked at
+  first like a clean data-volume effect (63 auto rows vs. 14 gold rows, similar win rate) but
+  traces mostly to a confound in this task's own control -- the Napoleonic era inside this
+  19-general population has exactly two members (Napoleon, Wellington), so any gap between them
+  gets stretched to the same z-score regardless of sample size, foreshadowing H8's cohort-size
+  question rather than demonstrating a clean data-only effect. Confirmed directly from
+  `data/battles.csv`: the gold set's two Waterloo rows cross-reference each other via
+  `opponent_general_id` (the one head-to-head anchor between Napoleon and Wellington), which H4
+  already found is completely absent from the auto data -- tying this task's rank swing to H4's
+  missing-row finding and H6's measured ~115-Elo method-dependent gap. Also measured: strength-
+  field coverage drops sharply from gold to auto for several pre-gunpowder generals (Saladin 100%
+  -> 43%, Genghis Khan 100% -> 50%, Hannibal 100% -> 50%, Alexander 100% -> 60%), consistent with
+  H5's force-ratio finding -- infobox strength figures for these campaigns are more often
+  unparseable prose estimates than a clean headline number. No weights, roster, or `war/` code
+  changed -- diagnosis only.
