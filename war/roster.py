@@ -2,20 +2,19 @@
 
 Scans every candidate battle page (C1's `data/raw/battle_universe.csv`), parses commanders (C3)
 and strength numbers (C2) from each infobox, and inverts each page into 0-2 `BattleAppearance`s
-— one per side with an identifiable primary commander. `select_roster` then keeps a general (C4a
-seed or not) if they have at least `min_usable_battles` battles where *both* sides' troop
-strength were extracted — PROGRESS.md's "usable strength figures" line. A non-seed general may
-still join if they turn up as the opponent in a kept general's battle and clear the same bar
-(PROGRESS.md: "Opponents who appear in kept battles but are not on the seed list may join if
-they clear the same bar") — this is deliberately a one-hop-from-a-kept-general join, not "anyone
-in the whole universe with enough battles," so an unrelated figure the seed crawl simply missed
-doesn't enter just because they happen to have fought a lot.
+-- one per side with an identifiable primary commander. `select_roster` then keeps *any* general
+(seed-listed or not) with at least `min_usable_battles` battles where both sides' troop strength
+were extracted -- PROGRESS.md's "usable strength figures" line. E4 dropped the original seed-list
+gate (a non-seed general used to need to additionally face an already-kept general to join); the
+seed list is now purely informational, carried through to `generals_csv_rows`'s `notes` column
+rather than used to decide membership. `must_include_ids` (PROGRESS.md's must-include list, E3)
+forces membership regardless of `min_usable_battles`, including generals with zero appearances at
+all -- callers are expected to check `usable_battle_counts` themselves and substitute hand-curated
+data for any must-include general that's still thin (see `scripts/build_roster_selection.py`).
 
 `generals_csv_rows` then builds `GENERAL_COLUMNS`-shaped rows: era and career years come from
 the dates of the general's own kept battles (`war.rules.era_for_year`), not hand judgment.
 """
-
-from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
@@ -149,50 +148,73 @@ def seed_general_ids(
     return ids
 
 
+def usable_battle_counts(appearances: list[BattleAppearance]) -> dict[str, int]:
+    """Usable-strength battle count per `general_id`, the number `select_roster`'s bar and E3/E4's
+    thin-must-include checks both key off. Exposed separately so a caller can classify a
+    must-include general as thin (usable count below the chosen `min_usable_battles`) without
+    duplicating `select_roster`'s internal grouping."""
+    counts: dict[str, int] = defaultdict(int)
+    for appearance in appearances:
+        if appearance.has_usable_strength:
+            counts[appearance.general_id] += 1
+    return dict(counts)
+
+
+def pipeline_general_id_for(canonical_title: str, resolver: dict[str, str | None]) -> str:
+    """The `general_id` the pipeline assigns to a person identified by their canonical Wikipedia
+    title (as `data/must_include.csv` records it): the resolver's answer if that exact title was
+    itself seen as a commander wikilink (and so is a resolver key), else the same raw-slug
+    fallback every other pipeline caller uses for a title outside E1's scan."""
+    resolved = resolver.get(canonical_title)
+    return resolved if resolved is not None else general_id_from_title(canonical_title)
+
+
 def select_roster(
     appearances: list[BattleAppearance],
-    seed_ids: set[str],
     min_usable_battles: int,
+    must_include_ids: frozenset[str] = frozenset(),
 ) -> dict[str, list[BattleAppearance]]:
-    """Return `{general_id: [appearances]}` for the selected roster (see module docstring for
-    the seed-bar / opponent-join rule)."""
+    """Return `{general_id: [appearances]}` for the selected roster (see module docstring).
+
+    E4: a general joins if they have at least `min_usable_battles` usable-strength battles,
+    seed-listed or not -- no opponent-of-a-kept-general hop needed any more, since that hop only
+    ever admitted generals who *already* cleared the bar on their own; the thing it depended on
+    (the seed-only gate) is gone. Every id in `must_include_ids` joins unconditionally, even with
+    zero appearances at all, so a thin must-include general still gets a (possibly empty) roster
+    entry for the caller to detect via `usable_battle_counts` and substitute hand-curated data
+    for (see `scripts/build_roster_selection.py`).
+    """
     by_general: dict[str, list[BattleAppearance]] = defaultdict(list)
     for appearance in appearances:
         by_general[appearance.general_id].append(appearance)
 
-    usable_count = {
-        general_id: sum(1 for a in items if a.has_usable_strength)
-        for general_id, items in by_general.items()
-    }
+    usable_count = usable_battle_counts(appearances)
 
     kept: set[str] = {
-        general_id for general_id in seed_ids if usable_count.get(general_id, 0) >= min_usable_battles
+        general_id
+        for general_id, count in usable_count.items()
+        if count >= min_usable_battles
     }
-
-    changed = True
-    while changed:
-        changed = False
-        opponents_of_kept = {
-            appearance.opponent_general_id
-            for general_id in kept
-            for appearance in by_general[general_id]
-            if appearance.opponent_general_id
-        }
-        for opponent_id in opponents_of_kept - kept:
-            if usable_count.get(opponent_id, 0) >= min_usable_battles:
-                kept.add(opponent_id)
-                changed = True
+    kept |= set(must_include_ids)
 
     return {general_id: by_general[general_id] for general_id in kept}
 
 
-def generals_csv_rows(roster: dict[str, list[BattleAppearance]]) -> list[dict]:
+def generals_csv_rows(
+    roster: dict[str, list[BattleAppearance]],
+    seed_ids: frozenset[str] = frozenset(),
+    extra_notes: dict[str, str] | None = None,
+) -> list[dict]:
     """Build `war.schema.GENERAL_COLUMNS`-shaped rows from a selected roster.
 
     A general with no dateable battle (every `date` field unparseable) is dropped here — the
     schema requires `career_start_year`/`career_end_year`, and there is nothing to derive them
     from. `era` is the most common `era_for_year` result across the general's own battles, not
     just their first one, since a long career can span a boundary.
+
+    `seed_ids` no longer gates membership (E4) but is still recorded in `notes` so the roster's
+    seed/non-seed split stays visible. `extra_notes` (keyed by `general_id`) appends a caller-
+    supplied sentence, e.g. E4's thin-must-include-with-no-hand-curated-fallback flag for Han Xin.
     """
     rows = []
     for general_id, items in sorted(roster.items()):
@@ -202,6 +224,12 @@ def generals_csv_rows(roster: dict[str, list[BattleAppearance]]) -> list[dict]:
         era_counts = Counter(era_for_year(year) for year in years)
         era = era_counts.most_common(1)[0][0]
         usable = sum(1 for a in items if a.has_usable_strength)
+        note = (
+            f"auto-generated (C4b): {usable} usable-strength battle(s) of {len(items)} found "
+            f"(seed={'true' if general_id in seed_ids else 'false'})"
+        )
+        if extra_notes and general_id in extra_notes:
+            note += f"; {extra_notes[general_id]}"
         rows.append(
             {
                 "general_id": general_id,
@@ -209,10 +237,7 @@ def generals_csv_rows(roster: dict[str, list[BattleAppearance]]) -> list[dict]:
                 "era": era,
                 "career_start_year": min(years),
                 "career_end_year": max(years),
-                "notes": (
-                    f"auto-generated (C4b): {usable} usable-strength battle(s) "
-                    f"of {len(items)} found"
-                ),
+                "notes": note,
             }
         )
     return rows

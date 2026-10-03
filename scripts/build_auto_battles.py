@@ -12,8 +12,15 @@ parser couldn't read. Writes `data/auto/battles.csv`, validates it against `war/
 (`war.validate.validate_file`/`validate_ranges`, plus the general_id foreign-key check
 `validate_all` does for the gold set), and logs row counts and per-field null rates.
 
-Does not touch `data/battles.csv`/`data/generals.csv` (the hand-curated gold set) or
-`data/auto/generals.csv` (C4b's roster, left as the input here).
+E4: `scripts/build_roster_selection.py`'s `data/raw/roster_selection_report.json` names any
+must-include general whose roster entry is a hand-curated fallback (thin pipeline data, gold-set
+rows substituted in `generals.csv`). Those general_ids are excluded from the pipeline wikitext
+parse here (it would never find them anyway -- their canonical pipeline identity, not the gold
+slug, is what shows up in infoboxes) and instead get their `data/battles.csv` rows copied
+verbatim, so the gold-set general has real battle rows in `data/auto/battles.csv` too.
+
+Does not touch `data/battles.csv`/`data/generals.csv` (the hand-curated gold set, read-only here)
+or `data/auto/generals.csv` (C4b/E4's roster, left as the input here).
 """
 
 import csv
@@ -36,6 +43,8 @@ WIKITEXT_CACHE_PATH = REPO_ROOT / "data" / "raw" / "battle_wikitext_cache.json"
 GENERALS_PATH = REPO_ROOT / "data" / "auto" / "generals.csv"
 RESOLVED_FIELDS_PATH = REPO_ROOT / "data" / "auto" / "c5_resolved_fields.json"
 IDENTITY_MAP_PATH = REPO_ROOT / "data" / "raw" / "identity_map.json"
+ROSTER_REPORT_PATH = REPO_ROOT / "data" / "raw" / "roster_selection_report.json"
+GOLD_BATTLES_PATH = REPO_ROOT / "data" / "battles.csv"
 OUTPUT_PATH = REPO_ROOT / "data" / "auto" / "battles.csv"
 REPORT_PATH = REPO_ROOT / "data" / "raw" / "c6_report.json"
 
@@ -61,6 +70,26 @@ def _load_identity_resolver() -> dict[str, str | None] | None:
 
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def hand_curated_fallback_ids() -> set[str]:
+    """E4: must-include general_ids whose `data/auto/generals.csv` row is a hand-curated gold-set
+    fallback rather than a pipeline-derived one (empty set if the report doesn't exist yet, or
+    names none). Read from `scripts/build_roster_selection.py`'s report rather than re-deriving
+    it, since that script already did the thin/fallback classification."""
+    report = _load_json(ROSTER_REPORT_PATH)
+    return set(report.get("hand_curated_fallback_general_ids", []))
+
+
+def gold_battle_rows(general_ids: set[str]) -> list[dict]:
+    """Verbatim `data/battles.csv` rows for the given gold-set `general_id`s, with empty optional
+    cells normalized to `None` so `null_rate_report` counts them the same way a pipeline-derived
+    row's missing field would be counted."""
+    if not general_ids or not GOLD_BATTLES_PATH.exists():
+        return []
+    with GOLD_BATTLES_PATH.open(newline="", encoding="utf-8") as handle:
+        rows = [row for row in csv.DictReader(handle) if row.get("general_id") in general_ids]
+    return [{key: (value if value != "" else None) for key, value in row.items()} for row in rows]
 
 
 def _read_column(path: Path, column: str) -> list[str]:
@@ -166,6 +195,9 @@ def main() -> int:
     roster_ids = set(_read_column(GENERALS_PATH, "general_id"))
     resolved = _load_json(RESOLVED_FIELDS_PATH)
 
+    hand_curated_ids = hand_curated_fallback_ids() & roster_ids
+    pipeline_roster_ids = roster_ids - hand_curated_ids
+
     cache = crawl(titles)
     pages_found = sum(1 for title in titles if title in cache)
     print(f"{pages_found}/{len(titles)} battle pages available in wikitext cache")
@@ -177,8 +209,16 @@ def main() -> int:
         else "identity resolver: none (data/raw/identity_map.json not found, falling back to raw slugs)"
     )
 
-    rows = build_rows(titles, cache, roster_ids, resolved, identity_resolver)
-    print(f"{len(rows)} battle rows built for {len(roster_ids)} roster generals")
+    rows = build_rows(titles, cache, pipeline_roster_ids, resolved, identity_resolver)
+    print(f"{len(rows)} battle rows built for {len(pipeline_roster_ids)} pipeline roster generals")
+
+    if hand_curated_ids:
+        gold_rows = gold_battle_rows(hand_curated_ids)
+        rows.extend(gold_rows)
+        print(
+            f"{len(gold_rows)} hand-curated battle row(s) copied verbatim from "
+            f"{GOLD_BATTLES_PATH} for must-include general(s): {sorted(hand_curated_ids)}"
+        )
 
     write_csv(rows)
     print(f"wrote {OUTPUT_PATH}")

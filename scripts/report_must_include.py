@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""E3: report whether every must-include general clears the auto pipeline's roster bar.
+"""E3/E4: report whether every must-include general clears the auto pipeline's roster bar.
 
     python scripts/report_must_include.py [--min-battles N]
 
@@ -8,13 +8,13 @@ Wikipedia title) and runs the same parsing `scripts/build_roster_selection.py` d
 extraction over every cached battle page (`data/raw/battle_wikitext_cache.json`), canonicalized
 through E1/E2's identity resolver -- to count each must-include general's battle appearances and
 classify why they are or are not in the roster `--min-battles` would select. Read-only: does not
-crawl new pages or write `data/auto/generals.csv` (that stays C4b/G2's job); a battle_universe
-title missing from the wikitext cache is just counted as uncrawled, not fetched.
+crawl new pages or write `data/auto/generals.csv` (that stays build_roster_selection.py's job); a
+battle_universe title missing from the wikitext cache is just counted as uncrawled, not fetched.
 
-E4 has not dropped the seed-list requirement yet, so `select_roster` still only keeps a non-seed
-general if they clear the bar *and* face an already-kept general. This script reports seed
-membership alongside the roster verdict so that distinction (seed bar vs. the E4 change still to
-come) is visible rather than papered over.
+E4 dropped the seed-list gate and made every must-include general join the roster regardless of
+`--min-battles` (falling back to hand-curated data when thin -- see
+`scripts/build_roster_selection.py`'s module docstring). This script reports seed membership
+alongside the roster verdict purely for visibility, not because it still gates anything.
 """
 
 import argparse
@@ -26,12 +26,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from war.commanders import general_id_from_title  # noqa: E402
 from war.identity import build_general_id_resolver, load_identity_map  # noqa: E402
 from war.roster import (  # noqa: E402
     battle_appearances,
+    pipeline_general_id_for,
     seed_general_ids,
     select_roster,
+    usable_battle_counts,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -40,8 +41,9 @@ BATTLE_UNIVERSE_PATH = REPO_ROOT / "data" / "raw" / "battle_universe.csv"
 SEED_ROSTER_PATH = REPO_ROOT / "data" / "raw" / "general_seed_roster.csv"
 WIKITEXT_CACHE_PATH = REPO_ROOT / "data" / "raw" / "battle_wikitext_cache.json"
 IDENTITY_MAP_PATH = REPO_ROOT / "data" / "raw" / "identity_map.json"
+HAN_XIN_GENERAL_ID = "han-xin"
 
-DEFAULT_MIN_BATTLES = 2
+DEFAULT_MIN_BATTLES = 4
 
 
 @dataclass(frozen=True)
@@ -54,15 +56,6 @@ class MustIncludeStatus:
     usable_appearances: int
     in_roster: bool
     reason: str
-
-
-def pipeline_general_id_for(canonical_title: str, resolver: dict[str, str | None]) -> str:
-    """The `general_id` the pipeline would assign to a person identified by their canonical
-    Wikipedia title: the resolver's answer if that exact title was itself seen as a commander
-    wikilink (and so is a resolver key), else the same raw-slug fallback every other pipeline
-    caller uses for a title outside E1's scan."""
-    resolved = resolver.get(canonical_title)
-    return resolved if resolved is not None else general_id_from_title(canonical_title)
 
 
 def classify(
@@ -78,19 +71,18 @@ def classify(
     usable = sum(1 for a in appearances if a.has_usable_strength)
     in_roster = pipeline_general_id in roster
 
-    if in_roster:
-        reason = "in roster" + (" (seed)" if is_seed else " (opponent-joined)")
-    elif not appearances:
-        reason = "not a primary commander in any parsed battle page"
-    elif usable < min_battles:
-        reason = f"too few usable-strength battles ({usable} usable of {len(appearances)} total, need {min_battles})"
-    elif not is_seed:
+    if usable >= min_battles:
+        reason = "in roster" + (" (seed)" if is_seed else " (non-seed, clears the bar directly)")
+    elif general_id == HAN_XIN_GENERAL_ID:
         reason = (
-            f"clears the usable-battle bar ({usable} usable) but is not seed-listed and never "
-            "faces an already-kept general (E4 is expected to drop this seed requirement)"
+            f"thin ({usable} usable of {len(appearances)} total, need {min_battles}); "
+            "forced in via must-include, no hand-curated fallback exists for Han Xin"
         )
     else:
-        reason = "unresolved: clears the bar and is seed-listed but was not kept (investigate)"
+        reason = (
+            f"thin ({usable} usable of {len(appearances)} total, need {min_battles}); "
+            "falls back to the hand-curated data/generals.csv row (build_roster_selection.py)"
+        )
 
     return MustIncludeStatus(
         general_id=general_id,
@@ -139,7 +131,10 @@ def main() -> int:
         appearances_by_general.setdefault(appearance.general_id, []).append(appearance)
 
     seed_ids = seed_general_ids(seed_titles, identity_resolver)
-    roster = select_roster(appearances, seed_ids, args.min_battles)
+    must_include_pipeline_ids = frozenset(
+        pipeline_general_id_for(row["canonical_title"], identity_resolver) for row in must_include_rows
+    )
+    roster = select_roster(appearances, args.min_battles, must_include_ids=must_include_pipeline_ids)
 
     statuses = []
     for row in must_include_rows:
@@ -158,13 +153,16 @@ def main() -> int:
             )
         )
 
-    kept = sum(1 for s in statuses if s.in_roster)
-    print(f"\nmin_battles={args.min_battles}: {kept}/{len(statuses)} must-include generals in roster\n")
+    kept = sum(1 for s in statuses if s.usable_appearances >= args.min_battles)
+    thin = len(statuses) - kept
+    print(
+        f"\nmin_battles={args.min_battles}: {kept}/{len(statuses)} must-include generals clear the "
+        f"bar directly, {thin} are thin and need the E4 fallback path\n"
+    )
     for s in statuses:
         print(
             f"{s.general_id:25s} ({s.canonical_title}) -> general_id={s.pipeline_general_id} "
-            f"seed={s.is_seed} appearances={s.total_appearances} usable={s.usable_appearances} "
-            f"in_roster={s.in_roster}: {s.reason}"
+            f"seed={s.is_seed} appearances={s.total_appearances} usable={s.usable_appearances}: {s.reason}"
         )
     return 0
 

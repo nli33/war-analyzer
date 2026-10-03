@@ -13,8 +13,10 @@ from war.roster import (
     battle_appearances,
     extract_year,
     generals_csv_rows,
+    pipeline_general_id_for,
     seed_general_ids,
     select_roster,
+    usable_battle_counts,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -108,7 +110,7 @@ def test_battle_appearances_missing_strength_is_not_usable():
     assert not mine.has_usable_strength
 
 
-# --- seed_general_ids / select_roster --------------------------------------------------------
+# --- seed_general_ids / pipeline_general_id_for ------------------------------------------------
 
 
 def test_seed_general_ids_slugs_titles():
@@ -131,6 +133,18 @@ def test_seed_general_ids_falls_back_to_slug_when_resolver_has_no_entry_or_resol
     }
 
 
+def test_pipeline_general_id_for_uses_resolver_entry():
+    assert pipeline_general_id_for("Napoleon", {"Napoleon": "napoleon-merged"}) == "napoleon-merged"
+
+
+def test_pipeline_general_id_for_falls_back_to_slug():
+    assert pipeline_general_id_for("Han Xin", {}) == "han-xin"
+    assert pipeline_general_id_for("Napoleon", {"Napoleon": None}) == "napoleon"
+
+
+# --- usable_battle_counts / select_roster (E4: seedless, must-include forcing) -----------------
+
+
 def _appearance(general_id, opponent_id, usable=True, year=1800):
     return BattleAppearance(
         battle_title=f"Battle for {general_id}",
@@ -143,33 +157,31 @@ def _appearance(general_id, opponent_id, usable=True, year=1800):
     )
 
 
-def test_select_roster_keeps_seed_general_at_bar():
+def test_usable_battle_counts_only_counts_usable_strength_rows():
+    appearances = [
+        _appearance("alice", "bob"),
+        _appearance("alice", "bob", usable=False),
+        _appearance("bob", "alice"),
+    ]
+    assert usable_battle_counts(appearances) == {"alice": 1, "bob": 1}
+
+
+def test_select_roster_keeps_any_general_at_bar_seed_or_not():
+    # E4: no seed_ids parameter any more -- clearing the bar is sufficient regardless of origin.
     appearances = [_appearance("alice", "bob"), _appearance("alice", "bob")]
-    roster = select_roster(appearances, seed_ids={"alice"}, min_usable_battles=2)
+    roster = select_roster(appearances, min_usable_battles=2)
     assert set(roster) == {"alice"}
 
 
-def test_select_roster_drops_seed_general_below_bar():
+def test_select_roster_drops_general_below_bar():
     appearances = [_appearance("alice", "bob")]
-    roster = select_roster(appearances, seed_ids={"alice"}, min_usable_battles=2)
+    roster = select_roster(appearances, min_usable_battles=2)
     assert roster == {}
 
 
-def test_select_roster_admits_unlisted_opponent_who_clears_bar():
-    # bob isn't a seed general but fights alice (kept) twice with usable strength both times;
-    # a real scan emits bob's own-perspective appearances alongside alice's from the same two
-    # battle pages (battle_appearances returns both identifiable sides together).
-    appearances = [
-        _appearance("alice", "bob"),
-        _appearance("bob", "alice"),
-        _appearance("alice", "bob"),
-        _appearance("bob", "alice"),
-    ]
-    roster = select_roster(appearances, seed_ids={"alice"}, min_usable_battles=2)
-    assert set(roster) == {"alice", "bob"}
-
-
-def test_select_roster_does_not_admit_unrelated_general_never_facing_a_kept_one():
+def test_select_roster_admits_every_general_who_independently_clears_the_bar():
+    # E4 dropped the old "must face an already-kept general" hop: carol/dave clear the bar on
+    # their own and are admitted even though alice/bob never appear in the same appearances list.
     appearances = [
         _appearance("alice", "bob"),
         _appearance("bob", "alice"),
@@ -180,16 +192,34 @@ def test_select_roster_does_not_admit_unrelated_general_never_facing_a_kept_one(
         _appearance("carol", "dave"),
         _appearance("dave", "carol"),
     ]
-    # carol/dave never fight a kept general (alice/bob's opponents), so neither seed-eligible
-    # nor opponent-eligible even though carol clears the usable-battle bar on her own.
-    roster = select_roster(appearances, seed_ids={"alice"}, min_usable_battles=2)
-    assert set(roster) == {"alice", "bob"}
+    roster = select_roster(appearances, min_usable_battles=2)
+    assert set(roster) == {"alice", "bob", "carol", "dave"}
 
 
 def test_select_roster_below_bar_strength_rows_are_not_usable():
     appearances = [_appearance("alice", "bob", usable=False), _appearance("alice", "bob", usable=False)]
-    roster = select_roster(appearances, seed_ids={"alice"}, min_usable_battles=2)
+    roster = select_roster(appearances, min_usable_battles=2)
     assert roster == {}
+
+
+def test_select_roster_must_include_joins_below_bar():
+    appearances = [_appearance("alice", "bob")]  # alice: 1 usable, below a bar of 2
+    roster = select_roster(appearances, min_usable_battles=2, must_include_ids=frozenset({"alice"}))
+    assert set(roster) == {"alice"}
+    assert len(roster["alice"]) == 1
+
+
+def test_select_roster_must_include_joins_with_zero_appearances():
+    appearances = [_appearance("bob", "alice")]
+    roster = select_roster(appearances, min_usable_battles=2, must_include_ids=frozenset({"alice"}))
+    assert roster["alice"] == []
+
+
+def test_select_roster_must_include_does_not_suppress_normal_bar_clearing():
+    appearances = [_appearance("alice", "bob"), _appearance("alice", "bob")]
+    roster = select_roster(appearances, min_usable_battles=2, must_include_ids=frozenset({"someone-else"}))
+    assert set(roster) == {"alice", "someone-else"}
+    assert roster["someone-else"] == []
 
 
 # --- generals_csv_rows ------------------------------------------------------------------------
@@ -216,6 +246,20 @@ def test_generals_csv_rows_derives_era_and_career_years():
 def test_generals_csv_rows_drops_general_with_no_dateable_battle():
     roster = {"alice": [_appearance("alice", "bob", year=None)]}
     assert generals_csv_rows(roster) == []
+
+
+def test_generals_csv_rows_flags_seed_membership_in_notes():
+    roster = {"alice": [_appearance("alice", "bob")], "bob": [_appearance("bob", "alice")]}
+    rows = generals_csv_rows(roster, seed_ids=frozenset({"alice"}))
+    by_id = {row["general_id"]: row for row in rows}
+    assert "seed=true" in by_id["alice"]["notes"]
+    assert "seed=false" in by_id["bob"]["notes"]
+
+
+def test_generals_csv_rows_appends_extra_notes():
+    roster = {"alice": [_appearance("alice", "bob")]}
+    rows = generals_csv_rows(roster, extra_notes={"alice": "THIN must-include"})
+    assert "THIN must-include" in rows[0]["notes"]
 
 
 # --- real page integration -------------------------------------------------------------------

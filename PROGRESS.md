@@ -89,15 +89,47 @@ What went wrong, from the previous run's sanity pass:
       battle each) are genuinely thin and will need E4's hand-curated-fallback path. None are
       absent from the cache entirely (0 "not a commander in any parsed battle" cases). 412 tests
       pass (5 new, covering the status-classification logic).
-- [ ] E4. Drop the seed requirement. Any commander with at least N battles that have usable
-      strength figures joins the roster, whether or not they were on a seed list, and every
-      must-include general joins regardless of N. Keep the seed list only as a flag in the
-      output. Choose N so the rule-based roster lands in the target band and write down the roster
-      size at N=1 through 5. Verify with E3's report. For a must-include general with fewer than
-      N usable pipeline battles: the 19 gold-set generals fall back to their hand-curated rows
-      (migrated to the current schema, and marked as hand-curated in the notes column of
-      `generals.csv`); Han Xin has no hand-curated rows, so use whatever the pipeline finds and
-      record why if it is thin or empty. Report each case.
+- [x] E4. Drop the seed requirement. `war.roster.select_roster` no longer gates on seed
+      membership (and the old "opponent of a kept general" hop is gone too -- it only ever
+      admitted generals who already cleared the bar on their own, which is now sufficient by
+      itself): any general with >= N usable-strength battles joins, seed-listed or not. The seed
+      list is now informational only, carried into `generals.csv`'s `notes` column
+      (`seed=true`/`seed=false`) by `generals_csv_rows`, not used to decide membership. A new
+      `must_include_ids` param on `select_roster` forces every must-include general in
+      regardless of N, including with zero pipeline appearances.
+      Roster size at N=1 through 5 (seedless, no must-include forcing, from the full 8,430-page
+      wikitext cache): N=1 -> 4,703, N=2 -> 1,245, N=3 -> 552, N=4 -> 284, N=5 -> 183. Target
+      band is 200-400, so **N=4**. (N=5's 183 is close but under the floor; N=3's 552 overshoots.)
+      With must-include forcing and the N=4 bar: 13/20 must-include generals clear the bar
+      directly; 7 are thin (usable count below 4): genghis-khan (3), georgy-zhukov (3), subutai
+      (1), dwight-d-eisenhower (1), erwin-rommel (3), erich-von-manstein (2), and han-xin (3).
+      The first six are gold-set generals, so `scripts/build_roster_selection.py` substitutes
+      their hand-curated `data/generals.csv`/`data/battles.csv` rows verbatim (notes column
+      marked `hand-curated fallback (E4, must-include): ...`); their thin pipeline-derived roster
+      entry is popped first so there's no duplicate `general_id` row. Han Xin has no hand-curated
+      rows (he was never part of the original 8/19-general curation), so his thin pipeline entry
+      (3 usable of 4 total appearances) stays as-is with a `THIN must-include` note explaining
+      why -- flagged, not papered over. Final roster size: 288 (282 pipeline-cleared + 6
+      hand-curated fallbacks), comfortably inside the 200-400 band.
+      `scripts/build_auto_battles.py` reads the new fallback list from
+      `data/raw/roster_selection_report.json` (written by `build_roster_selection.py`), excludes
+      those general_ids from the pipeline wikitext parse (their canonical pipeline identity, not
+      the gold slug, is what infoboxes actually link to, so the parse would never find them
+      anyway), and copies their `data/battles.csv` rows in verbatim instead (39 rows across the 6
+      generals), normalizing empty cells to `None` so null-rate reporting counts them correctly.
+      Did not run either build script against the live `data/auto/` this task -- that
+      regeneration is G2's job and requires archiving the current (pre-E4, seed-gated)
+      `data/auto/` first per this file's "Decisions already made" rule. Verified instead via: (1)
+      `tests/test_roster.py`/`tests/test_report_must_include.py`, rewritten for the new
+      seedless/must-include-forcing behavior (420 tests pass, up from 412); (2)
+      `scripts/report_must_include.py --min-battles 4` (read-only, no crawl) against the real
+      cached data, confirming the 13-clear/7-thin split above; (3) a throwaway sandboxed run of
+      the real `build_roster_selection.py`/`build_auto_battles.py` functions against the real
+      cached wikitext and gold CSVs, writing to `/tmp` instead of `data/auto/`, confirming no
+      duplicate `general_id` rows, correct display_name/era/years carried through from the gold
+      set, and correct gold battle-row counts/normalization. `scripts/eval_ingest.py` and the
+      validator weren't re-run for this task -- neither touches roster-selection logic, and
+      `data/auto/` itself isn't regenerated until G2.
 
 ## Phase F: Where rows are lost
 
