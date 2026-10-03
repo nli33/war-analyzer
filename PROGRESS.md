@@ -94,7 +94,7 @@ this run. The user reviews the report and decides.
       Check how the force-ratio input behaves for those rows (Eisenhower's 4.5M vs 1.6M "Rhine
       crossing and final drive"). Check whether attackers and defenders are distinguished, how
       draws are scored, and whether each of several commanders on a side gets full credit for a win.
-- [ ] H6. Opponent strength. Today 65% of opponents are off-roster at a flat 1500. Test two
+- [x] H6. Opponent strength. Today 65% of opponents are off-roster at a flat 1500. Test two
       variants in a script, not in the shipped code: rate off-roster opponents by their own
       record in the full battle universe (not only roster rows), and weight each battle by
       opponent rating quality. Report how many opponents have enough rows to rate and how the top 30
@@ -206,3 +206,26 @@ this run. The user reviews the report and decides.
   (Battle of Stalingrad, 16 vs 24 named commanders) that credit is all-or-nothing per side -- the
   first-listed commander gets the whole row, undivided, never split, which is the H4 finding's
   other half. No weights, roster, or `war/` code changed -- diagnosis only.
+- **H6**: wrote `scripts/h6_opponent_strength.py`, report at
+  `notes/ranking-diagnosis/H6-opponent-strength.md` (two CSVs alongside it). Built a "full battle
+  universe" Elo graph by reusing `build_auto_battles.build_rows` with an allow-every-general_id
+  stand-in for the real roster filter (no shipped-code change, no new network or LLM calls --
+  same cached wikitext, same identity resolver), then ran the unmodified `oar_ratings` solver over
+  it (variant 1) and a locally-duplicated, confidence-weighted copy of that solver over the
+  existing roster graph (variant 2, weight = opponent's full-universe battle count / (that + 5),
+  reusing `MIN_BATTLES_FOR_HEADLINE_RANKING`'s pseudo-count convention same as H3's shrinkage
+  variant). First finding supersedes the PROGRESS.md number this task opened with: off-roster
+  share is 81% of distinct opponents today (59% of opponent-rows), not 65%/35% -- the dataset grew
+  under H1/H4 and the split moved the wrong direction from what the task text assumed. Headline
+  answer: neither variant moves the composite ranking much (Spearman +0.997/+0.995 vs. baseline,
+  only 3 of the top 30 swap either way under each) because the real bottleneck is corpus coverage,
+  not which slice of it the graph uses -- 655 of 999 off-roster opponents have only 1-2
+  identifiable battles anywhere in the whole cached universe (not just against the roster), so
+  there is barely more signal to extract even with the bigger graph. The one place opponent-rating
+  method clearly matters: Napoleon and Wellington share zero opponents and never get a Waterloo
+  row (per H4), so their relative order rests entirely on their disjoint opponent pools' ratings --
+  their OAR gap swings from +173 Elo (baseline) to +231 (full-universe) to +116
+  (confidence-weighted) across the three methods, ~115 points of method-dependent movement on a
+  head-to-head that has no shared battle to anchor it, though neither general's rating ever
+  reverses relative to the other. No weights, roster, or `war/` code changed -- diagnosis only,
+  per Phase H's rules.
