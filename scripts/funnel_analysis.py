@@ -35,11 +35,13 @@ from war.commanders import extract_commander_fields, primary_commander  # noqa: 
 from war.infobox_numbers import extract_strength_and_casualties  # noqa: E402
 from war.roster import extract_year  # noqa: E402
 from war.rules import (  # noqa: E402
+    _name_in_combatant,
     _POLITY_STOPWORDS,
     _RESULT_DRAW_RE,
     _RESULT_VICTORY_RE,
-    _WORD_RE,
     _side_match_score,
+    _trailing_victory_name,
+    _WORD_RE,
     outcome_from_result,
 )
 from war.scrape import find_infobox_body, parse_military_infobox  # noqa: E402
@@ -111,7 +113,14 @@ def _outcome_fail_reason(
         w for w in _WORD_RE.findall(match.group(1).lower()) if w not in _POLITY_STOPWORDS
     ]
     if not adjective_words:
-        return "victory_keyword_no_adjective"
+        name = _trailing_victory_name(result_text)
+        if name is None:
+            return "victory_keyword_no_adjective"
+        in1 = _name_in_combatant(name, combatant1_text)
+        in2 = _name_in_combatant(name, combatant2_text)
+        if in1 == in2:
+            return "ambiguous_trailing_victory_name"
+        return "unexpected_resolved"  # should not happen; outcome_from_result would resolve
     score1 = _side_match_score(adjective_words, combatant1_text)
     score2 = _side_match_score(adjective_words, combatant2_text)
     if score1 == score2:

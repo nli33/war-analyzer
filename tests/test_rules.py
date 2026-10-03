@@ -125,3 +125,45 @@ def test_outcome_from_result_unmatched_demonym_is_unresolved():
 
 def test_outcome_from_result_no_victory_word_is_unresolved():
     assert outcome_from_result("Ceasefire agreed", "France", "Great Britain") == (None, None)
+
+
+def test_outcome_from_result_united_kingdom_official_name():
+    # F2: "British" has no word in common with "United Kingdom" at all -- not even a stopword
+    # overlap -- since neither "united" nor "kingdom" stems to "britain". Regression for the
+    # single biggest ambiguous_side_match loss cause F1 found.
+    assert outcome_from_result("British victory", "United Kingdom", "France") == ("Win", "Loss")
+    assert outcome_from_result("British victory", "France", "United Kingdom") == ("Loss", "Win")
+
+
+def test_outcome_from_result_united_states_official_name():
+    assert outcome_from_result("American victory", "United States", "Mexico") == ("Win", "Loss")
+
+
+def test_outcome_from_result_trailing_victory_for_name():
+    # "Victory for X" / "Victory of X" put the winning side's name *after* "victory" -- the
+    # leading-adjective capture sees nothing before it. Matched as a literal name, not a
+    # demonym, since this form is usually a person or faction name, not a country.
+    assert outcome_from_result(
+        "Victory for Philip II", "Supporters of António Prior of Crato", "Supporters of Philip II"
+    ) == ("Loss", "Win")
+    assert outcome_from_result(
+        "Victory of Antiochus Hierax", "Seleucid Empire", "Antiochus Hierax; Kingdom of Pontus"
+    ) == ("Loss", "Win")
+
+
+def test_outcome_from_result_trailing_victory_name_stops_at_bullet_separator():
+    # "Victory for Drenthe * Death of Otto II of Lippe" -- the trailing clause after "*" isn't
+    # part of the winning side's name and must not leak into the match.
+    assert outcome_from_result(
+        "Victory for Drenthe * Death of Otto II of Lippe", "Bishopric of Utrecht", "Drenthe"
+    ) == ("Loss", "Win")
+
+
+def test_outcome_from_result_trailing_victory_name_no_match_is_unresolved():
+    assert outcome_from_result("Victory for Kassa Hailu", None, None) == (None, None)
+
+
+def test_outcome_from_result_generic_victory_word_stays_unresolved():
+    # "Government" is a stopword with no side-identifying content and no "for"/"of" clause to
+    # fall back on -- must stay unresolved rather than guessing.
+    assert outcome_from_result("Government victory", "Rebels", "National Army") == (None, None)

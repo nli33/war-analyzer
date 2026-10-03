@@ -285,6 +285,19 @@ _DEMONYM_TO_COUNTRY: dict[str, str] = {
 
 _DEMONYM_SUFFIXES = ("ese", "ian", "ish", "an", "ic")
 
+# Some common official country names don't contain their own demonym as a word at all --
+# "United Kingdom" has no word that stems to "britain", not even via a suffix strip, because
+# both of its words ("united", "kingdom") are themselves generic polity-type stopwords, not a
+# country name. Same gap for "United States" vs. "american"/"america". Measured against the real
+# battle-universe cache (F2 dev log entry): these two phrases alone account for most of the
+# "ambiguous_side_match" no_outcome loss cause F1 found -- adding them as whole-phrase aliases
+# (checked against the raw text, before stopword filtering, rather than trying to patch the
+# stopword list or suffix rules) resolves them without touching any other country.
+_COUNTRY_PHRASE_ALIASES: dict[str, str] = {
+    "united kingdom": "britain",
+    "united states": "america",
+}
+
 # Generic polity-type nouns that don't identify *which* polity, stripped before token matching
 # so e.g. "Confederate States" matches on "confederate" and not also, uselessly, on "states".
 _POLITY_STOPWORDS = frozenset(
@@ -298,6 +311,31 @@ _POLITY_STOPWORDS = frozenset(
 _RESULT_VICTORY_RE = re.compile(r"^(.*?)\bvictory\b", re.IGNORECASE)
 _RESULT_DRAW_RE = re.compile(r"inconclusive|indecisive|stalemate|\bdraw\b|status quo", re.IGNORECASE)
 _WORD_RE = re.compile(r"[a-zA-Z]{3,}")
+
+# Some result strings put the winning side *after* "victory" instead of before it -- "Victory
+# for Philip II", "Victory of Antiochus Hierax" -- which the leading-adjective extraction above
+# can't see (its capture group stops at "victory"). Unlike the leading-adjective case, the name
+# here is often a person or a specific faction rather than a country demonym, so it's matched as
+# a literal substring against the combatant text instead of through the demonym-stem machinery.
+# A trailing clause (another sentence/bullet, e.g. "Victory for Drenthe * Death of Otto II of
+# Lippe") is cut at the first `;`/`*`/newline so it doesn't pollute the matched name.
+_RESULT_TRAILING_VICTORY_RE = re.compile(r"\bvictory\s+(?:for|of|to)\s+(.+)", re.IGNORECASE)
+_TRAILING_NAME_SPLIT_RE = re.compile(r"[;*\n]")
+
+
+def _trailing_victory_name(result_text: str) -> str | None:
+    match = _RESULT_TRAILING_VICTORY_RE.search(result_text)
+    if not match:
+        return None
+    name = _TRAILING_NAME_SPLIT_RE.split(match.group(1))[0].strip()
+    return name or None
+
+
+def _name_in_combatant(name: str, combatant_text: str | None) -> bool:
+    if not combatant_text:
+        return False
+    name, combatant_text = name.lower(), combatant_text.lower()
+    return name in combatant_text or combatant_text in name
 
 
 def _demonym_stem(word: str) -> str:
@@ -313,7 +351,12 @@ def _demonym_stem(word: str) -> str:
 def _combatant_tokens(text: str | None) -> set[str]:
     if not text:
         return set()
-    return {w for w in _WORD_RE.findall(text.lower()) if w not in _POLITY_STOPWORDS}
+    lowered = text.lower()
+    tokens = {w for w in _WORD_RE.findall(lowered) if w not in _POLITY_STOPWORDS}
+    for phrase, alias in _COUNTRY_PHRASE_ALIASES.items():
+        if phrase in lowered:
+            tokens.add(alias)
+    return tokens
 
 
 def _side_match_score(adjective_words: list[str], combatant_text: str | None) -> int:
@@ -345,6 +388,8 @@ def outcome_from_result(
     ('Draw', 'Draw')
     >>> outcome_from_result("Ceasefire agreed", "France", "Great Britain")
     (None, None)
+    >>> outcome_from_result("Victory for Philip II", "Supporters of António", "Supporters of Philip II")
+    ('Loss', 'Win')
     """
     if not result_text:
         return (None, None)
@@ -358,13 +403,28 @@ def outcome_from_result(
         w for w in _WORD_RE.findall(match.group(1).lower()) if w not in _POLITY_STOPWORDS
     ]
     if not adjective_words:
-        return (None, None)
+        return _outcome_from_trailing_victory_name(
+            result_text, combatant1_text, combatant2_text
+        )
 
     score1 = _side_match_score(adjective_words, combatant1_text)
     score2 = _side_match_score(adjective_words, combatant2_text)
     if score1 == score2:
         return (None, None)
     return ("Win", "Loss") if score1 > score2 else ("Loss", "Win")
+
+
+def _outcome_from_trailing_victory_name(
+    result_text: str, combatant1_text: str | None, combatant2_text: str | None
+) -> tuple[str | None, str | None]:
+    name = _trailing_victory_name(result_text)
+    if name is None:
+        return (None, None)
+    in1 = _name_in_combatant(name, combatant1_text)
+    in2 = _name_in_combatant(name, combatant2_text)
+    if in1 == in2:  # named side matches both/neither combatant text -- stay unresolved
+        return (None, None)
+    return ("Win", "Loss") if in1 else ("Loss", "Win")
 
 
 def era_for_year(year: int) -> str:
