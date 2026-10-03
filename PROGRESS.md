@@ -299,3 +299,5 @@ this run. The user reviews the report and decides.
   scope alongside the README update. Verified: 504 tests pass, `scripts/validate_data.py` passes
   (neither touches ranking logic or data, so no `eval_ingest.py` rerun needed). No weights,
   roster, or ranking behavior changed.
+
+DONE
