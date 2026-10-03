@@ -171,40 +171,50 @@ What went wrong, from the previous run's sanity pass:
       441 tests pass (10 new). `eval_ingest.py`/`validate_data.py` not re-run -- F2 touches the
       wikitext cache and rules, not `data/auto/` (G2's job); `funnel_analysis.py` is this task's
       own before/after tool.
-- [ ] F3. Only if unresolved result strings are still a top loss after F2: classify them in one
+- [x] F3. Only if unresolved result strings are still a top loss after F2: classify them in one
       bounded Claude CLI pass (see rules above). Report the row count, call count, and rough cost,
       and drop anything outside sanity bounds. If the queue exceeds the cap, process the most
       frequent patterns first and note the rest. Skip this task if F1/F2 show results are not a
       main cause, and say so in Notes.
-      IN PROGRESS: confirmed F3 applies -- `no_outcome` (2,907 titles, the `ambiguous_side_match`/
-      `no_victory_or_draw_keyword`/`victory_keyword_no_adjective`/`ambiguous_trailing_victory_name`
-      reasons) is still the single largest post-F2 loss stage, well above `no_infobox` (310) or
-      `no_commander` (698). Built `war/uncertain_outcomes.py` (queue: every title that already
-      clears the infobox/year/commander gates but whose `outcome_from_result` returns `(None,
-      None)`, restricted to titles with real `result` text and at least one `combatant` field's
-      text to match it against -- titles with no side-identifying text at all resolve to
-      "unresolvable" for free, same rule C5 applied to digit-less numeric fields) and
-      `scripts/resolve_uncertain_outcomes.py` (haiku, low effort, batched, `--tools ""`, JSON
-      schema, resumable via `data/raw/f3_llm_cache.json`). Real queue against the full 8,824-title
-      cache: 2,823 queued (603 free-resolve, no side text), 2,220 sent to the model in 56 batches
-      of 40 -- both well inside the 3,000-row/60-call cap. 457 tests pass (16 new,
-      `tests/test_uncertain_outcomes.py`) before launching the real pass.
-      Launched the real run (`python scripts/resolve_uncertain_outcomes.py`, detached via nohup,
-      log at /tmp/f3_run.log) after committing the code. First two batches measured at ~60-90s
-      each against the real API, so 56 batches projects to roughly 60-70 minutes total --
-      over the ~30-minute threshold for babysitting a job synchronously. Checkpointing here per
-      that rule rather than waiting out the full run: the script writes `data/raw/f3_llm_cache.json`
-      after every batch (id -> resolved value), so it resumes correctly whether or not the
-      detached process survives this iteration ending.
-      Resume with: `python scripts/resolve_uncertain_outcomes.py` (no flags -- a plain rerun skips
-      every id already in the cache and only calls for what's left; add `--refresh` only if the
-      cache looks corrupted). Once it completes, finish the task by reading
-      `data/raw/f3_report.json` for the row/call/cost numbers and `data/auto/f3_resolved_outcomes.json`
-      for the resolved `{title: "side1"|"side2"|"draw"}` map, spot-checking a handful against the
-      raw queue dump (`data/raw/f3_uncertain_outcome_queue.json`), recording the final numbers in
-      the dev log and here, and committing the outputs. Not yet wired into
-      `war/battles_dataset.py`/`data/auto/` -- per the same C5/C6 split this project already uses,
-      that merge is G2's job (G2 regenerates `data/auto/` from the full pipeline), not F3's.
+      Confirmed F3 applies: `no_outcome` (2,907 titles post-F2) is still the single largest loss
+      stage, well above `no_infobox` (310) or `no_commander` (698). Built
+      `war/uncertain_outcomes.py` (queue: every title clearing the infobox/year/commander gates
+      whose `outcome_from_result` returns `(None, None)`, restricted to titles with real `result`
+      text and at least one `combatant` field's text to match it against -- same free-resolve
+      rule C5 applied to digit-less numeric fields) and `scripts/resolve_uncertain_outcomes.py`
+      (haiku, low effort, batched, `--tools ""`, JSON schema, resumable via
+      `data/raw/f3_llm_cache.json`).
+      Real queue against the full 8,824-title cache: 2,823 unresolved outcomes, 603 free-resolved
+      (no side-identifying text at all -- genuinely nothing for a model to read either), 2,220
+      sent to the model in 56 batches of 40 -- both inside the 3,000-row/60-call cap. One batch
+      (21/56) hit the 180s subprocess timeout and crashed the script with an unhandled
+      `TimeoutExpired` on the first attempt; fixed by catching that (and a malformed-JSON
+      response) in `call_batch` and treating it as "no results this batch" rather than a crash --
+      the per-batch cache write already made this safe to just rerun. Resumed from the 800 items
+      already cached and finished the remaining 36 calls clean, no further errors.
+      Final numbers (combined across both runs): 56 calls total, cost $1.1162 + $2.2083 =
+      **$3.3245**, 1,656 of the 2,220 sent (74.6%) resolved to a real outcome (1,224 side1 / 372
+      side2 / 60 draw), 0 rejected by the sanity check (output is a closed 3-value enum, so the
+      only possible rejections are a malformed/off-enum value or a missing id -- neither showed
+      up in practice). The other 564 sent to the model came back null (genuinely unresolvable from
+      the given text) or missing (timed-out batch 21, since re-sent and resolved). Spot-checked 10
+      `side1`, 6 `side2`, and 6 `draw` resolutions by hand against their raw queue text -- all
+      correct, including non-trivial cases (matching a result's "Greek victory" against a
+      combatant list naming Epirotes/Aetolians/Italiot Greeks with no literal "Greek" token, and
+      inferring a winner from "weakening of the magnates" when the winning side's own combatant
+      field was empty). The side1/side2 skew (1,224 vs. 372) held up under spot-checking as a real
+      pattern in this queue, not the model defaulting to side1 under uncertainty -- not
+      investigated further than the sample, since "why is it skewed" isn't a correctness question
+      this task's sanity check needs to answer.
+      457 tests pass (16 new, `tests/test_uncertain_outcomes.py`). `eval_ingest.py`/
+      `validate_data.py` not re-run -- same reasoning as C5/F2: this task writes a standalone
+      `data/auto/f3_resolved_outcomes.json` artifact, not `data/auto/battles.csv` itself (ran
+      `validate_data.py` once anyway as a smoke test that nothing else broke; still clean). Not
+      yet wired into `war/battles_dataset.py`/`data/auto/` -- per the same C5/C6 split this
+      project already uses, that merge (reading `f3_resolved_outcomes.json` as a fallback when
+      `outcome_from_result` itself returns `None`, same shape as C5's `resolved_fields` fallback
+      for strength/casualties) is G2's job, which regenerates `data/auto/` from the full pipeline,
+      not F3's.
 
 ## Phase G: Rankings and checks
 
