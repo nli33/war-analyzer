@@ -14,15 +14,21 @@ weekly usage windows is used and when each resets. After every finished task the
                           (only if the reset is within --max-wait-hours, so a nearly used-up
                           weekly window still stops the run)
 
+An iteration counts as progress if it moved HEAD or changed any tracked or untracked file; the loop
+stops as stuck only after --stall-limit iterations in a row that leave the repo exactly as it was.
+An agent that cannot continue writes a line starting with "BLOCKED:" in PROGRESS.md and the loop
+stops there.
+
 If the limit is hit in the middle of a task anyway, that iteration doesn't count as a stall:
 with --wait-for-reset the loop sleeps until the reset and retries, otherwise it stops. The
 prompt tells the next iteration to finish any interrupted task first.
 
-Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck (no commits), 2 = iteration cap reached,
-3 = stopped because of usage.
+Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck (repo unchanged), 2 = iteration cap reached,
+3 = stopped because of usage, 4 = PROGRESS.md has a BLOCKED: line.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -181,10 +187,28 @@ def run_iteration(cfg, prompt: str, log_path: Path) -> RunSummary:
     return summary
 
 
-def git_head(repo: Path) -> str:
-    return subprocess.run(
+def repo_state(repo: Path) -> tuple[str, str]:
+    """HEAD plus a fingerprint of every uncommitted change (paths and file contents)."""
+    head = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=repo, capture_output=True, text=True, check=True
     ).stdout.strip()
+    status = subprocess.run(
+        ["git", "status", "--porcelain", "-uall", "--", ".", ":(exclude)logs/overnight"], cwd=repo, capture_output=True, text=True, check=True
+    ).stdout
+    fingerprint = hashlib.sha1()
+    for line in sorted(status.splitlines()):
+        fingerprint.update(line.encode())
+        changed_file = repo / line[3:]
+        if changed_file.is_file():
+            fingerprint.update(changed_file.read_bytes())
+    return head, fingerprint.hexdigest()
+
+
+def blocked_line(repo: Path) -> str | None:
+    for line in (repo / "PROGRESS.md").read_text().splitlines():
+        if line.startswith("BLOCKED:"):
+            return line
+    return None
 
 
 def is_done(repo: Path) -> bool:
@@ -227,9 +251,13 @@ def main(argv=None) -> int:
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
     iteration = stalls = limit_streak = 0
-    previous_head = git_head(cfg.repo)
+    previous_state = repo_state(cfg.repo)
 
     while iteration < cfg.max_iterations:
+        blocked = blocked_line(cfg.repo)
+        if blocked:
+            print(f"Stopping, PROGRESS.md says: {blocked}")
+            return 4
         iteration += 1
         print(f"=== iteration {iteration} ===", flush=True)
         log_path = log_dir / f"{stamp}-iter{iteration:02d}.jsonl"
@@ -252,13 +280,13 @@ def main(argv=None) -> int:
                 return 3
         else:
             limit_streak = 0
-            head = git_head(cfg.repo)
-            stalls = stalls + 1 if head == previous_head else 0
-            previous_head = head
+            state = repo_state(cfg.repo)
+            stalls = stalls + 1 if state == previous_state else 0
+            previous_state = state
             if summary.returncode != 0:
                 time.sleep(30)
             if stalls >= cfg.stall_limit:
-                print(f"No commits in {cfg.stall_limit} iterations, stopping (stuck).")
+                print(f"Repo unchanged for {cfg.stall_limit} iterations in a row, stopping (stuck).")
                 return 1
 
         action = decide(summary, cfg, time.time())

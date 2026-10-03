@@ -10,8 +10,9 @@ unchecked task. Do the work for
 that ONE task only - do not jump ahead. Verify it before marking it done: run the test suite and,
 where the task calls for it, scripts/eval_ingest.py and the validator. Update PROGRESS.md (check the task, add a one-line note on what
 happened or any deviation) and commit your work with a message per CLAUDE.md's commit rules.
-If a phase's exit criteria can't be verified, stop and write why in PROGRESS.md instead of
-guessing. If everything in PROGRESS.md is checked off, write DONE as the last line of
+If a phase's exit criteria can't be verified, or you genuinely cannot proceed, write a line starting
+with `BLOCKED:` and the reason at the end of PROGRESS.md and stop; the loop halts on that line. Use it
+only when stopping is the right outcome, not for ordinary uncertainty. If everything in PROGRESS.md is checked off, write DONE as the last line of
 PROGRESS.md and stop.
 
 Data ingestion rules: do not research individual battles with web searches or sub-agents. Data
@@ -22,3 +23,17 @@ numbers are fine). Time-box each comparison. Measure with scripts/eval_ingest.py
 
 If `git status` shows uncommitted changes when you start, they are from an earlier iteration that
 was interrupted. Review them, finish that same task rather than starting a new one, then commit.
+
+Long-running work (important, this is a headless `claude -p` run):
+- Commit your code and tests before starting any long job (more than a minute or two), so the work is
+  safe even if this iteration ends early.
+- ScheduleWakeup, background-job notifications, and "I'll check back later" do not work here. Nothing
+  wakes you up after you end your turn, and the process exiting can kill what you started. Do not
+  end your turn expecting a running job to finish by itself.
+- Run long jobs so they checkpoint to disk as they go and can resume from the checkpoint. Start them
+  detached (nohup, with output to a log file), then wait in the foreground with bounded sleeps (for
+  example `sleep 240`) and check the log, until the job is done.
+- If a job would take more than about 30 minutes in total, do not wait for all of it. Make sure it
+  checkpoints and resumes, write "in progress, resume with <exact command>" under the task in
+  PROGRESS.md, commit, and end your turn. The job may be killed when you end it; the next iteration
+  resumes from the checkpoint.

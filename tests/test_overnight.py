@@ -114,10 +114,10 @@ import json, subprocess, sys, time
 from pathlib import Path
 
 repo = Path.cwd()
-counter = repo / ".stub_calls"
+counter = repo.parent / (repo.name + ".calls")
 calls = int(counter.read_text()) + 1 if counter.exists() else 1
 counter.write_text(str(calls))
-scenario = json.loads((repo / ".stub_scenario.json").read_text())[calls - 1]
+scenario = json.loads((repo.parent / (repo.name + ".scenario.json")).read_text())[calls - 1]
 
 def emit(event):
     print(json.dumps(event), flush=True)
@@ -134,9 +134,12 @@ emit({{"type": "rate_limit_event", "rate_limit_info": {{"status": "allowed", "un
     "seven_day": {{"utilization": 0.1, "resetsAt": reset + 400000}}}}}}}})
 if scenario.get("done"):
     (repo / "PROGRESS.md").write_text("done\\nDONE\\n")
+if scenario.get("blocked"):
+    (repo / "PROGRESS.md").write_text("BLOCKED: needs a decision\\n")
 (repo / f"work{{calls}}.txt").write_text("x")
-subprocess.run(["git", "add", "-A"], check=True)
-subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", f"feat: task {{calls}}"], check=True)
+if scenario.get("commit", True):
+    subprocess.run(["git", "add", "-A"], check=True)
+    subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t", "commit", "-qm", f"feat: task {{calls}}"], check=True)
 emit({{"type": "result", "is_error": False, "result": "ok", "total_cost_usd": 0.01}})
 """
 
@@ -158,7 +161,7 @@ def fake_repo(tmp_path):
 
 
 def run_loop(repo, scenario, *flags):
-    (repo / ".stub_scenario.json").write_text(json.dumps(scenario))
+    (repo.parent / (repo.name + ".scenario.json")).write_text(json.dumps(scenario))
     return overnight.main([
         "--repo", str(repo),
         "--prompt-file", str(repo / "prompt.txt"),
@@ -200,7 +203,26 @@ def test_limit_hit_without_wait_flag_stops(fake_repo):
     assert code == 3
 
 
-def test_no_commits_counts_as_stall(fake_repo):
+def test_uncommitted_changes_count_as_progress_not_a_stall(fake_repo):
+    scenario = [{"used": 0.1, "commit": False}] * 3 + [{"used": 0.1, "done": True}]
+    code = run_loop(fake_repo, scenario, "--stall-limit", "2")
+    assert code == 0
+
+
+def test_blocked_line_stops_the_loop_after_that_iteration(fake_repo):
+    code = run_loop(fake_repo, [{"used": 0.1, "blocked": True}, {"used": 0.1, "done": True}])
+    assert code == 4
+    assert commit_count(fake_repo) == 2  # the blocked iteration ran, nothing after it
+
+
+def test_existing_blocked_line_refuses_to_start(fake_repo):
+    (fake_repo / "PROGRESS.md").write_text("BLOCKED: left over\n")
+    code = run_loop(fake_repo, [{"used": 0.1, "done": True}])
+    assert code == 4
+    assert not (fake_repo.parent / (fake_repo.name + ".calls")).exists()
+
+
+def test_unchanged_repo_counts_as_stall(fake_repo):
     (fake_repo / "claude_stub.py").write_text("#!/bin/sh\necho '{\"type\":\"result\",\"is_error\":false,\"result\":\"nothing\"}'\n")
     code = overnight.main([
         "--repo", str(fake_repo), "--prompt-file", str(fake_repo / "prompt.txt"),

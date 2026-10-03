@@ -28,7 +28,11 @@ streams a short line per tool call to the terminal, and writes the full event st
 iteration to `logs/overnight/` (gitignored). Options:
 
 - `--max-iterations` (default 40, or `MAX_ITERATIONS`) and `--stall-limit` (default 3, or
-  `STALL_LIMIT`): hard caps on iterations and on consecutive iterations without a new commit.
+  `STALL_LIMIT`): hard caps on iterations and on consecutive iterations that leave the repo exactly
+  as it was. An iteration counts as progress if it moved HEAD or changed any file, committed or not.
+- `BLOCKED:` line: the prompt tells the agent to end `PROGRESS.md` with a line starting `BLOCKED:`
+  and the reason when stopping is the right outcome. The loop halts on it, and refuses to start
+  while one is present, so delete a stale line before restarting.
 - `--model` and `--effort`: passed to `claude`. Unset means whatever the machine defaults to.
 - `--min-remaining-pct N`: each run reports how much of the five-hour and weekly usage windows is
   used and when they reset. After a task finishes, if either window has less than N% left, the
@@ -40,7 +44,8 @@ iteration to `logs/overnight/` (gitignored). Options:
   waits for the reset (with `--wait-for-reset`) or stops, then retries, and the prompt tells the
   next iteration to finish the interrupted task first. Three limit hits in a row stop the run.
 
-Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck, 2 = iteration cap, 3 = stopped for usage.
+Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck, 2 = iteration cap, 3 = stopped for usage,
+4 = BLOCKED line.
 Look at `git status` before restarting after a usage stop in case a task was cut off.
 
 The usage-limit failure path (what `claude -p` prints when it is actually cut off) has not been
