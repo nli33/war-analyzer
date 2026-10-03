@@ -16,7 +16,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from war.metrics.uncertainty import monte_carlo_uncertainty  # noqa: E402
 from war.records import load_battles, load_generals  # noqa: E402
-from war.viz.ranking_tables import save_ranking_tables  # noqa: E402
+from war.viz.ranking_tables import (  # noqa: E402
+    MIN_BATTLES_FOR_HEADLINE_RANKING,
+    save_ranking_tables,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT_PATH = REPO_ROOT / "output" / "viz" / "ranking_tables.html"
@@ -38,6 +41,13 @@ def parse_args() -> argparse.Namespace:
         default=25,
         help="cap each HTML table at its best N rows (CSVs are never truncated); 0 disables the cap",
     )
+    parser.add_argument(
+        "--min-battles",
+        type=int,
+        default=MIN_BATTLES_FOR_HEADLINE_RANKING,
+        help="drop generals below this many battles from the HTML tables (CSVs keep everyone); "
+        "0 disables the floor",
+    )
     return parser.parse_args()
 
 
@@ -48,7 +58,9 @@ def main() -> int:
     battles = load_battles(args.battles)
     generals = load_generals(args.generals)
     mc = monte_carlo_uncertainty(battles, seed=MC_SEED)
-    output_path = save_ranking_tables(battles, generals, args.output, mc=mc, top_n=top_n)
+    output_path = save_ranking_tables(
+        battles, generals, args.output, mc=mc, top_n=top_n, min_battles=args.min_battles
+    )
     print(f"wrote {output_path}")
     print(f"wrote {output_path.with_name(output_path.stem + '_composite.csv')}")
     print(f"wrote {output_path.with_name(output_path.stem + '_categories.csv')}")

@@ -189,7 +189,9 @@ def test_render_html_contains_composite_and_all_six_category_tables():
     composite_rows = composite_ranking_rows(battles, generals)
     category_rows = category_ranking_rows(battles, generals)
 
-    output = render_ranking_tables_html(composite_rows, category_rows)
+    # min_battles=0: these fixtures only have 1 battle per general, and this
+    # test is about table structure, not the battle-count floor.
+    output = render_ranking_tables_html(composite_rows, category_rows, min_battles=0)
 
     assert output.startswith("<!DOCTYPE html>")
     assert "Composite Power Ranking" in output
@@ -221,7 +223,9 @@ def test_render_html_top_n_truncates_composite_and_categories():
     composite_rows = composite_ranking_rows(battles, generals)
     category_rows = category_ranking_rows(battles, generals)
 
-    output = render_ranking_tables_html(composite_rows, category_rows, top_n=1)
+    # min_battles=0: this fixture's generals have 1-2 battles each; this
+    # test is about top_n truncation, not the battle-count floor.
+    output = render_ranking_tables_html(composite_rows, category_rows, top_n=1, min_battles=0)
 
     # only the #1-ranked general's name should appear in the composite table...
     assert "(top 1 of 3)" in output
@@ -239,7 +243,7 @@ def test_render_html_top_n_none_shows_everyone():
     composite_rows = composite_ranking_rows(battles, generals)
     category_rows = category_ranking_rows(battles, generals)
 
-    output = render_ranking_tables_html(composite_rows, category_rows, top_n=None)
+    output = render_ranking_tables_html(composite_rows, category_rows, top_n=None, min_battles=0)
 
     assert "(top" not in output
     for row in composite_rows:
@@ -250,7 +254,7 @@ def test_save_does_not_truncate_csv_even_with_small_top_n(tmp_path):
     battles, generals = _three_general_fixture()
     output_path = tmp_path / "ranking_tables.html"
 
-    save_ranking_tables(battles, generals, output_path, top_n=1)
+    save_ranking_tables(battles, generals, output_path, top_n=1, min_battles=0)
 
     html_text = output_path.read_text(encoding="utf-8")
     assert "(top 1 of 3)" in html_text
@@ -280,4 +284,71 @@ def test_save_writes_html_and_two_matching_csvs(tmp_path):
     assert len(composite_lines) == 1 + 2  # header + alice + bob
 
     category_lines = category_csv.read_text(encoding="utf-8").strip().splitlines()
-    assert category_lines[0] == "category,rank,general_id,display_name,value,ci_low,ci_high"
+    assert category_lines[0] == "category,rank,general_id,display_name,battle_count,value,ci_low,ci_high"
+
+
+def _thin_and_thick_fixture():
+    """"thin" has 1 battle, "thick" has 3 -- enough to exercise a min_battles=2 or 3 floor."""
+    battles = [
+        make_battle("thin", "Win", opponent_general_id="thick", battle_id="t1"),
+        make_battle("thick", "Win", opponent_general_id="thin", battle_id="k1"),
+        make_battle("thick", "Win", opponent_general_id="thin", battle_id="k2"),
+        make_battle("thick", "Loss", opponent_general_id="thin", battle_id="k3"),
+    ]
+    generals = [make_general("thin"), make_general("thick")]
+    return battles, generals
+
+
+def test_composite_and_category_rows_report_battle_count():
+    battles, generals = _thin_and_thick_fixture()
+
+    composite_by_id = {r.general_id: r for r in composite_ranking_rows(battles, generals)}
+    assert composite_by_id["thin"].battle_count == 1
+    assert composite_by_id["thick"].battle_count == 3
+
+    category_rows = category_ranking_rows(battles, generals)
+    win_rate_by_id = {r.general_id: r for r in category_rows["win_rate"]}
+    assert win_rate_by_id["thin"].battle_count == 1
+    assert win_rate_by_id["thick"].battle_count == 3
+
+
+def test_render_html_min_battles_floor_drops_thin_generals_from_html():
+    battles, generals = _thin_and_thick_fixture()
+    composite_rows = composite_ranking_rows(battles, generals)
+    category_rows = category_ranking_rows(battles, generals)
+
+    output = render_ranking_tables_html(composite_rows, category_rows, min_battles=2)
+
+    composite_section, _, categories_section = output.partition("<h2>Category Rankings</h2>")
+    assert "Thick" in composite_section
+    assert "Thin" not in composite_section
+    assert "Thin" not in categories_section
+
+
+def test_render_html_min_battles_zero_keeps_everyone():
+    battles, generals = _thin_and_thick_fixture()
+    composite_rows = composite_ranking_rows(battles, generals)
+    category_rows = category_ranking_rows(battles, generals)
+
+    output = render_ranking_tables_html(composite_rows, category_rows, min_battles=0)
+
+    assert "Thin" in output
+    assert "Thick" in output
+
+
+def test_save_min_battles_floor_excludes_thin_general_from_html_but_not_csv(tmp_path):
+    battles, generals = _thin_and_thick_fixture()
+    output_path = tmp_path / "ranking_tables.html"
+
+    save_ranking_tables(battles, generals, output_path, min_battles=2)
+
+    html_text = output_path.read_text(encoding="utf-8")
+    assert "Thin" not in html_text
+    assert "Thick" in html_text
+
+    composite_csv = tmp_path / "ranking_tables_composite.csv"
+    composite_lines = composite_csv.read_text(encoding="utf-8").strip().splitlines()
+    # CSV is never floored: both generals present, each with its real battle_count
+    assert len(composite_lines) == 1 + 2
+    general_ids = [line.split(",")[1] for line in composite_lines[1:]]
+    assert set(general_ids) == {"thin", "thick"}

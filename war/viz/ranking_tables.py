@@ -62,10 +62,31 @@ Design choices not fully specified by PLAN.md/SCOPE.md:
   top of a ranking (D3) without the page turning back into a full roster
   dump; `top_n=None` disables truncation for callers that want everything
   (e.g. a small gold-set run where truncation would never trigger anyway).
+* **`min_battles` (PROGRESS.md's G1, default 5)**: a general with only one
+  or two recorded battles can still get a composite score (every input has a
+  no-data convention, per `composite.py`'s docstring), but that score is
+  nearly meaningless next to someone with a dozen battles, and the
+  auto-ingested roster has plenty of 1-2-battle generals (see the dev log's
+  F-phase funnel numbers). Rather than drop them from the dataset (that's a
+  roster-membership decision, already made in `war.roster`), this is a
+  *display* floor on the headline tables only, the same `top_n`-style
+  "filter what's shown, never what's stored" split: a row's `battle_count`
+  (added to both dataclasses, always populated, never filtered out of the
+  CSVs) is compared against `min_battles` only inside
+  `render_ranking_tables_html`, after which `top_n` slices the *eligible*
+  rows. 5 was picked because it's the gold set's own floor — every one of
+  the 19 hand-curated generals has at least 5 recorded battles (SCOPE.md's
+  Phase 2 target was "8-15 battles per general", and nobody landed below 5
+  even at the thin end) — so this reuses a bar the project has already
+  validated as "enough to compute metrics honestly" (SCOPE.md's stop-and-
+  flag wording) rather than inventing a new one. Applies to every category
+  table too, not just the composite ranking, per PROGRESS.md's explicit
+  ask — one shared constant, not six per-category tunables.
 """
 
 import csv
 import html
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -109,6 +130,11 @@ _CATEGORY_VALUE_FORMAT: dict[str, tuple[str, "callable"]] = {
 # docstring) -> the `uncertainty.py` metric name it reuses.
 _CATEGORY_MC_METRIC = {"clutch_rating": "clutch_rating"}
 
+# Minimum recorded battles for a general to appear in the headline (HTML)
+# tables -- see module docstring's "min_battles" entry. Never filters the
+# CSVs; every roster general with a computable value stays in those.
+MIN_BATTLES_FOR_HEADLINE_RANKING = 5
+
 
 @dataclass(frozen=True)
 class CompositeRankingRow:
@@ -118,6 +144,7 @@ class CompositeRankingRow:
     display_name: str
     era: str
     rank: int
+    battle_count: int
     composite_score: float
     oar_rating: float
     decisive_win_rate: float | None
@@ -134,6 +161,7 @@ class CategoryTableRow:
     general_id: str
     display_name: str
     rank: int
+    battle_count: int
     value: float
     ci_low: float | None
     ci_high: float | None
@@ -169,6 +197,7 @@ def composite_ranking_rows(
 
     era_by_general = {general.general_id: general.era for general in generals}
     display_names = {general.general_id: general.display_name for general in generals}
+    battle_counts = Counter(battle.general_id for battle in battles)
     oar = oar_ratings(battles)
     rate_stats = rate_stats_by_general(battles)
     longevity = longevity_adjusted_value_by_general(battles, generals)
@@ -184,6 +213,7 @@ def composite_ranking_rows(
                 display_name=display_names[gid],
                 era=era_by_general[gid],
                 rank=entry.rank,
+                battle_count=battle_counts[gid],
                 composite_score=entry.composite_score,
                 oar_rating=oar[gid].rating,
                 decisive_win_rate=rate_stats[gid].decisive_win_rate,
@@ -208,6 +238,7 @@ def category_ranking_rows(
     `category_rankings`'s own convention.
     """
     display_names = {general.general_id: general.display_name for general in generals}
+    battle_counts = Counter(battle.general_id for battle in battles)
     rankings = category_rankings(battles, generals)
 
     def to_row(category: str, entry: CategoryRankEntry) -> CategoryTableRow:
@@ -219,6 +250,7 @@ def category_ranking_rows(
             general_id=entry.general_id,
             display_name=display_names[entry.general_id],
             rank=entry.rank,
+            battle_count=battle_counts[entry.general_id],
             value=entry.value,
             ci_low=ci_low,
             ci_high=ci_high,
@@ -238,7 +270,7 @@ def _table_caption(label: str, shown: int, total: int) -> str:
 
 def _composite_table_html(rows: list[CompositeRankingRow], total: int) -> str:
     header = (
-        "<tr><th>Rank</th><th>General</th><th>Era</th><th>Composite Score</th>"
+        '<tr><th>Rank</th><th>General</th><th class="era-cell">Era</th><th>Battles</th><th>Composite Score</th>'
         "<th>OAR</th><th>WAR-Residual (90% CI)</th><th>Decisive Win Rate</th>"
         "<th>Longevity-Adj. Value</th></tr>"
     )
@@ -258,7 +290,8 @@ def _composite_table_html(rows: list[CompositeRankingRow], total: int) -> str:
             "<tr>"
             f"<td>{row.rank}</td>"
             f"<td>{html.escape(row.display_name)}</td>"
-            f"<td>{html.escape(row.era)}</td>"
+            f'<td class="era-cell">{html.escape(row.era)}</td>'
+            f"<td>{row.battle_count}</td>"
             f"<td>{row.composite_score:+.3f}</td>"
             f"<td>{row.oar_rating:.0f}</td>"
             f"<td>{war_residual_cell}</td>"
@@ -275,7 +308,9 @@ def _composite_table_html(rows: list[CompositeRankingRow], total: int) -> str:
 
 def _category_table_html(category: str, rows: list[CategoryTableRow], total: int) -> str:
     value_label, formatter = _CATEGORY_VALUE_FORMAT[category]
-    header = f"<tr><th>Rank</th><th>General</th><th>{html.escape(value_label)}</th></tr>"
+    header = (
+        f"<tr><th>Rank</th><th>General</th><th>Battles</th><th>{html.escape(value_label)}</th></tr>"
+    )
     body_rows = []
     for row in rows:
         if row.ci_low is not None:
@@ -286,6 +321,7 @@ def _category_table_html(category: str, rows: list[CategoryTableRow], total: int
             "<tr>"
             f"<td>{row.rank}</td>"
             f"<td>{html.escape(row.display_name)}</td>"
+            f"<td>{row.battle_count}</td>"
             f"<td>{value_cell}</td>"
             "</tr>"
         )
@@ -307,7 +343,7 @@ table.ranking-table caption {{ text-align: left; font-weight: 600; color: {_TEXT
 table.ranking-table th, table.ranking-table td {{ padding: 0.35rem 0.75rem;
   border-bottom: 1px solid {_BORDER_COLOR}; text-align: right; white-space: nowrap; }}
 table.ranking-table th:nth-child(2), table.ranking-table td:nth-child(2) {{ text-align: left; }}
-table.ranking-table th:nth-child(3):not(:last-child), table.ranking-table td:nth-child(3):not(:last-child) {{ text-align: left; }}
+table.ranking-table td.era-cell {{ text-align: left; }}
 table.ranking-table thead th {{ border-bottom: 2px solid {_ACCENT_COLOR}; color: {_TEXT_SECONDARY};
   font-weight: 600; }}
 """
@@ -317,32 +353,38 @@ def render_ranking_tables_html(
     composite_rows: list[CompositeRankingRow],
     category_rows: dict[str, list[CategoryTableRow]],
     top_n: int | None = 25,
+    min_battles: int = MIN_BATTLES_FOR_HEADLINE_RANKING,
 ) -> str:
     """Render the Composite Power Ranking and the six category rankings as one
     static HTML page (no JS, no server) — plain string in, plain string out,
     so tests can assert on its contents directly rather than parsing a file.
 
-    `top_n` (see module docstring) caps every table at its best `top_n` rows;
-    `None` renders every row.
+    `min_battles` (see module docstring) drops rows below the battle-count
+    floor from every table *before* `top_n` slices the survivors, so a
+    thin-data general never occupies a "top n" slot nor displaces a
+    better-populated general further down the ranking; the caption's
+    "of N" count also reflects the post-`min_battles` pool, not the full
+    roster. `top_n` caps each table (post-floor) at its best `top_n` rows;
+    `None` renders every eligible row.
     """
     full_categories = {
         category: category_rows.get(category, []) for category in CATEGORY_LABELS
     }
-    category_tables = "".join(
-        _category_table_html(
-            category,
-            rows[:top_n] if top_n is not None else rows,
-            total=len(rows),
-        )
-        for category, rows in full_categories.items()
-    )
-    composite_display = composite_rows[:top_n] if top_n is not None else composite_rows
+    category_table_htmls = []
+    for category, rows in full_categories.items():
+        eligible = [row for row in rows if row.battle_count >= min_battles]
+        display = eligible[:top_n] if top_n is not None else eligible
+        category_table_htmls.append(_category_table_html(category, display, total=len(eligible)))
+    category_tables = "".join(category_table_htmls)
+
+    eligible_composite = [row for row in composite_rows if row.battle_count >= min_battles]
+    composite_display = eligible_composite[:top_n] if top_n is not None else eligible_composite
     return (
         "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">"
         "<title>War Analyzer — Ranking Tables</title>"
         f"<style>{_STYLE}</style></head><body>"
         "<h1>War Analyzer — Ranking Tables</h1>"
-        f"{_composite_table_html(composite_display, total=len(composite_rows))}"
+        f"{_composite_table_html(composite_display, total=len(eligible_composite))}"
         "<h2>Category Rankings</h2>"
         f'<div class="category-grid">{category_tables}</div>'
         "</body></html>"
@@ -358,6 +400,7 @@ def _write_composite_csv(rows: list[CompositeRankingRow], path: Path) -> None:
                 "general_id",
                 "display_name",
                 "era",
+                "battle_count",
                 "composite_score",
                 "oar_rating",
                 "decisive_win_rate",
@@ -374,6 +417,7 @@ def _write_composite_csv(rows: list[CompositeRankingRow], path: Path) -> None:
                     row.general_id,
                     row.display_name,
                     row.era,
+                    row.battle_count,
                     row.composite_score,
                     row.oar_rating,
                     row.decisive_win_rate,
@@ -388,11 +432,22 @@ def _write_composite_csv(rows: list[CompositeRankingRow], path: Path) -> None:
 def _write_category_csv(category_rows: dict[str, list[CategoryTableRow]], path: Path) -> None:
     with open(path, "w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["category", "rank", "general_id", "display_name", "value", "ci_low", "ci_high"])
+        writer.writerow(
+            ["category", "rank", "general_id", "display_name", "battle_count", "value", "ci_low", "ci_high"]
+        )
         for category, rows in category_rows.items():
             for row in rows:
                 writer.writerow(
-                    [category, row.rank, row.general_id, row.display_name, row.value, row.ci_low, row.ci_high]
+                    [
+                        category,
+                        row.rank,
+                        row.general_id,
+                        row.display_name,
+                        row.battle_count,
+                        row.value,
+                        row.ci_low,
+                        row.ci_high,
+                    ]
                 )
 
 
@@ -403,11 +458,13 @@ def save_ranking_tables(
     weights: CompositeWeights = DEFAULT_COMPOSITE_WEIGHTS,
     mc: dict[str, dict[str, MetricDistribution]] | None = None,
     top_n: int | None = 25,
+    min_battles: int = MIN_BATTLES_FOR_HEADLINE_RANKING,
 ) -> Path:
     """Compute both rankings, render the HTML page, and save it plus two CSVs
     (`<stem>_composite.csv`, `<stem>_categories.csv`) next to it — the CSV
     pair keeps every number independently machine-checkable and, per `top_n`
-    (module docstring), is never truncated even when the HTML page is.
+    and `min_battles` (module docstring), is never truncated/floored even
+    when the HTML page is.
 
     Returns the resolved HTML output path.
     """
@@ -417,7 +474,10 @@ def save_ranking_tables(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        render_ranking_tables_html(composite_rows, category_rows, top_n=top_n), encoding="utf-8"
+        render_ranking_tables_html(
+            composite_rows, category_rows, top_n=top_n, min_battles=min_battles
+        ),
+        encoding="utf-8",
     )
 
     _write_composite_csv(composite_rows, output_path.with_name(output_path.stem + "_composite.csv"))

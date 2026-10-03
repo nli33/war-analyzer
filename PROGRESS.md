@@ -218,11 +218,38 @@ What went wrong, from the previous run's sanity pass:
 
 ## Phase G: Rankings and checks
 
-- [ ] G1. Minimum-battle cutoff for the headline ranking. Look at the distribution of battle
+- [x] G1. Minimum-battle cutoff for the headline ranking. Look at the distribution of battle
       counts, choose a cutoff, and record why. Show each general's battle count in the ranking
       tables and CSVs, and apply the cutoff to category rankings too. Generals below the cutoff
       stay in the full CSV. Re-run `scripts/sensitivity_test.py` on the new data and confirm the
       ranking is still stable.
+      Implemented as a display-only floor in `war/viz/ranking_tables.py` (the same layer that
+      already owns `top_n` truncation), not a roster-membership or metrics change: both row-
+      joining functions now attach a `battle_count` field, and a new `min_battles` param on
+      `render_ranking_tables_html` (default `MIN_BATTLES_FOR_HEADLINE_RANKING = 5`) drops rows
+      below it from the rendered HTML only, before `top_n` slices the rest; the two CSVs stay
+      unfiltered (every general, `battle_count` included), matching how they're already never
+      `top_n`-truncated. `scripts/render_ranking_tables.py` gained a matching `--min-battles` flag.
+      Cutoff value (5) was chosen from the gold set's own floor, not the stale pre-E4/F3
+      `data/auto/` snapshot on disk (which G2 is about to replace): every one of the 19
+      hand-curated generals has at least 5 battles (the three thinnest -- Scipio Africanus,
+      Subutai, Manstein -- all landed at exactly 5), so 5 reuses a bar the project already
+      validated as "enough to compute metrics honestly" (SCOPE.md) rather than inventing a new
+      one from data about to be thrown away. Net effect: a no-op on the gold set today (as
+      intended -- the floor targets the auto roster's long thin tail, which the stale
+      `data/auto/` snapshot shows is real: 232 of 342 generals there have 1-2 battles), and will
+      start doing real work once G2 regenerates `data/auto/` and G4 renders it.
+      461 tests pass (4 new in `tests/test_viz_ranking_tables.py`; existing tests using
+      1-2-battle fixtures now pass `min_battles=0` explicitly since they're testing row-joining/
+      `top_n`, not the floor). Re-ran `scripts/sensitivity_test.py` (unaffected by this change,
+      since `composite_ranking` itself wasn't touched -- confirms no regression, not new
+      behavior): mean Spearman 0.990-0.994 and top-5 overlap 4.6-4.8/5 across 1.5x/2x/3x error
+      levels, 300 trials each, same "ranking tolerates ingestion noise" conclusion as the
+      original A5 run. Also ran `scripts/render_ranking_tables.py` for real against the gold set
+      to confirm the new `Battles` column renders and nobody is dropped (everyone clears 5).
+      `eval_ingest.py`/`validate_data.py` not run -- this task touches the ranking renderer only,
+      not `data/auto/battles.csv` or the gold set's data. Full reasoning in the dev log's G1
+      entry.
 - [ ] G2. Archive the current `data/auto/`, regenerate it with the full pipeline, and re-run the
       quality gate with `scripts/eval_ingest.py` against the floor above. If it fails, write why
       in Notes and stop.
