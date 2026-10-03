@@ -152,9 +152,25 @@ What went wrong, from the previous run's sanity pass:
       The two cheapest, highest-volume candidates for F2 (not implemented here): follow
       `#REDIRECT` targets before giving up on "no infobox" (~981 recoverable), and fix the
       "British"/"United Kingdom" demonym gap (~924 recoverable from one table edit).
-- [ ] F2. Fix the biggest deterministic loss causes from F1, at most three fixes. Each one gets a
-      test and a before/after row count. Stop after three even if loss remains and note what is
-      left.
+- [x] F2. Three fixes, each measured with `scripts/funnel_analysis.py` before/after against the
+      real cache: (1) `war.scrape.redirect_stub_target` + `scripts/refresh_redirect_stubs.py`
+      refreshed 900 stale `#REDIRECT`-stub cache entries (the redirect-following fix already
+      existed in `fetch_wikitext_batch` since b57cc1b, but the 8,430-page cache predated that
+      commit by 8 minutes and was never refreshed) -- `no_infobox` 1,160 -> 310 (-850); (2)
+      `war.rules._COUNTRY_PHRASE_ALIASES` fixes "United Kingdom"/"United States" matching no
+      demonym (both words in each phrase are themselves stopwords) -- `ambiguous_side_match`
+      2,141 -> 2,061 (-80, well under F1's ~924 estimate, which wasn't gated by the funnel's
+      earlier stages -- see dev log for why raw text-pattern counts overstate real yield); (3)
+      found while measuring (2): `_trailing_victory_name` handles "Victory for/of X" result text
+      (name after the keyword, not before) -- `victory_keyword_no_adjective` 175 -> 98 (-77, 30
+      of those resolved, 47 reclassified to an honestly-still-unresolved
+      `ambiguous_trailing_victory_name`). Combined: `produced_row` 3,480 -> 3,982 (+502), usable
+      strength on both sides 2,242 -> 2,555 (+313). Stopped at three per the cap.
+      `ambiguous_side_match` (2,291 remaining, mostly both-combatant-fields-`None`) is the
+      biggest loss left untouched; full numbers and what's left in the dev log's F2 entry.
+      441 tests pass (10 new). `eval_ingest.py`/`validate_data.py` not re-run -- F2 touches the
+      wikitext cache and rules, not `data/auto/` (G2's job); `funnel_analysis.py` is this task's
+      own before/after tool.
 - [ ] F3. Only if unresolved result strings are still a top loss after F2: classify them in one
       bounded Claude CLI pass (see rules above). Report the row count, call count, and rough cost,
       and drop anything outside sanity bounds. If the queue exceeds the cap, process the most
