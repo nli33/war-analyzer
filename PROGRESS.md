@@ -12,11 +12,16 @@ this run. The user reviews the report and decides.
 
 ## What is already known (check it, do not take it on faith)
 
-- Career length comes from the min and max battle year, and some dates are mis-parsed: Napoleon's
-  Montenotte is 1112 and Eckmühl 2122, Wellington's Pombal 911. Napoleon gets a 1,105-year career,
-  Wellington 905, and 13 generals are over 80 years. Longevity is wins divided by career years, so
-  Napoleon and Wellington score about 0.03 and 2-year careers score 4-5.
-- 41 rows dated 2006-2014 (Libya, Iraq, Syria) are tagged era WWII.
+- Career length comes from the min and max battle year. **Fixed by H1** (two `war/scrape.py` date-
+  parsing bugs — Napoleon's Montenotte/Eckmühl and Wellington's Pombal were the named symptoms,
+  a missing HTML-entity decode breaking BC years turned out to be the bigger cause). Napoleon's
+  career is now 1794-1815, Wellington's 1799-1815; 4 of the 13 generals that had >80-year careers
+  still do, but those are a different bug (generic rank words like "Captain" collapsing several
+  real people into one `general_id`, not a date-parsing issue — still open). Longevity is wins
+  divided by career years, so a correctly-dated short career still scores high relative to a long
+  one; that shape of the metric itself is unchanged by H1 and is H8's to look at.
+- 2006-2017 rows (Libya, Iraq, Syria, Macedonia; 64 rows, not 41) were tagged era WWII. **Fixed by
+  H1**: a `"Modern"` era now starts in 1945.
 - Only 41 of 1,884 rows are labeled Strategic or Rout, so decisiveness (15% of the composite) is
   mostly zeros, with a few 1.0s from one battle (Eisenhower, Zhukov).
 - Roster generals win 62% of their rows. Generals with 11 or more rows win 73%. Wikipedia lists
@@ -53,7 +58,7 @@ this run. The user reviews the report and decides.
 
 ## Phase H: Ranking diagnosis
 
-- [ ] H1. Fix date parsing and era assignment. Find why Montenotte parses as 1112, Eckmühl as 2122,
+- [x] H1. Fix date parsing and era assignment. Find why Montenotte parses as 1112, Eckmühl as 2122,
       and Pombal as 911 (likely a digit-grabbing regex on dates like "11-12 April 1796" or
       "1809 ... 22 April"). Fix it with tests built from the real infobox strings. Then add a
       sanity check that flags rows whose parsed year differs from the year in the battle title or
@@ -111,4 +116,16 @@ this run. The user reviews the report and decides.
       the user. Update the README's known-limitations section. Do not implement the proposals.
 
 ## Notes / deviations
-(none yet)
+
+- **H1**: two bugs in `war/scrape.py`'s shared infobox-field cleanup, not one — template deletion
+  splicing adjacent digits together (Montenotte/Eckmühl/Pombal, the named symptoms) and a missing
+  HTML-entity decode that broke the BC-year regex (Alexander/Hannibal/Scipio/Pyrrhus, found by the
+  new sanity check, bigger effect than the named bugs: 9 of 13 >80-year careers resolved, not 3).
+  Era fix: added a `"Modern"` era at 1945 rather than excluding post-1945 rows, so they keep a
+  real era cohort instead of being dropped. Sanity check (`war.roster.suspicious_year_rows`) is
+  wired into `build_auto_battles.py`'s report, not a standalone script — prints flagged rows and
+  the count. 3 rows still flagged after the fix: `general_id` in `{captain, brigadier-general}`
+  etc. collapse multiple real people under a generic rank-word id, a identity-resolution bug, not
+  a date bug — left for a future task (closest fit is H4's funnel tracing). Full writeup:
+  `data/archive/2026-10-03-pre-h1-date-era-fix/README.md`. Napoleon moved #49 -> #27 and Hannibal
+  #147 -> #123 in the composite as a side effect (not the point of this task, not re-tuned).

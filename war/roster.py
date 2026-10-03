@@ -58,6 +58,76 @@ def extract_year(date_field: str | None) -> int | None:
     return None
 
 
+# A battle title sometimes carries its own year in parentheses, as a disambiguator from other
+# battles of the same name ("Battle of Eckmühl" has none; "Action at Mannheim (1795)" does).
+# Reusing `_BC_YEAR_RE`'s "year immediately before a BC/BCE marker" convention for the one case
+# where a title needs it ("Battle of Cartagena (209 BC)").
+_TITLE_YEAR_RE = re.compile(r"\((\d{3,4})(?:\s*(BCE|BC|B\.C\.E?\.?))?\)")
+
+
+def year_from_title(battle_title: str) -> int | None:
+    """Pull a parenthetical year out of a battle title, or None if it has none.
+
+    >>> year_from_title("Action at Mannheim (1795)")
+    1795
+    >>> year_from_title("Battle of Cartagena (209 BC)")
+    -209
+    >>> year_from_title("Battle of Eckmühl")
+    """
+    match = _TITLE_YEAR_RE.search(battle_title)
+    if not match:
+        return None
+    year = int(match.group(1))
+    return -year if match.group(2) else year
+
+
+def suspicious_year_rows(
+    appearances: list[tuple[str, str, int | None]],
+    max_lifetime_years: int = 80,
+) -> list[dict]:
+    """H1's sanity check: flag `(general_id, battle_title, year)` entries whose `year` looks
+    wrong -- more than `max_lifetime_years` (a generous human lifetime, not a campaign length)
+    from a year named in the battle's own title, or from the same general's other dated battles.
+    Catches exactly the class of bug `extract_year` can produce from a mis-cleaned date field
+    (see `war.scrape._strip_wikitext_markup`'s H1 fix) without re-deriving the correct year --
+    that still needs a human or a better source, this only says which rows need one.
+
+    Does not mutate or drop anything; callers (`scripts/build_auto_battles.py`) report the count
+    and the flagged rows, they don't get auto-corrected or excluded.
+    """
+    years_by_general: dict[str, list[tuple[int, int]]] = defaultdict(list)
+    for index, (general_id, _title, year) in enumerate(appearances):
+        if year is not None:
+            years_by_general[general_id].append((index, year))
+
+    flagged: list[dict] = []
+    for index, (general_id, title, year) in enumerate(appearances):
+        if year is None:
+            continue
+        reasons = []
+
+        title_year = year_from_title(title)
+        if title_year is not None and abs(title_year - year) > max_lifetime_years:
+            reasons.append(f"battle title names {title_year}")
+
+        other_years = [y for i, y in years_by_general[general_id] if i != index]
+        if other_years:
+            nearest = min(other_years, key=lambda y: abs(y - year))
+            if abs(nearest - year) > max_lifetime_years:
+                reasons.append(f"general's other battles cluster near {nearest}")
+
+        if reasons:
+            flagged.append(
+                {
+                    "general_id": general_id,
+                    "battle_title": title,
+                    "year": year,
+                    "reason": "; ".join(reasons),
+                }
+            )
+    return flagged
+
+
 @dataclass(frozen=True)
 class BattleAppearance:
     """One general's perspective on one battle page, found by scanning the battle universe."""

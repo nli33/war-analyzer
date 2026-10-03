@@ -8,6 +8,7 @@ with, or are more credulous than, academic estimates. Every value returned here 
 `_source: "wikipedia_infobox_scrape (unverified)"` as a reminder of that at the call site.
 """
 
+import html
 import json
 import re
 import time
@@ -193,11 +194,29 @@ class InfoboxDraft:
         return {"title": self.title, "fields": self.fields, "_source": self.source}
 
 
+def _unescape_html_entities(value: str) -> str:
+    """Decode HTML entities, including double-encoded ones (`&amp;nbsp;` -- a literal `&amp;`
+    followed by `nbsp;` in the wikitext source -- needs two passes to reach a real space; a
+    single `html.unescape` only gets as far as `&nbsp;`). Runs to a fixed point so ordinary
+    single-encoded entities (the common case) still resolve in one pass and stop there."""
+    previous = None
+    while previous != value:
+        previous = value
+        value = html.unescape(value)
+    return value
+
+
 def _strip_wikitext_markup(value: str) -> str:
     """Best-effort cleanup: drop refs, wikilinks brackets, templates, collapse whitespace."""
+    value = _unescape_html_entities(value)
     value = re.sub(r"<ref[^>]*>.*?</ref>", "", value, flags=re.DOTALL)
     value = re.sub(r"<ref[^>]*/>", "", value)
-    value = re.sub(r"\{\{[^{}]*\}\}", "", value)  # inline templates like {{convert|...}}
+    # Replaced with a space, not deleted outright: a template with no surrounding whitespace
+    # (e.g. a date range written "11{{ndash}}12 April 1796") would otherwise splice the digits
+    # on either side into one run ("1112 April 1796"), which `war.roster.extract_year` then
+    # misreads as the year (see H1 dev log entry). The trailing whitespace collapse below cleans
+    # up any resulting double spaces.
+    value = re.sub(r"\{\{[^{}]*\}\}", " ", value)  # inline templates like {{convert|...}}
     value = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", value)  # [[a|b]] -> b, [[a]] -> a
     value = re.sub(r"<br\s*/?>", "; ", value)
     value = re.sub(r"'''?", "", value)

@@ -1,0 +1,41 @@
+{
+  "total_rows": 1884,
+  "own_troop_strength": {
+    "present": 1673,
+    "null": 211,
+    "coverage": 0.888004246284501
+  },
+  "enemy_troop_strength": {
+    "present": 1664,
+    "null": 220,
+    "coverage": 0.8832271762208068
+  },
+  "own_casualties": {
+    "present": 1334,
+    "null": 550,
+    "coverage": 0.7080679405520169
+  },
+  "enemy_casualties": {
+    "present": 1419,
+    "null": 465,
+    "coverage": 0.7531847133757962
+  },
+  "opponent_general_id": {
+    "present": 1637,
+    "null": 247,
+    "coverage": 0.868895966029724
+  },
+  "decisiveness": {
+    "present": 1175,
+    "null": 709,
+    "coverage": 0.6236730360934183
+  },
+  "generals_with_rows": 333,
+  "outcome_counts": {
+    "Loss": 601,
+    "Win": 1163,
+    "Draw": 120
+  },
+  "candidate_battle_titles": 8824,
+  "battle_pages_found": 8430
+}

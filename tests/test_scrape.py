@@ -66,6 +66,32 @@ def test_no_infobox_returns_empty():
     assert parse_military_infobox("Just some plain article text, no template here.") == {}
 
 
+# H1: a date range written with an {{ndash}} template and no surrounding whitespace used to have
+# the template deleted outright, splicing the two day numbers into one run ("1112 April 1796")
+# that `war.roster.extract_year` then misread as the year. Real infobox strings, trimmed.
+def test_date_template_splice_does_not_glue_adjacent_digits():
+    wikitext = "{{Infobox military conflict\n| date = 11{{ndash}}12 April 1796\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["date"] == "11 12 April 1796"
+
+
+def test_date_sfn_template_does_not_glue_year_to_trailing_citation():
+    wikitext = "{{Infobox military conflict\n| date = 21{{ndash}}22 April 1809{{sfn|Epstein|1994|p=68}}\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["date"] == "21 22 April 1809"
+
+
+def test_double_encoded_nbsp_entity_decodes_to_real_whitespace():
+    # Real "Battle of Cartagena (207 BC)" infobox date: "Early 209&amp;nbsp;BC" in the raw
+    # wikitext source is doubly-encoded (a literal "&amp;" followed by "nbsp;"), so a single
+    # html.unescape pass only reaches "&nbsp;", not a real space -- see `_unescape_html_entities`.
+    # The trailing whitespace-collapse regex folds the resulting \xa0 into a plain space, which
+    # is exactly what lets `war.roster.extract_year`'s `\s*` separator match it afterwards.
+    wikitext = "{{Infobox military conflict\n| date = Early 209&amp;nbsp;BC\n}}"
+    fields = parse_military_infobox(wikitext)
+    assert fields["date"] == "Early 209 BC"
+
+
 def test_split_infobox_params_does_not_truncate_on_nested_template_close():
     # Regression test (C2): a value containing a nested multi-line {{efn|...}} citation has its
     # own "}}" before the field's real end. The old single-regex param splitter

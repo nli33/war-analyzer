@@ -16,7 +16,9 @@ from war.roster import (
     pipeline_general_id_for,
     seed_general_ids,
     select_roster,
+    suspicious_year_rows,
     usable_battle_counts,
+    year_from_title,
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -49,6 +51,65 @@ def test_extract_year_century_only_is_none():
 def test_extract_year_empty_is_none():
     assert extract_year("") is None
     assert extract_year(None) is None
+
+
+# H1 regression: a date range glued together by a stripped {{ndash}} template used to read as
+# "1112 April 1796" / "2122 April 1809" / "9 11 March 1811" before war/scrape.py's fix (the
+# splice bug lived in scrape.py; these pin the pipeline's year extraction against what the fixed
+# scraper now actually hands it, so a future regression there would surface here too).
+def test_extract_year_after_ndash_fix_reads_the_real_year_not_the_spliced_digits():
+    assert extract_year("11 12 April 1796") == 1796  # Battle of Montenotte
+    assert extract_year("21 22 April 1809") == 1809  # Battle of Eckmühl
+    assert extract_year("9 11 March 1811") == 1811  # Battle of Pombal
+
+
+# --- year_from_title -------------------------------------------------------------------------
+
+
+def test_year_from_title_parenthetical_year():
+    assert year_from_title("Action at Mannheim (1795)") == 1795
+
+
+def test_year_from_title_parenthetical_bc_year():
+    assert year_from_title("Battle of Cartagena (209 BC)") == -209
+
+
+def test_year_from_title_no_parenthetical_is_none():
+    assert year_from_title("Battle of Eckmühl") is None
+
+
+# --- suspicious_year_rows ---------------------------------------------------------------------
+
+
+def test_suspicious_year_rows_flags_year_far_from_title():
+    appearances = [("napoleon", "Action at Mannheim (1795)", 1112)]
+    flagged = suspicious_year_rows(appearances)
+    assert len(flagged) == 1
+    assert flagged[0]["general_id"] == "napoleon"
+    assert "title" in flagged[0]["reason"]
+
+
+def test_suspicious_year_rows_flags_year_far_from_generals_other_battles():
+    appearances = [
+        ("napoleon", "Battle of Montenotte", 1796),
+        ("napoleon", "Battle of Eckmühl", 2122),
+        ("napoleon", "Battle of Waterloo", 1815),
+    ]
+    flagged = suspicious_year_rows(appearances)
+    assert [item["battle_title"] for item in flagged] == ["Battle of Eckmühl"]
+
+
+def test_suspicious_year_rows_no_flag_for_consistent_career():
+    appearances = [
+        ("napoleon", "Battle of Montenotte", 1796),
+        ("napoleon", "Battle of Waterloo", 1815),
+    ]
+    assert suspicious_year_rows(appearances) == []
+
+
+def test_suspicious_year_rows_single_dated_battle_with_no_title_year_is_not_flagged():
+    # Nothing to compare against -- must not flag for lack of evidence either way.
+    assert suspicious_year_rows([("han-xin", "Battle of Jingxing", 204)]) == []
 
 
 # --- battle_appearances ----------------------------------------------------------------------

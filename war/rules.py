@@ -88,6 +88,7 @@ RESOURCE_ERA_DEFAULT: dict[str, int] = {
     "Napoleonic": 4,  # mass conscription, nation-at-war mobilization (entirely pre-1816)
     "Industrial": 3,  # fallback only: used when a matched state/year is missing from CINC
     "WWII": 3,  # fallback only: used when a matched state/year is missing from CINC
+    "Modern": 3,  # fallback only: used when a matched state/year is missing from CINC
 }
 assert set(RESOURCE_ERA_DEFAULT) == set(ERAS)
 
@@ -226,7 +227,12 @@ def decisiveness_from_result(result_text: str | None, outcome: str) -> str | Non
 #       a coincidence of two independent choices, not a dependency between them)
 #   Industrial / WWII      - 1914 (matches `_TECH_ERA_BREAKPOINTS`'s tier-5 threshold: WWI has
 #       no era of its own in `ERAS`, so 1914-1918 battles land in the "WWII" bucket — a known,
-#       accepted gap in the 6-value enum, not a claim that WWI battles are WWII battles)
+#       accepted gap in the enum, not a claim that WWI battles are WWII battles)
+#   WWII / Modern          - 1945 (WWII's end). H1: the original table had no upper bound on
+#       "WWII" at all, so 2001-2017 battles (Macedonia, Iraq, Libya, Syria) were landing in that
+#       bucket too, inflating "WWII" careers and z-score cohorts with Cold-War-and-later rows
+#       that have nothing to do with the war. This is the fix PROGRESS.md's H1 asked for: add a
+#       bound, don't leave post-1945 battles mistagged.
 _ERA_BREAKPOINTS: tuple[tuple[int, str], ...] = (
     (-999999, "Ancient"),
     (500, "Medieval"),
@@ -234,6 +240,7 @@ _ERA_BREAKPOINTS: tuple[tuple[int, str], ...] = (
     (1792, "Napoleonic"),
     (1816, "Industrial"),
     (1914, "WWII"),
+    (1945, "Modern"),
 )
 assert {era for _, era in _ERA_BREAKPOINTS} == set(ERAS)
 
@@ -444,6 +451,10 @@ def era_for_year(year: int) -> str:
     'WWII'
     >>> era_for_year(1944)
     'WWII'
+    >>> era_for_year(1945)
+    'Modern'
+    >>> era_for_year(2011)
+    'Modern'
     """
     era = _ERA_BREAKPOINTS[0][1]
     for threshold, candidate_era in _ERA_BREAKPOINTS:

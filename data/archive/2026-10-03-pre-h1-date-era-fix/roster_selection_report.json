@@ -1,0 +1,46 @@
+{
+  "min_battles": 4,
+  "candidate_battle_titles": 8824,
+  "battle_pages_found": 8430,
+  "appearances_parsed": 12392,
+  "seed_general_titles": 3707,
+  "generals_kept": 341,
+  "generals_written": 340,
+  "generals_dropped_no_dateable_battle": 4,
+  "must_include_total": 20,
+  "must_include_thin": [
+    {
+      "general_id": "georgy-zhukov",
+      "canonical_title": "Georgy Zhukov",
+      "pipeline_general_id": "georgy-zhukov",
+      "usable": 3,
+      "fallback": "hand-curated fallback"
+    },
+    {
+      "general_id": "subutai",
+      "canonical_title": "Subutai",
+      "pipeline_general_id": "subutai",
+      "usable": 1,
+      "fallback": "hand-curated fallback"
+    },
+    {
+      "general_id": "dwight-d-eisenhower",
+      "canonical_title": "Dwight D. Eisenhower",
+      "pipeline_general_id": "dwight-d-eisenhower",
+      "usable": 1,
+      "fallback": "hand-curated fallback"
+    },
+    {
+      "general_id": "han-xin",
+      "canonical_title": "Han Xin",
+      "pipeline_general_id": "han-xin",
+      "usable": 3,
+      "fallback": "pipeline-thin (no hand-curated rows for Han Xin)"
+    }
+  ],
+  "hand_curated_fallback_general_ids": [
+    "dwight-d-eisenhower",
+    "georgy-zhukov",
+    "subutai"
+  ]
+}

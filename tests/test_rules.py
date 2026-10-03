@@ -3,6 +3,7 @@
 from war.rules import (
     CincTable,
     decisiveness_from_result,
+    era_for_year,
     load_cinc_table,
     outcome_from_result,
     resource_backing_tier,
@@ -21,6 +22,30 @@ def test_tech_era_tier_boundaries():
     assert tech_era_tier_for_year(1913) == 4
     assert tech_era_tier_for_year(1914) == 5  # mechanised warfare
     assert tech_era_tier_for_year(1945) == 5
+
+
+def test_era_for_year_boundaries():
+    assert era_for_year(-334) == "Ancient"
+    assert era_for_year(499) == "Ancient"
+    assert era_for_year(500) == "Medieval"
+    assert era_for_year(1499) == "Medieval"
+    assert era_for_year(1500) == "Early Modern"
+    assert era_for_year(1791) == "Early Modern"
+    assert era_for_year(1792) == "Napoleonic"
+    assert era_for_year(1815) == "Napoleonic"
+    assert era_for_year(1816) == "Industrial"
+    assert era_for_year(1913) == "Industrial"
+    assert era_for_year(1914) == "WWII"
+    assert era_for_year(1944) == "WWII"
+
+
+def test_era_for_year_post_1945_is_modern_not_wwii():
+    # H1: the original table had no upper bound on "WWII" at all, so 2001-2017 battles (Iraq,
+    # Libya, Syria, Macedonia) were landing in it too.
+    assert era_for_year(1945) == "Modern"
+    assert era_for_year(2001) == "Modern"
+    assert era_for_year(2011) == "Modern"
+    assert era_for_year(2017) == "Modern"
 
 
 def test_resource_backing_tier_uses_era_default_before_cinc_start():

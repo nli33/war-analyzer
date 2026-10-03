@@ -11,3 +11,8 @@ own README.md for the full source/method/scores/replacement-reason.
   2026-10-01 run, before Phase E (identity resolution, seedless/must-include roster) and Phase F
   (redirect-stub refresh, demonym/outcome parser fixes, F3's bounded LLM outcome pass) were
   folded into a regenerated `data/auto/` by G2; superseded by that regeneration.
+- `2026-10-03-pre-h1-date-era-fix/` (2026-10-03) — `data/auto/{generals,battles}.csv` from G2's
+  regen, before H1 fixed a wikitext-template-stripping bug and a missing HTML-entity decode (both
+  in `war/scrape.py`, together the cause of Napoleon's 1,105-year "career" and 8 other absurd
+  spans) and an unbounded "WWII" era bucket (`war/rules.py`, added a "Modern" era); superseded by
+  a rerun of `scripts/build_roster_selection.py`/`build_auto_battles.py` against the fixed code.

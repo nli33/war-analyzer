@@ -36,6 +36,7 @@ ERAS = (
     "Napoleonic",
     "Industrial",
     "WWII",
+    "Modern",
 )
 
 OUTCOMES = ("Win", "Loss", "Draw")

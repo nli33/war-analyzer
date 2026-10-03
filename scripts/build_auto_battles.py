@@ -35,8 +35,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from war.battles_dataset import build_battle_rows  # noqa: E402
 from war.identity import build_general_id_resolver, load_identity_map  # noqa: E402
+from war.roster import suspicious_year_rows  # noqa: E402
 from war.scrape import fetch_wikitext_batch  # noqa: E402
-from war.schema import BATTLE_COLUMNS, BATTLE_FIELD_NAMES, GENERAL_COLUMNS  # noqa: E402
+from war.schema import (  # noqa: E402
+    BATTLE_COLUMNS,
+    BATTLE_FIELD_NAMES,
+    GENERAL_COLUMNS,
+    parse_year,
+)
 from war.validate import validate_file, validate_ranges  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -199,6 +205,19 @@ def null_rate_report(rows: list[dict]) -> dict:
     return report
 
 
+def year_sanity_report(rows: list[dict]) -> list[dict]:
+    """H1: flag rows whose parsed year looks wrong (`war.roster.suspicious_year_rows`)."""
+    appearances = [
+        (
+            row["general_id"],
+            row["battle_name"],
+            parse_year(row["date"]) if row.get("date") else None,
+        )
+        for row in rows
+    ]
+    return suspicious_year_rows(appearances)
+
+
 def main() -> int:
     titles = _read_column(BATTLE_UNIVERSE_PATH, "battle_title")
     roster_ids = set(_read_column(GENERALS_PATH, "general_id"))
@@ -241,9 +260,21 @@ def main() -> int:
         return 1
     print("data/auto/battles.csv is valid")
 
+    flagged_years = year_sanity_report(rows)
+    if flagged_years:
+        print(f"\n{len(flagged_years)} row(s) flagged by the year sanity check:")
+        for item in flagged_years[:20]:
+            print(
+                f"  {item['general_id']} / {item['battle_title']!r}: "
+                f"year={item['year']} ({item['reason']})"
+            )
+        if len(flagged_years) > 20:
+            print(f"  ... and {len(flagged_years) - 20} more")
+
     report = null_rate_report(rows)
     report["candidate_battle_titles"] = len(titles)
     report["battle_pages_found"] = pages_found
+    report["suspicious_year_rows"] = len(flagged_years)
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(f"wrote {REPORT_PATH}")
