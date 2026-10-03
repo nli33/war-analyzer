@@ -273,13 +273,67 @@ What went wrong, from the previous run's sanity pass:
       canonical title, not slug equality, per E3's note). 463 tests pass (unchanged, no new
       library code this task). `scripts/validate_data.py` (gold set) still clean. Full numbers
       and reasoning in the dev log's G2 entry.
-- [ ] G3. Published-ranking reference. Collect 3-5 published "top N greatest generals" lists from
+- [x] G3. Published-ranking reference. Collect 3-5 published "top N greatest generals" lists from
       different kinds of sources (for example a Wikipedia list, a historians' survey, a popular
       list). Fetch the pages with plain HTTP; reading names off a list page is fine, no research
       per general. Save the names, ranks, and source URLs in `data/reference/top_n_lists.csv`.
       Map names to canonical titles with E1's resolver. Report which listed generals are missing
       from our roster, and for those in both, how our ranking compares (rank correlation and the
       biggest disagreements). This is a reference check only.
+      Checked Wikipedia first per the task's own example: `List_of_military_commanders` exists
+      but is organized alphabetically by continent, not ranked -- no genuine Wikipedia "top N
+      greatest generals" list exists (expected; a ranked judgment call like that violates NPOV).
+      Also tried to find a historian-survey-style source (Michael Lee Lanning's book "The
+      Military 100" was the closest real candidate) but no site reproduces its full ranked list,
+      and `britannica.com` returned HTTP 403 on every attempt (default curl, browser user-agent,
+      a referer header -- all time-boxed and dropped). Found and fetched `historynet.com`'s "100
+      Greatest Generals of All Time" (a real history magazine, the nearest available analog to a
+      historian survey) but dropped it too: its own list is chronological by era, not merit-
+      ranked, and a first extraction pass silently dropped ~72% of it (28 of ~100 names) because
+      ad/newsletter headings are interleaved between era sections in the raw HTML -- not worth
+      fixing given the list was never going to carry rank data anyway. `ranker.com` (401) and
+      `thetoptens.com` (403) were also unreachable via plain HTTP.
+      Settled on 4 lists that are genuinely rank-ordered and plain-HTTP-fetchable, deliberately
+      picked from different kinds of outlets since no Wikipedia/historian-survey option survived:
+      thecollector.com ("ranked by impact", 7 entries, history-website editorial),
+      grunge.com ("ranked", 15 entries, pop-culture listicle), watchmojo.com (10 entries, video-
+      countdown site), and a 1991 Gallup public-opinion poll (9 entries, ranked by % of
+      respondents naming them, scoped to American generals only -- the one genuinely different
+      "kind" of source: a scientific poll, not an editorial pick). 41 rows, 32 distinct names, in
+      `data/reference/top_n_lists.csv` (added `source_kind` column beyond the task's own
+      ask, to make the "different kinds of sources" intent checkable from the CSV itself).
+      `war/reference_rankings.py` (pure, tested: `load_reference_list`, `build_comparison_rows`,
+      `spearman_correlation`, `rank_correlation_by_source`, `biggest_disagreements` -- the last
+      compares published-rank percentile against our-rank percentile, `(rank-1)/(size-1)`, since
+      a 7-entry list and the 340-general roster are on completely different scales) +
+      `scripts/report_reference_rankings.py` (I/O: resolves each name to a canonical identity via
+      E1's own `resolve_identities`/`load_identity_map`, merged with the pipeline's corpus
+      identity map so a reference name sharing a Wikidata ID with an already-ingested commander
+      title lands on the same `general_id` the roster uses, then joins against `data/auto/`'s
+      composite ranking). 472 tests pass (9 new, `tests/test_reference_rankings.py`).
+      Real run against `data/auto/`: 30/41 entries resolved to a ranked roster general, 11
+      missing (resolved to a real Wikipedia page, but not in the 340-general roster: Hernán
+      Cortés, Charlemagne, Themistocles, Timur, Leonidas I, Joan of Arc, Sun Tzu, George S.
+      Patton, Colin Powell, Norman Schwarzkopf, Omar Bradley), 0 unresolved (every name found a
+      real Wikipedia page). Spearman correlation (published rank vs. our composite rank) per
+      source, over ranked-only entries: thecollector 0.56 (n=7), watchmojo 0.60 (n=8), gallup_1991
+      0.49 (n=5), grunge 0.14 (n=10) -- weak-to-moderate positive everywhere, expected for small
+      n and because these lists measure historical fame/impact, not this project's battle-level
+      composite score; not a thing to tune toward per PROGRESS.md's "reference check only" rule.
+      Biggest disagreements (full list in the dev log's G3 entry): Simón Bolívar (grunge's #15/15,
+      their least-impactful pick, but our #41 of 330 ranked -- top 12%), Napoleon Bonaparte
+      (thecollector's #7/7 but our #49 -- top 15%), Ulysses S. Grant (gallup's #8/9 but our #36 --
+      top 11%), Georgy Zhukov (thecollector's #5/7 but our #14 -- top 4%) -- a consistent pattern
+      of generals these lists rank near their own bottom but whose battle-level record (as this
+      project measures it) is comparatively strong. Flagging for G4's sanity pass rather than
+      adjudicating here (reference check only): Dwight D. Eisenhower currently ranks #1 of 330 in
+      the full composite ranking, and his own `data/auto/generals.csv` notes column already
+      documents a 6-0-0 structural all-victories record from the "singular supreme command"
+      scoping decision made at ingestion time -- worth a direct look, not necessarily a bug.
+      `data/raw/reference_identity_cache.json`/`reference_ranking_report.json` are gitignored
+      cache/report output (same convention as every other `data/raw/*.json`); the numbers above
+      are the durable record. `eval_ingest.py`/`validate_data.py` not run -- this task reads
+      `data/auto/` and the gold set but writes neither.
 - [ ] G4. Regenerate `output/viz_auto/`. Sanity-check the new ranking against historian
       consensus and G3's reference lists: report where the 19 gold generals and Han Xin landed
       and flag anything that looks like a bug or a roster artifact. Do not hand-tune weights.
