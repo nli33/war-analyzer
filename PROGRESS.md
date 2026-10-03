@@ -76,10 +76,19 @@ What went wrong, from the previous run's sanity pass:
       different people (Philip II of France/Macedon, William III of England/the Silent), not a
       merge bug. 406 tests pass (31 new). `scripts/eval_ingest.py`/`validate_data.py` re-run clean
       (unaffected by construction — both call the parser with the default `None` resolver).
-- [ ] E3. Must-include list. Write `data/must_include.csv` with the 19 gold-set generals mapped to
-      their canonical Wikipedia titles, plus Han Xin. Add a script that reports, for each one,
-      whether they are in the auto roster and, if not, why (not a commander in any parsed battle,
-      too few usable battles, and so on).
+- [x] E3. Must-include list. `data/must_include.csv`: the 19 gold-set generals (by their
+      `data/generals.csv` `general_id`) plus Han Xin, each mapped to its canonical Wikipedia title
+      via E1's `data/raw/identity_map.json` (two differ from the gold slug after canonicalization:
+      `hannibal-barca` -> canonical title "Hannibal", `napoleon-bonaparte` -> "Napoleon"; `wellington`
+      stays "Arthur Wellesley, 1st Duke of Wellington"). `scripts/report_must_include.py` re-parses
+      the cached battle universe the same way C4b does (read-only, no crawl) and reports each
+      must-include general's appearance/usable-battle counts and roster status at a given
+      `--min-battles`. At the current default (N=2, seed-gated, pre-E4): 9/20 in roster. Of the 11
+      missing, 9 already clear the usable-battle bar but are blocked only by the still-active seed
+      requirement (expected to resolve once E4 drops it) and 2 (Subutai, Eisenhower: 1 usable
+      battle each) are genuinely thin and will need E4's hand-curated-fallback path. None are
+      absent from the cache entirely (0 "not a commander in any parsed battle" cases). 412 tests
+      pass (5 new, covering the status-classification logic).
 - [ ] E4. Drop the seed requirement. Any commander with at least N battles that have usable
       strength figures joins the roster, whether or not they were on a seed list, and every
       must-include general joins regardless of N. Keep the seed list only as a flag in the
