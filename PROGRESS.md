@@ -88,7 +88,7 @@ this run. The user reviews the report and decides.
       of the top 50 most famous battles (use the 41 reference-list generals' battles as a probe) are
       missing. Fix a clear bug if one is found, with tests. Otherwise write down the cause and the
       size of the loss.
-- [ ] H5. Row granularity and credit. Sample 40 rows across the strength range and classify them as
+- [x] H5. Row granularity and credit. Sample 40 rows across the strength range and classify them as
       single engagement, campaign, or siege/operation, using title keywords (Campaign, Operation,
       War, Siege). Measure how many rows are campaign-scale and whether those generals rank higher.
       Check how the force-ratio input behaves for those rows (Eisenhower's 4.5M vs 1.6M "Rhine
@@ -184,3 +184,25 @@ this run. The user reviews the report and decides.
   Famous-battle probe (18 reference-list generals not in must_include): 18/18 titles found in
   cache, only 6/18 (33%) produce a row, for the same generic-victory-phrasing and first-listed-name
   reasons. No weights, roster design, or `war/rules.py` changed; all open causes flagged for H9.
+- **H5**: wrote `scripts/h5_row_granularity.py`, report at
+  `notes/ranking-diagnosis/H5-row-granularity.md` (sample CSV alongside it). 15.3% of rows (357 of
+  2,327) are campaign/siege-operation scale by title keyword; generals with at least one such row
+  rank higher on average (mean rank 158 vs 183) but it's a plain association, not a controlled
+  test. Biggest finding, not in the task's own framing: the force-ratio input mixes two
+  incompatible units with nothing in the schema to tell them apart. The task's own named example
+  (Eisenhower's 4.5M-vs-1.6M Rhine-crossing row) turned out to be hand-curated gold-set data
+  copied verbatim (Eisenhower is one of 3 `hand_curated_fallback_general_ids`, not pipeline-
+  derived), and its own notes field already flags the theater-vs-personal-command gap by hand. The
+  pipeline reproduces the same failure in the opposite direction on its own, unprompted: when an
+  infobox gives a strength field as a division/brigade breakdown instead of one troop number (e.g.
+  Montgomery's Operation Cobra: "8 infantry divisions / 3 armored divisions" with no headline
+  total), `war/infobox_numbers.py`'s sum-every-segment fallback adds the bare division counts as
+  if they were soldiers (own_troop_strength=11), since `_UNIT_MULTIPLIER` has no entry for
+  "division"/"brigade". Confirmed on 2 real pipeline rows and flagged corpus-wide (16 of 289
+  campaign/siege-operation rows have an implausibly small <=200 strength figure, vs 176 of 1,784
+  single-engagement rows). Confirmed no attacker/defender field anywhere (only Wikipedia's own
+  combatant1/combatant2 order) and draws score symmetrically at 0.5/0.5 with no decisiveness
+  label, matching the schema's documented rule. Credit-sharing: confirmed via a real example
+  (Battle of Stalingrad, 16 vs 24 named commanders) that credit is all-or-nothing per side -- the
+  first-listed commander gets the whole row, undivided, never split, which is the H4 finding's
+  other half. No weights, roster, or `war/` code changed -- diagnosis only.

@@ -1,0 +1,41 @@
+battle_id,general_id,battle_name,category,own_troop_strength,enemy_troop_strength,outcome
+rupprecht-crown-prince-of-bavaria-battle-of-flers-courcelette,rupprecht-crown-prince-of-bavaria,Battle of Flers–Courcelette,single engagement,1,11,Loss
+rupprecht-crown-prince-of-bavaria-battle-of-the-trou-e-de-charmes,rupprecht-crown-prince-of-bavaria,Battle of the Trouée de Charmes,single engagement,6,,Loss
+william-halsey-jr-battle-of-rennell-island,william-halsey-jr,Battle of Rennell Island,single engagement,30,43,Loss
+chief-joseph-battle-of-the-clearwater,chief-joseph,Battle of the Clearwater,single engagement,200,440,Draw
+julius-caesar-battle-of-ruspina,julius-caesar,Battle of Ruspina,single engagement,580,11200,Loss
+guy-carleton-1st-baron-dorchester-battle-of-trois-rivi-res,guy-carleton-1st-baron-dorchester,Battle of Trois-Rivières,single engagement,1000,2000,Win
+james-graham-1st-marquess-of-montrose-battle-of-auldearn,james-graham-1st-marquess-of-montrose,Battle of Auldearn,single engagement,1550,3900,Win
+george-rooke-capture-of-gibraltar,george-rooke,Capture of Gibraltar,single engagement,2000,430,Win
+philip-sheridan-battle-of-waynesboro-virginia,philip-sheridan,"Battle of Waynesboro, Virginia",single engagement,2500,1600,Win
+ernst-von-mansfeld-battle-of-sablat,ernst-von-mansfeld,Battle of Sablat,single engagement,3200,5000,Loss
+prince-georg-friedrich-of-waldeck-battle-of-prostken,prince-georg-friedrich-of-waldeck,Battle of Prostken,single engagement,4000,8000,Loss
+general-officer-battle-of-kampot,general-officer,Battle of Kampot,single engagement,5000,,Loss
+michelangelo-alessandro-colli-marchi-battle-of-ceva,michelangelo-alessandro-colli-marchi,Battle of Ceva,single engagement,6000,7908,Loss
+guru-gobind-singh-battle-of-anandpur-1700,guru-gobind-singh,Battle of Anandpur (1700),single engagement,7000,10000,Win
+louis-gabriel-suchet-battle-of-alca-iz,louis-gabriel-suchet,Battle of Alcañiz,single engagement,8000,9000,Loss
+khalid-ibn-al-walid-battle-of-al-anbar,khalid-ibn-al-walid,Battle of Al-Anbar,single engagement,9000,30000,Win
+napoleon-battle-of-champaubert,napoleon,Battle of Champaubert,single engagement,10000,4350,Win
+belisarius-siege-of-ariminum,belisarius,Siege of Ariminum,siege/operation,10200,,Win
+thomas-c-hindman-battle-of-davis-cross-roads,thomas-c-hindman,Battle of Davis' Cross Roads,single engagement,12000,8000,Draw
+johann-von-hiller-battle-of-caldiero-1813,johann-von-hiller,Battle of Caldiero (1813),single engagement,13000,20000,Loss
+khalid-ibn-al-walid-battle-of-ajnadayn,khalid-ibn-al-walid,Battle of Ajnadayn,single engagement,15000,10000,Win
+jan-zamoyski-battle-of-bucov,jan-zamoyski,Battle of Bucov,single engagement,16000,15500,Win
+claude-victor-perrin-battle-of-medell-n,claude-victor-perrin,Battle of Medellín,single engagement,17500,23000,Win
+jean-baptiste-kl-ber-battle-of-altenkirchen,jean-baptiste-kl-ber,Battle of Altenkirchen,single engagement,20000,20000,Win
+khalid-ibn-al-walid-siege-of-damascus-634,khalid-ibn-al-walid,Siege of Damascus (634),siege/operation,20000,15500,Win
+napoleon-battle-of-saint-dizier,napoleon,Battle of Saint-Dizier,single engagement,22000,9000,Win
+arthur-wellesley-1st-duke-of-wellington-battle-of-sorauren,arthur-wellesley-1st-duke-of-wellington,Battle of Sorauren,single engagement,24000,30000,Win
+subutai-khankala-1222,subutai,Battle of Khankala,single engagement,25000,50000,Win
+napoleon-battle-of-la-favorita,napoleon,Battle of La Favorita,single engagement,28000,17500,Win
+oda-nobunaga-siege-of-ishiyama-honganji,oda-nobunaga,Siege of Ishiyama Honganji,siege/operation,30000,15000,Win
+frederick-the-great-battle-of-kol-n,frederick-the-great,Battle of Kolín,single engagement,33500,53895,Loss
+prince-eugene-of-savoy-battle-of-turin,prince-eugene-of-savoy,Battle of Turin,single engagement,36000,60000,Win
+sulla-battle-of-mount-tifata,sulla,Battle of Mount Tifata,single engagement,40000,60000,Win
+ahmed-muhtar-pasha-battle-of-vu-ji-do,ahmed-muhtar-pasha,Battle of Vučji Do,single engagement,45024,14028,Loss
+scipio-africanus-battle-of-ilipa,scipio-africanus,Battle of Ilipa,single engagement,51500,64250,Win
+charles-emmanuel-iii-battle-of-san-pietro,charles-emmanuel-iii,Battle of San Pietro,single engagement,60000,50000,Win
+pietro-badoglio-first-battle-of-tembien,pietro-badoglio,First Battle of Tembien,single engagement,70000,70000,Draw
+mehmed-ii-battle-of-otlukbeli,mehmed-ii,Battle of Otlukbeli,single engagement,85000,70000,Win
+constantine-i-of-greece-battle-of-kilkis-lachanas,constantine-i-of-greece,Battle of Kilkis–Lachanas,single engagement,117934,75133,Win
+yama-iwao-battle-of-mukden,yama-iwao,Battle of Mukden,single engagement,206861,292104,Win
