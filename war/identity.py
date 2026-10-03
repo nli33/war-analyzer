@@ -7,7 +7,8 @@ historical figure with more than one Wikipedia title (a redirect like "Napoleon 
 the full-name one) ends up split across multiple `general_id`s. This module answers, for a batch
 of requested titles, "what page do they really resolve to, and do any of them share a Wikidata
 item" — redirects answer the first question, a shared Wikidata ID (`pageprops.wikibase_item`)
-answers the second. `war/roster.py`/`war/commanders.py` (E2) are the callers that act on it.
+answers the second. `build_general_id_resolver` (E2) turns that into a `general_id` for
+`war/commanders.py`'s callers to use instead of slugging each raw title independently.
 
 A resolved title landing on a disambiguation page (`pageprops.disambiguation` present) means the
 original wikilink was ambiguous, not a real resolution to one person — E2 treats that the same as
@@ -19,8 +20,11 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from collections import defaultdict
 from dataclasses import dataclass
+from pathlib import Path
 
+from war.commanders import general_id_from_title
 from war.scrape import MAX_TITLES_PER_BATCH, USER_AGENT, WIKIPEDIA_API
 
 
@@ -135,3 +139,55 @@ def resolve_identities(
         if start + batch_size < len(deduped):
             time.sleep(delay_seconds)
     return results
+
+
+def load_identity_map(path: Path) -> dict[str, IdentityInfo]:
+    """Read back `scripts/build_identity_map.py`'s `data/raw/identity_map.json` cache into
+    `{requested_title: IdentityInfo}`, for E2's callers to build a resolver from."""
+    raw = json.loads(Path(path).read_text(encoding="utf-8"))
+    return {
+        title: IdentityInfo(
+            requested_title=entry["requested_title"],
+            canonical_title=entry["canonical_title"],
+            wikidata_id=entry["wikidata_id"],
+            is_disambiguation=entry["is_disambiguation"],
+        )
+        for title, entry in raw.items()
+    }
+
+
+def build_general_id_resolver(identities: dict[str, IdentityInfo]) -> dict[str, str | None]:
+    """E2: map every requested (raw wikilink) title to the `general_id` it should resolve to.
+
+    Titles sharing a Wikidata ID resolve to the same id, slugged from whichever of their
+    canonical titles sorts first alphabetically — an arbitrary but deterministic tie-break;
+    picking a single "preferred name" per historical figure from Wikipedia's own data is out of
+    scope here. A title that resolves to a disambiguation page, or to no page at all (deleted or
+    moved since E1's scan), maps to `None` — PROGRESS.md's E2 line treats both the same as an
+    unidentified commander, the same way `war.commanders.CommanderRef` already treats a name with
+    no Wikipedia link at all.
+
+    Callers (`war.commanders.extract_commander_fields` and friends) fall back to
+    `general_id_from_title` on the raw title for any title not present in this resolver's output
+    — this is built from whatever commander wikilink titles E1 happened to scan, and a title
+    outside that set (e.g. a battle page added to the universe after E1 last ran) is not an
+    error, just unresolved.
+    """
+    canonical_titles_by_wikidata_id: dict[str, set[str]] = defaultdict(set)
+    for info in identities.values():
+        if info.wikidata_id and info.canonical_title and not info.is_disambiguation:
+            canonical_titles_by_wikidata_id[info.wikidata_id].add(info.canonical_title)
+
+    representative_title = {
+        wikidata_id: min(titles) for wikidata_id, titles in canonical_titles_by_wikidata_id.items()
+    }
+
+    resolver: dict[str, str | None] = {}
+    for title, info in identities.items():
+        if info.is_disambiguation or info.canonical_title is None:
+            resolver[title] = None
+        elif info.wikidata_id and info.wikidata_id in representative_title:
+            resolver[title] = general_id_from_title(representative_title[info.wikidata_id])
+        else:
+            resolver[title] = general_id_from_title(info.canonical_title)
+    return resolver

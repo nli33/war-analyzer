@@ -81,7 +81,9 @@ class BattleAppearance:
         )
 
 
-def battle_appearances(title: str, wikitext: str) -> list[BattleAppearance]:
+def battle_appearances(
+    title: str, wikitext: str, identity_resolver: dict[str, str | None] | None = None
+) -> list[BattleAppearance]:
     """Parse one battle page into 0-2 `BattleAppearance`s (combines C2 + C3, side-aware).
 
     `war.commanders.invert_to_general_battles` already does the commander-only half of this
@@ -89,10 +91,14 @@ def battle_appearances(title: str, wikitext: str) -> list[BattleAppearance]:
     from, which is exactly what's needed to pair a general with their *own* (not the
     opponent's) strength number — so this re-derives the side-aware pairing directly from
     `primary_commander` on each side instead of calling it.
+
+    `identity_resolver` (E2's `war.identity.build_general_id_resolver` output) is forwarded to
+    `war.commanders.extract_commander_fields` unchanged; `None` (the default) keeps the pre-E2
+    raw-slug behavior.
     """
     year = extract_year(parse_military_infobox(wikitext).get("date"))
 
-    commander_fields = extract_commander_fields(wikitext)
+    commander_fields = extract_commander_fields(wikitext, identity_resolver)
     side1 = commander_fields.get("commander1", [])
     side2 = commander_fields.get("commander2", [])
     primary1 = primary_commander(side1)
@@ -125,9 +131,22 @@ def battle_appearances(title: str, wikitext: str) -> list[BattleAppearance]:
     return appearances
 
 
-def seed_general_ids(seed_titles: list[str]) -> set[str]:
-    """C4a's seed roster titles, slugged the same way commander wikilinks are (C3)."""
-    return {general_id_from_title(title) for title in seed_titles}
+def seed_general_ids(
+    seed_titles: list[str], identity_resolver: dict[str, str | None] | None = None
+) -> set[str]:
+    """C4a's seed roster titles, canonicalized the same way commander wikilinks are (E2) so seed
+    membership and battle-commander `general_id`s are comparable after identity merging.
+
+    A seed title that resolves to `None` (disambiguation — not expected for a general's own
+    article, but not structurally ruled out) or that isn't a key in `identity_resolver` at all
+    (E1's scan only covers titles seen as commander wikilink targets, not every seed-roster
+    title) falls back to the raw slug rather than dropping the general from the seed set.
+    """
+    ids: set[str] = set()
+    for title in seed_titles:
+        resolved = identity_resolver.get(title) if identity_resolver is not None else None
+        ids.add(resolved if resolved is not None else general_id_from_title(title))
+    return ids
 
 
 def select_roster(

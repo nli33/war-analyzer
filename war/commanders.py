@@ -148,7 +148,9 @@ def _clean_for_parsing(raw_value: str) -> str:
     return text
 
 
-def _ref_from_segment(segment: str) -> CommanderRef | None:
+def _ref_from_segment(
+    segment: str, identity_resolver: dict[str, str | None] | None = None
+) -> CommanderRef | None:
     segment = segment.strip().lstrip("*").strip()
     if not segment:
         return None
@@ -164,18 +166,30 @@ def _ref_from_segment(segment: str) -> CommanderRef | None:
         title = match.group(1).split("#", 1)[0].strip()
         if title and ":" not in title:
             display = (match.group(2) or title).strip()
-            return CommanderRef(
-                display_name=display, wikipedia_title=title, general_id=general_id_from_title(title)
-            )
+            if identity_resolver is not None and title in identity_resolver:
+                general_id = identity_resolver[title]
+            else:
+                general_id = general_id_from_title(title)
+            return CommanderRef(display_name=display, wikipedia_title=title, general_id=general_id)
     plain = re.sub(r"\[\[[^\]]*\]\]", "", segment).strip("[]").strip()
     if not plain:
         return None
     return CommanderRef(display_name=plain, wikipedia_title=None, general_id=None)
 
 
-def parse_commander_field(raw_value: str) -> list[CommanderRef]:
+def parse_commander_field(
+    raw_value: str, identity_resolver: dict[str, str | None] | None = None
+) -> list[CommanderRef]:
     """Parse one infobox `commander1`/`commander2` raw (unstripped) wikitext value into an
     ordered list of commanders — ordered because `primary_commander` depends on it.
+
+    `identity_resolver` is E1/E2's `war.identity.build_general_id_resolver` output
+    (`{wikipedia_title: general_id_or_None}`), threaded through so a linked name's `general_id`
+    comes from its canonical, redirect/Wikidata-merged identity rather than a raw slug of
+    whatever title the infobox happened to use. `None` (the default) preserves the pre-E2
+    behavior — every linked name gets `general_id_from_title(title)` — which existing callers
+    and tests still rely on. A title not present in the resolver falls back the same way, since
+    the resolver only covers titles E1's scan actually saw.
 
     Known limitations, inherent to parsing free text rather than structured data: a plain
     (non-wikilinked) name containing a literal comma or the word "and" could be mis-split into
@@ -199,18 +213,21 @@ def parse_commander_field(raw_value: str) -> list[CommanderRef]:
 
     refs = []
     for segment in segments:
-        ref = _ref_from_segment(segment)
+        ref = _ref_from_segment(segment, identity_resolver)
         if ref is not None:
             refs.append(ref)
     return refs
 
 
-def extract_commander_fields(wikitext: str) -> dict[str, list[CommanderRef]]:
+def extract_commander_fields(
+    wikitext: str, identity_resolver: dict[str, str | None] | None = None
+) -> dict[str, list[CommanderRef]]:
     """Parse `commander1`/`commander2` from a page's raw wikitext infobox.
 
     Returns `{}` if no `{{Infobox military conflict ...}}` is found; omits a field name the
     infobox doesn't set at all (an empty/whitespace-only value is also omitted — same "no data"
-    convention `war.infobox_numbers.extract_strength_and_casualties` uses).
+    convention `war.infobox_numbers.extract_strength_and_casualties` uses). `identity_resolver`
+    is forwarded to `parse_commander_field` unchanged — see its docstring.
     """
     body = find_infobox_body(wikitext)
     if body is None:
@@ -218,7 +235,7 @@ def extract_commander_fields(wikitext: str) -> dict[str, list[CommanderRef]]:
     result: dict[str, list[CommanderRef]] = {}
     for name, raw_value in split_infobox_params(body):
         if name in _COMMANDER_FIELD_NAMES and raw_value.strip():
-            result[name] = parse_commander_field(raw_value)
+            result[name] = parse_commander_field(raw_value, identity_resolver)
     return result
 
 

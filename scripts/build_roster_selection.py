@@ -27,6 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from war.identity import build_general_id_resolver, load_identity_map  # noqa: E402
 from war.roster import (  # noqa: E402
     battle_appearances,
     generals_csv_rows,
@@ -40,8 +41,17 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BATTLE_UNIVERSE_PATH = REPO_ROOT / "data" / "raw" / "battle_universe.csv"
 SEED_ROSTER_PATH = REPO_ROOT / "data" / "raw" / "general_seed_roster.csv"
 WIKITEXT_CACHE_PATH = REPO_ROOT / "data" / "raw" / "battle_wikitext_cache.json"
+IDENTITY_MAP_PATH = REPO_ROOT / "data" / "raw" / "identity_map.json"
 OUTPUT_PATH = REPO_ROOT / "data" / "auto" / "generals.csv"
 REPORT_PATH = REPO_ROOT / "data" / "raw" / "roster_selection_report.json"
+
+
+def _load_identity_resolver() -> dict[str, str | None] | None:
+    """E2: `None` (raw-slug fallback for every title) if E1 hasn't been run yet; otherwise the
+    full title -> canonical-general_id map built from `data/raw/identity_map.json`."""
+    if not IDENTITY_MAP_PATH.exists():
+        return None
+    return build_general_id_resolver(load_identity_map(IDENTITY_MAP_PATH))
 
 DEFAULT_MIN_BATTLES = 2
 
@@ -92,14 +102,21 @@ def main() -> int:
     pages_found = sum(1 for title in titles if title in cache)
     print(f"{pages_found}/{len(titles)} battle pages found in wikitext cache")
 
+    identity_resolver = _load_identity_resolver()
+    print(
+        f"identity resolver: {len(identity_resolver)} titles"
+        if identity_resolver is not None
+        else "identity resolver: none (data/raw/identity_map.json not found, falling back to raw slugs)"
+    )
+
     appearances = []
     for title in titles:
         wikitext = cache.get(title)
         if wikitext:
-            appearances.extend(battle_appearances(title, wikitext))
+            appearances.extend(battle_appearances(title, wikitext, identity_resolver))
     print(f"{len(appearances)} general-perspective battle appearances parsed")
 
-    seed_ids = seed_general_ids(seed_titles)
+    seed_ids = seed_general_ids(seed_titles, identity_resolver)
     roster = select_roster(appearances, seed_ids, args.min_battles)
     rows = generals_csv_rows(roster)
     print(f"{len(roster)} generals cleared the bar; {len(rows)} have a dateable battle -> generals.csv")

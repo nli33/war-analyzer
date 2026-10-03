@@ -198,6 +198,46 @@ def test_invert_to_general_battles_neither_side_identifiable():
     assert invert_to_general_battles(side1, side2) == []
 
 
+# --- identity_resolver threading (E2) --------------------------------------------------------
+
+
+def test_parse_commander_field_identity_resolver_merges_title():
+    resolver = {"Napoleon Bonaparte": "napoleon"}
+    refs = parse_commander_field("[[Napoleon Bonaparte|Napoleon]]", resolver)
+    assert refs == [CommanderRef("Napoleon", "Napoleon Bonaparte", "napoleon")]
+
+
+def test_parse_commander_field_identity_resolver_disambiguation_is_unidentified():
+    # A linked name whose resolver entry is None (E1 resolved it to a disambiguation page, or to
+    # no page at all) is treated as an unidentified commander even though it *is* wikilinked --
+    # general_id is None but wikipedia_title is still recorded, unlike a plain unlinked name.
+    resolver = {"John Smith": None}
+    refs = parse_commander_field("[[John Smith]]", resolver)
+    assert refs == [CommanderRef("John Smith", "John Smith", None)]
+    assert primary_commander(refs) is None
+
+
+def test_parse_commander_field_identity_resolver_falls_back_for_unseen_title():
+    # A title absent from the resolver (E1's scan never saw it) falls back to the raw slug,
+    # same as passing no resolver at all.
+    resolver = {"Some Other Title": "some-other-title"}
+    refs = parse_commander_field("[[Hannibal]]", resolver)
+    assert refs == [CommanderRef("Hannibal", "Hannibal", "hannibal")]
+
+
+def test_extract_commander_fields_forwards_identity_resolver():
+    resolver = {"Napoleon Bonaparte": "napoleon", "Napoleon I": "napoleon"}
+    wikitext = (
+        "{{Infobox military conflict\n"
+        "| commander1 = [[Napoleon Bonaparte]]\n"
+        "| commander2 = [[Napoleon I]]\n"
+        "}}"
+    )
+    fields = extract_commander_fields(wikitext, resolver)
+    assert fields["commander1"][0].general_id == "napoleon"
+    assert fields["commander2"][0].general_id == "napoleon"
+
+
 @pytest.mark.skipif(not EVAL_CACHE.exists(), reason="requires data/raw/eval_ingest_cache.json")
 @pytest.mark.parametrize(
     "title,expected_general,expected_opponent",

@@ -53,6 +53,20 @@ def test_build_battle_rows_no_infobox_is_empty():
     assert build_battle_rows("Not A Battle", "just prose", {"general-one"}) == []
 
 
+def test_build_battle_rows_forwards_identity_resolver():
+    # E2: general_id/opponent_general_id come from the resolver when given, so roster_ids must
+    # be the canonicalized ids to match.
+    resolver = {"General One": "canonical-general", "General Two": "general-two"}
+    rows = build_battle_rows(
+        "Battle of Example",
+        _WIKITEXT,
+        {"canonical-general", "general-two"},
+        identity_resolver=resolver,
+    )
+    mine = next(r for r in rows if r["general_id"] == "canonical-general")
+    assert mine["opponent_general_id"] == "general-two"
+
+
 def test_build_battle_rows_no_year_is_dropped():
     wikitext = """
 {{Infobox military conflict

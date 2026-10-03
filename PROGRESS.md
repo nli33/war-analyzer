@@ -58,10 +58,24 @@ What went wrong, from the previous run's sanity pass:
       so a kill mid-run would have lost all progress — it finished cleanly this time, but if a
       future re-run (e.g. `--refresh`) gets interrupted, note that caveat rather than assuming
       resumability works at the batch level. 375 tests pass.
-- [ ] E2. Use it in the pipeline. `general_id` comes from the canonical title, and titles sharing a
+- [x] E2. Use it in the pipeline. `general_id` comes from the canonical title, and titles sharing a
       Wikidata ID merge into one general. A link that resolves to a disambiguation page counts as
       an unidentified commander. Update tests. Verify: no two `general_id`s share a Wikidata ID,
       and the full test suite passes.
+      `war.commanders`/`war.roster`/`war.battles_dataset` gained an optional `identity_resolver`
+      param (default `None` = old raw-slug behavior), fed by new `war.identity.build_general_id_
+      resolver` (groups titles by Wikidata ID, slugs the alphabetically-first canonical title per
+      group; disambiguation/unresolved -> `None` = unidentified). Also threaded into
+      `seed_general_ids` (not explicitly named in this line, but needed so seed membership stays
+      comparable to the now-canonicalized battle `general_id`s — otherwise the merge would have
+      broken seed matching for exactly the split-identity generals it's meant to fix). Verified
+      against the real 14,967-title E1 run: a dedicated test asserts no two `general_id`s share a
+      Wikidata ID (passes), and a throwaway in-memory run of the real roster-selection logic
+      (not written to `data/auto/` — that's G2's job) showed roster size 434->503 kept generals and
+      duplicate-`display_name` count 12->2, the remaining 2 confirmed by hand to be genuinely
+      different people (Philip II of France/Macedon, William III of England/the Silent), not a
+      merge bug. 406 tests pass (31 new). `scripts/eval_ingest.py`/`validate_data.py` re-run clean
+      (unaffected by construction — both call the parser with the default `None` resolver).
 - [ ] E3. Must-include list. Write `data/must_include.csv` with the 19 gold-set generals mapped to
       their canonical Wikipedia titles, plus Han Xin. Add a script that reports, for each one,
       whether they are in the auto roster and, if not, why (not a commander in any parsed battle,

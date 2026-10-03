@@ -49,13 +49,18 @@ def build_battle_rows(
     wikitext: str,
     roster_ids: set[str],
     resolved_fields: dict | None = None,
+    identity_resolver: dict[str, str | None] | None = None,
 ) -> list[dict]:
     """Zero-to-two `war.schema.BATTLE_COLUMNS`-shaped dict rows for one battle page.
 
     `resolved_fields` is one battle's entry from C5's `data/auto/c5_resolved_fields.json`
     (`{"strength1": 30000, ...}`), used as a fallback only where C2's regex parser found no
     number at all. `roster_ids` is `war.roster`'s C4b-selected general id set — a side whose
-    primary commander isn't in it produces no row.
+    primary commander isn't in it produces no row. `identity_resolver` (E2's
+    `war.identity.build_general_id_resolver` output) is forwarded to
+    `war.commanders.extract_commander_fields` unchanged, so `general_id`/`opponent_general_id`
+    here use the same canonicalized ids `roster_ids` was built from; `None` keeps the pre-E2
+    raw-slug behavior.
     """
     resolved_fields = resolved_fields or {}
 
@@ -64,7 +69,7 @@ def build_battle_rows(
     if year is None:
         return []
 
-    commander_fields = extract_commander_fields(wikitext)
+    commander_fields = extract_commander_fields(wikitext, identity_resolver)
     primaries = {
         side: primary_commander(commander_fields.get(f"commander{side}", []))
         for side in _SIDE_NUMBERS

@@ -86,6 +86,12 @@ def test_battle_appearances_no_infobox_is_empty():
     assert battle_appearances("Not A Battle Page", "just some prose, no infobox") == []
 
 
+def test_battle_appearances_forwards_identity_resolver():
+    resolver = {"General One": "canonical-general"}
+    appearances = battle_appearances("Battle of Example", _SYNTHETIC_WIKITEXT, resolver)
+    assert {a.general_id for a in appearances} >= {"canonical-general"}
+
+
 def test_battle_appearances_missing_strength_is_not_usable():
     wikitext = """
 {{Infobox military conflict
@@ -107,6 +113,22 @@ def test_battle_appearances_missing_strength_is_not_usable():
 
 def test_seed_general_ids_slugs_titles():
     assert seed_general_ids(["Napoleon", "Julius Caesar"]) == {"napoleon", "julius-caesar"}
+
+
+def test_seed_general_ids_uses_identity_resolver_when_given():
+    resolver = {"Napoleon I": "napoleon"}
+    assert seed_general_ids(["Napoleon I", "Julius Caesar"], resolver) == {
+        "napoleon",
+        "julius-caesar",
+    }
+
+
+def test_seed_general_ids_falls_back_to_slug_when_resolver_has_no_entry_or_resolves_to_none():
+    resolver = {"Napoleon I": None}
+    assert seed_general_ids(["Napoleon I", "Unseen Title"], resolver) == {
+        "napoleon-i",
+        "unseen-title",
+    }
 
 
 def _appearance(general_id, opponent_id, usable=True, year=1800):

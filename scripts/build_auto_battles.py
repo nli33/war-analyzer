@@ -25,6 +25,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from war.battles_dataset import build_battle_rows  # noqa: E402
+from war.identity import build_general_id_resolver, load_identity_map  # noqa: E402
 from war.scrape import fetch_wikitext_batch  # noqa: E402
 from war.schema import BATTLE_COLUMNS, BATTLE_FIELD_NAMES, GENERAL_COLUMNS  # noqa: E402
 from war.validate import validate_file, validate_ranges  # noqa: E402
@@ -34,6 +35,7 @@ BATTLE_UNIVERSE_PATH = REPO_ROOT / "data" / "raw" / "battle_universe.csv"
 WIKITEXT_CACHE_PATH = REPO_ROOT / "data" / "raw" / "battle_wikitext_cache.json"
 GENERALS_PATH = REPO_ROOT / "data" / "auto" / "generals.csv"
 RESOLVED_FIELDS_PATH = REPO_ROOT / "data" / "auto" / "c5_resolved_fields.json"
+IDENTITY_MAP_PATH = REPO_ROOT / "data" / "raw" / "identity_map.json"
 OUTPUT_PATH = REPO_ROOT / "data" / "auto" / "battles.csv"
 REPORT_PATH = REPO_ROOT / "data" / "raw" / "c6_report.json"
 
@@ -45,6 +47,16 @@ NULL_RATE_FIELDS = (
     "opponent_general_id",
     "decisiveness",
 )
+
+
+def _load_identity_resolver() -> dict[str, str | None] | None:
+    """E2: `None` (raw-slug fallback for every title) if E1 hasn't been run yet; otherwise the
+    full title -> canonical-general_id map built from `data/raw/identity_map.json`, so
+    `general_id`/`opponent_general_id` here match `data/auto/generals.csv`'s roster ids (also
+    built from this same resolver, see `scripts/build_roster_selection.py`)."""
+    if not IDENTITY_MAP_PATH.exists():
+        return None
+    return build_general_id_resolver(load_identity_map(IDENTITY_MAP_PATH))
 
 
 def _load_json(path: Path) -> dict:
@@ -80,14 +92,22 @@ def _unique_battle_id(general_id: str, title: str, used: set[str]) -> str:
     return battle_id
 
 
-def build_rows(titles: list[str], cache: dict[str, str], roster_ids: set[str], resolved: dict) -> list[dict]:
+def build_rows(
+    titles: list[str],
+    cache: dict[str, str],
+    roster_ids: set[str],
+    resolved: dict,
+    identity_resolver: dict[str, str | None] | None,
+) -> list[dict]:
     used_ids: set[str] = set()
     rows: list[dict] = []
     for title in titles:
         wikitext = cache.get(title)
         if not wikitext:
             continue
-        for row in build_battle_rows(title, wikitext, roster_ids, resolved.get(title)):
+        for row in build_battle_rows(
+            title, wikitext, roster_ids, resolved.get(title), identity_resolver
+        ):
             battle_id = _unique_battle_id(row["general_id"], row["battle_title"], used_ids)
             csv_row = {"battle_id": battle_id, "battle_name": row["battle_title"]}
             csv_row.update({k: v for k, v in row.items() if k not in ("battle_title", "display_name")})
@@ -150,7 +170,14 @@ def main() -> int:
     pages_found = sum(1 for title in titles if title in cache)
     print(f"{pages_found}/{len(titles)} battle pages available in wikitext cache")
 
-    rows = build_rows(titles, cache, roster_ids, resolved)
+    identity_resolver = _load_identity_resolver()
+    print(
+        f"identity resolver: {len(identity_resolver)} titles"
+        if identity_resolver is not None
+        else "identity resolver: none (data/raw/identity_map.json not found, falling back to raw slugs)"
+    )
+
+    rows = build_rows(titles, cache, roster_ids, resolved, identity_resolver)
     print(f"{len(rows)} battle rows built for {len(roster_ids)} roster generals")
 
     write_csv(rows)
