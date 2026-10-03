@@ -69,8 +69,12 @@ def _read_column(path: Path, column: str) -> list[str]:
 
 
 def call_batch(batch) -> dict:
-    """One `claude -p` call for one batch. Returns the parsed JSON response (or {} if the
-    process produced no stdout, e.g. it errored before emitting anything)."""
+    """One `claude -p` call for one batch. Returns the parsed JSON response, or {} if the call
+    produced no usable stdout -- it errored before emitting anything, or (found running the real
+    F3 pass: batch 21/56 blew the 180s timeout once) it ran past `CALL_TIMEOUT_SECONDS` without
+    finishing. Either way the caller already treats missing ids as unresolved rather than a
+    crash, so swallowing the timeout here just means that batch's ids stay uncached and get
+    retried the next time this script runs, instead of losing every batch after it too."""
     prompt = build_prompt(batch)
     cmd = [
         "claude",
@@ -93,8 +97,11 @@ def call_batch(batch) -> dict:
         "--max-budget-usd",
         MAX_BUDGET_USD_PER_CALL,
     ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=CALL_TIMEOUT_SECONDS)
-    return json.loads(proc.stdout) if proc.stdout.strip() else {}
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=CALL_TIMEOUT_SECONDS)
+        return json.loads(proc.stdout) if proc.stdout.strip() else {}
+    except (subprocess.TimeoutExpired, json.JSONDecodeError):
+        return {}
 
 
 def main() -> int:
