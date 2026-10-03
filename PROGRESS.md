@@ -176,6 +176,35 @@ What went wrong, from the previous run's sanity pass:
       and drop anything outside sanity bounds. If the queue exceeds the cap, process the most
       frequent patterns first and note the rest. Skip this task if F1/F2 show results are not a
       main cause, and say so in Notes.
+      IN PROGRESS: confirmed F3 applies -- `no_outcome` (2,907 titles, the `ambiguous_side_match`/
+      `no_victory_or_draw_keyword`/`victory_keyword_no_adjective`/`ambiguous_trailing_victory_name`
+      reasons) is still the single largest post-F2 loss stage, well above `no_infobox` (310) or
+      `no_commander` (698). Built `war/uncertain_outcomes.py` (queue: every title that already
+      clears the infobox/year/commander gates but whose `outcome_from_result` returns `(None,
+      None)`, restricted to titles with real `result` text and at least one `combatant` field's
+      text to match it against -- titles with no side-identifying text at all resolve to
+      "unresolvable" for free, same rule C5 applied to digit-less numeric fields) and
+      `scripts/resolve_uncertain_outcomes.py` (haiku, low effort, batched, `--tools ""`, JSON
+      schema, resumable via `data/raw/f3_llm_cache.json`). Real queue against the full 8,824-title
+      cache: 2,823 queued (603 free-resolve, no side text), 2,220 sent to the model in 56 batches
+      of 40 -- both well inside the 3,000-row/60-call cap. 457 tests pass (16 new,
+      `tests/test_uncertain_outcomes.py`) before launching the real pass.
+      Launched the real run (`python scripts/resolve_uncertain_outcomes.py`, detached via nohup,
+      log at /tmp/f3_run.log) after committing the code. First two batches measured at ~60-90s
+      each against the real API, so 56 batches projects to roughly 60-70 minutes total --
+      over the ~30-minute threshold for babysitting a job synchronously. Checkpointing here per
+      that rule rather than waiting out the full run: the script writes `data/raw/f3_llm_cache.json`
+      after every batch (id -> resolved value), so it resumes correctly whether or not the
+      detached process survives this iteration ending.
+      Resume with: `python scripts/resolve_uncertain_outcomes.py` (no flags -- a plain rerun skips
+      every id already in the cache and only calls for what's left; add `--refresh` only if the
+      cache looks corrupted). Once it completes, finish the task by reading
+      `data/raw/f3_report.json` for the row/call/cost numbers and `data/auto/f3_resolved_outcomes.json`
+      for the resolved `{title: "side1"|"side2"|"draw"}` map, spot-checking a handful against the
+      raw queue dump (`data/raw/f3_uncertain_outcome_queue.json`), recording the final numbers in
+      the dev log and here, and committing the outputs. Not yet wired into
+      `war/battles_dataset.py`/`data/auto/` -- per the same C5/C6 split this project already uses,
+      that merge is G2's job (G2 regenerates `data/auto/` from the full pipeline), not F3's.
 
 ## Phase G: Rankings and checks
 
