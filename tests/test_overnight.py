@@ -107,6 +107,21 @@ def test_limit_hit_without_known_reset_time_stops():
     assert action.kind == "stop"
 
 
+def test_network_error_detected_from_result_text():
+    for text in ["API Error: Can't reach the API server — check your internet or DNS (EAI_AGAIN)", "API Error: Connection dropped (ECONNRESET)"]:
+        summary = overnight.RunSummary()
+        overnight.update_summary(summary, {"type": "result", "is_error": True, "result": text})
+        assert summary.network_error and not summary.limit_hit
+    ordinary = overnight.RunSummary()
+    overnight.update_summary(ordinary, {"type": "result", "is_error": True, "result": "tool crashed"})
+    assert not ordinary.network_error
+
+
+def test_network_backoff_doubles_and_caps():
+    assert [overnight.network_backoff_sec(n) for n in (1, 2, 3)] == [60, 120, 240]
+    assert overnight.network_backoff_sec(20) == 1800
+
+
 # --- end-to-end with a stand-in for the claude CLI --------------------------------------------
 
 STUB = """#!{python}
@@ -123,6 +138,9 @@ def emit(event):
     print(json.dumps(event), flush=True)
 
 emit({{"type": "system", "subtype": "init", "model": "stub-model"}})
+if scenario.get("network_error"):
+    emit({{"type": "result", "is_error": True, "result": "API Error: Connection dropped (ECONNRESET)"}})
+    sys.exit(1)
 if scenario.get("limit_hit"):
     emit({{"type": "rate_limit_event", "rate_limit_info": {{"status": "rejected", "resetsAt": int(time.time()) + 1}}}})
     emit({{"type": "result", "is_error": True, "result": "usage limit reached"}})
@@ -229,3 +247,16 @@ def test_unchanged_repo_counts_as_stall(fake_repo):
         "--claude-bin", str(fake_repo / "claude_stub.py"), "--stall-limit", "2",
     ])
     assert code == 1
+
+
+def test_network_errors_are_not_stalls_and_loop_recovers(fake_repo, monkeypatch):
+    monkeypatch.setattr(overnight.time, "sleep", lambda seconds: None)
+    scenario = [{"network_error": True}] * 4 + [{"used": 0.1, "done": True}]
+    code = run_loop(fake_repo, scenario, "--stall-limit", "1")
+    assert code == 0
+
+
+def test_network_errors_in_a_row_eventually_stop(fake_repo, monkeypatch):
+    monkeypatch.setattr(overnight.time, "sleep", lambda seconds: None)
+    code = run_loop(fake_repo, [{"network_error": True}] * overnight.MAX_NETWORK_STREAK)
+    assert code == 5

@@ -24,7 +24,11 @@ with --wait-for-reset the loop sleeps until the reset and retries, otherwise it 
 prompt tells the next iteration to finish any interrupted task first.
 
 Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck (repo unchanged), 2 = iteration cap reached,
-3 = stopped because of usage, 4 = PROGRESS.md has a BLOCKED: line.
+3 = stopped because of usage, 4 = PROGRESS.md has a BLOCKED: line, 5 = API unreachable.
+
+An iteration that fails with a network error (DNS failure, connection reset) is not a stall and
+does not use up an iteration: the loop waits with a growing delay (1 minute up to 30) and retries,
+and stops only after 8 failures in a row.
 """
 
 import argparse
@@ -43,7 +47,12 @@ REPO = Path(__file__).resolve().parent.parent
 OK_STATUSES = {"allowed", "allowed_warning"}
 LIMIT_TEXT = re.compile(r"usage limit|rate limit|limit reached|limit will reset", re.IGNORECASE)
 RESET_EPOCH_IN_TEXT = re.compile(r"\|(\d{10})\b")
+NETWORK_TEXT = re.compile(
+    r"EAI_AGAIN|ECONNRESET|ETIMEDOUT|ENOTFOUND|Can't reach the API server|Connection dropped",
+    re.IGNORECASE,
+)
 MAX_LIMIT_STREAK = 3
+MAX_NETWORK_STREAK = 8  # with the backoff below, about two hours of continuous outage
 
 
 @dataclass
@@ -74,6 +83,10 @@ class RunSummary:
     def limit_hit(self) -> bool:
         blocked = self.status is not None and self.status not in OK_STATUSES
         return blocked or (self.is_error and bool(LIMIT_TEXT.search(self.result_text)))
+
+    @property
+    def network_error(self) -> bool:
+        return self.is_error and bool(NETWORK_TEXT.search(self.result_text))
 
     @property
     def reset_at(self) -> int | None:
@@ -220,6 +233,11 @@ def sleep_until(epoch: float) -> None:
         time.sleep(min(60, left))
 
 
+def network_backoff_sec(streak: int) -> float:
+    """60s after the first failure, doubling up to 30 minutes."""
+    return min(60 * 2 ** (streak - 1), 1800)
+
+
 def usage_text(summary: RunSummary) -> str:
     parts = []
     for name, window in (("5h", summary.five_hour), ("7d", summary.seven_day)):
@@ -250,7 +268,7 @@ def main(argv=None) -> int:
     log_dir = cfg.repo / "logs" / "overnight"
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    iteration = stalls = limit_streak = 0
+    iteration = stalls = limit_streak = network_streak = 0
     previous_state = repo_state(cfg.repo)
 
     while iteration < cfg.max_iterations:
@@ -271,6 +289,18 @@ def main(argv=None) -> int:
         if is_done(cfg.repo):
             print("PROGRESS.md marked DONE, stopping.")
             return 0
+
+        if summary.network_error:
+            iteration -= 1
+            network_streak += 1
+            if network_streak >= MAX_NETWORK_STREAK:
+                print(f"API unreachable {network_streak} times in a row, stopping.")
+                return 5
+            delay = network_backoff_sec(network_streak)
+            print(f"Network error, retrying in {delay:.0f}s (attempt {network_streak}).", flush=True)
+            time.sleep(delay)
+            continue
+        network_streak = 0
 
         if summary.limit_hit:
             iteration -= 1

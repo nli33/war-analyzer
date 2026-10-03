@@ -44,8 +44,12 @@ iteration to `logs/overnight/` (gitignored). Options:
   waits for the reset (with `--wait-for-reset`) or stops, then retries, and the prompt tells the
   next iteration to finish the interrupted task first. Three limit hits in a row stop the run.
 
+- Network errors (DNS failure, connection reset, "Can't reach the API server") are not stalls and do
+  not use up an iteration. The loop waits 1 minute, doubling up to 30, and retries. Eight failures
+  in a row stop the run.
+
 Exit codes: 0 = PROGRESS.md says DONE, 1 = stuck, 2 = iteration cap, 3 = stopped for usage,
-4 = BLOCKED line.
+4 = BLOCKED line, 5 = API unreachable.
 Look at `git status` before restarting after a usage stop in case a task was cut off.
 
 The usage-limit failure path (what `claude -p` prints when it is actually cut off) has not been
